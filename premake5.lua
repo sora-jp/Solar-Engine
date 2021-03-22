@@ -13,6 +13,12 @@ function enginepch()
 	pchsource "src/%{prj.name:lower()}/pch.cpp"
 end
 
+function vendordllcopy()
+	prebuildcommands { 
+		"{COPY} vendor/%{prj.name:lower()}/dll %{cfg.targetdir}",
+	}
+end
+
 workspace "Solar"
 	language "C++"
 	cppdialect "C++17"
@@ -25,7 +31,7 @@ workspace "Solar"
 	targetdir "build/%{prj.name:lower()}/bin/%{cfg.buildcfg}"
 	objdir "build/%{prj.name:lower()}/obj/%{cfg.buildcfg}"
 	includedirs { "include", "include/%{prj.name:lower()}/", "src/%{prj.name:lower()}/", "vendor/%{prj.name:lower()}/include/" }
-	links { "vendor/%{prj.name:lower()}/*%{cfg.buildcfg}.lib" }
+	links { "vendor/%{prj.name:lower()}/*%{cfg.buildcfg}.lib", "vendor/%{prj.name:lower()}/dll/*.dll" }
 	files { "include/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp" }
 	vpaths {
 		["Source/*"] = {"src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp"},
@@ -35,6 +41,7 @@ workspace "Solar"
 filter { "platforms:Win64" }
     system "Windows"
     architecture "x64"
+	defines { "PLATFORM_WIN32=1", "D3D_SUPPORTED=1" ,"D3D2_SUPPORTED=1" ,"GL_SUPPORTED=1" ,"VULKAN_SUPPORTED=1" }
 
 filter "configurations:Debug"
 	defines { "DEBUG" }
@@ -65,11 +72,12 @@ project "Core"
 	
 project "Graphics"
 	kind "SharedLib"
-	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD" }
+	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD", "ENGINE_DLL=1" }
 	links { "Core" }
 	files { "vendor/graphics/include/dear-imgui/**.cpp", "vendor/graphics/include/dear-imgui/**.inl", "vendor/graphics/include/dear-imgui/**.h" }
 	includedirs {"vendor/core/include", "vendor/graphics/include/dear-imgui"}
 	copytoshared()
+	vendordllcopy()
 	--enginepch()
 	
 project "Test"
