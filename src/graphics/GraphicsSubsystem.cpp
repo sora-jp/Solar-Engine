@@ -112,14 +112,14 @@ void GraphicsSubsystem::PostRun()
 	s_imguiRenderer->EndFrame();
 	ImGui::Render();
 
-	const auto main = ScopedRenderingContext::Begin(s_window);
+	auto main = ScopedRenderingContext::Begin(s_window);
 	
 	main->BindRenderTarget();
 	main->Clear(nullptr, 1.0f, 0);
 	
 	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
-	
-	main->End();
+
+	main.reset();
 
 	m_ctx->GetContext()->Flush();
 	s_window->Present();

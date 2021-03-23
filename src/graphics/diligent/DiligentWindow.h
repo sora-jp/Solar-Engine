@@ -33,5 +33,5 @@ public:
 	Shared<DiligentContext> GetContext() { return m_ctx; }
 	ISwapChain* GetSwapChain() { return m_swapchain; }
 	operator GLFWwindow*() const { return m_window; }
-	void InvalidateCachedTexture();
+	void InvalidateCachedRenderTarget();
 };

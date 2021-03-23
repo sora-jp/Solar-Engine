@@ -1,10 +1,11 @@
 #include "DiligentWindow.h"
+#include "RenderTexture.h"
 
 void DiligentResizeWindowCallback(GLFWwindow* window, int width, int height)
 {
 	auto owner = static_cast<DiligentWindow*>(glfwGetWindowUserPointer(window));
 	owner->Resize(width, height);
-	owner->InvalidateCachedTexture();
+	owner->InvalidateCachedRenderTarget();
 }
 
 DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, const bool isMainWindow, GLFWwindow* window) : DiligentWindow(ctx, nullptr, isMainWindow, window) {}
@@ -24,7 +25,7 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 		m_ctx->CreateSwapChain(swapChainDesc, glfwGetWin32Window(window), &m_swapchain);
 	}
 	else m_swapchain = swapChain;
-
+	
 	glfwSetWindowUserPointer(m_window, this);
 	glfwSetFramebufferSizeCallback(m_window, DiligentResizeWindowCallback);
 }
@@ -47,5 +48,18 @@ void DiligentWindow::GetSize(int& width, int& height) const
 
 RenderTexture& DiligentWindow::GetRenderTarget()
 {
+	//if (!m_renderTarget) 
+	{
+		auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
+		auto* depthBuf = m_swapchain->GetDepthBufferDSV();
+
+		if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
+		else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
+	}
 	return *m_renderTarget;
+}
+
+void DiligentWindow::InvalidateCachedRenderTarget()
+{
+	//m_renderTarget.reset();
 }
