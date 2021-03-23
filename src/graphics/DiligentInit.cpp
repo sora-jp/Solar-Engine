@@ -9,17 +9,16 @@
 #include "diligent/Platforms/Win32/interface/Win32NativeWindow.h"
 
 #include "core/Log.h"
+#include "diligent/DiligentWindow.h"
+#include "diligent/RenderTexture.h"
 
-void DiligentContext::Init(void* nwh)
+Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 {
 	if (m_deviceType == -1) m_deviceType = RENDER_DEVICE_TYPE_D3D11;
 	
 	SwapChainDesc swapchain;
 	swapchain.ColorBufferFormat = TEX_FORMAT_RGBA8_UNORM;
 	swapchain.IsPrimary = true;
-	
-	FullScreenModeDesc fullscreen;
-	Win32NativeWindow window{nwh};
 
 	switch (m_deviceType)
 	{
@@ -27,9 +26,9 @@ void DiligentContext::Init(void* nwh)
 		{
 			EngineD3D11CreateInfo d3d11Info;
 			auto* d3d11Factory = LoadGraphicsEngineD3D11()();
-
+			m_factory = d3d11Factory;
+			
 			d3d11Factory->CreateDeviceAndContextsD3D11(d3d11Info, &m_device, &m_context);
-			d3d11Factory->CreateSwapChainD3D11(m_device, m_context, swapchain, fullscreen, window, &m_swapChain);
 			break;
 		}
 
@@ -37,29 +36,32 @@ void DiligentContext::Init(void* nwh)
 		{
 			EngineD3D12CreateInfo d3d12Info;
 			auto* d3d12Factory = LoadGraphicsEngineD3D12()();
+			m_factory = d3d12Factory;
 
 			d3d12Factory->CreateDeviceAndContextsD3D12(d3d12Info, &m_device, &m_context);
-			d3d12Factory->CreateSwapChainD3D12(m_device, m_context, swapchain, fullscreen, window, &m_swapChain);
 			break;
 		}
 
 		case RENDER_DEVICE_TYPE_GL:
 		{
 			EngineGLCreateInfo glInfo;
-			glInfo.Window.hWnd = nwh;
+			glInfo.Window.hWnd = window;
 
 			auto* glFactory = LoadGraphicsEngineOpenGL()();
-			glFactory->CreateDeviceAndSwapChainGL(glInfo, &m_device, &m_context, swapchain, &m_swapChain);
-			break;
+			m_factory = glFactory;
+
+			ISwapChain* tmp;
+			glFactory->CreateDeviceAndSwapChainGL(glInfo, &m_device, &m_context, swapchain, &tmp);
+			return MakeShared<DiligentWindow>(shared_from_this(), tmp, true, window);
 		}
 
 		case RENDER_DEVICE_TYPE_VULKAN:
 		{
 			EngineVkCreateInfo vulkanInfo;
 			auto* vulkanFactory = LoadGraphicsEngineVk()();
+			m_factory = vulkanFactory;
 
 			vulkanFactory->CreateDeviceAndContextsVk(vulkanInfo, &m_device, &m_context);
-			vulkanFactory->CreateSwapChainVk(m_device, m_context, swapchain, window, &m_swapChain);
 			break;
 		}
 
@@ -67,5 +69,50 @@ void DiligentContext::Init(void* nwh)
 			SOLAR_CORE_CRITICAL("Unknown graphics device type");
 			SOLAR_CORE_ASSERT(0);
 			break;
+	}
+
+	return MakeShared<DiligentWindow>(shared_from_this(), true, window);
+}
+
+void DiligentContext::CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain)
+{
+	const FullScreenModeDesc fsMode;
+	const Win32NativeWindow wnd { windowHandle };
+	
+	switch (m_device->GetDeviceCaps().DevType)
+	{
+		case RENDER_DEVICE_TYPE_GL:
+		case RENDER_DEVICE_TYPE_GLES:
+			SOLAR_CORE_WARN("OpenGL[ES] devices do not currently support multiple swapchains");
+			break;
+		case RENDER_DEVICE_TYPE_D3D11:
+			GetFactory<IEngineFactoryD3D11>()->CreateSwapChainD3D11(m_device, m_context, desc, fsMode, wnd, outSwapChain);
+			break;
+		case RENDER_DEVICE_TYPE_D3D12:
+			GetFactory<IEngineFactoryD3D12>()->CreateSwapChainD3D12(m_device, m_context, desc, fsMode, wnd, outSwapChain);
+			break;
+		case RENDER_DEVICE_TYPE_VULKAN:
+			GetFactory<IEngineFactoryVk>()->CreateSwapChainVk(m_device, m_context, desc, wnd, outSwapChain);
+			break;
+		default:
+			SOLAR_CORE_CRITICAL("Invalid device type {}", m_device->GetDeviceCaps().DevType);
+			SOLAR_CORE_ASSERT_ALWAYS(0);
+			break;
+	}
+}
+
+void DiligentContext::SetRenderTarget(RenderTexture& texture)
+{
+	m_context->SetRenderTargets(texture.m_numColorTargets, texture.m_rawColorTargets, texture.m_depthTarget, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+}
+
+void DiligentContext::ClearRenderTexture(RenderTexture& texture, float* rgba, float depth, uint8_t stencil)
+{
+	if (texture.m_depthTarget) 
+		m_context->ClearDepthStencil(texture.m_depthTarget, CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+	for (auto i = 0; i < texture.m_numColorTargets; i++)
+	{
+		m_context->ClearRenderTarget(texture.m_colorTargets[i], rgba, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 	}
 }

@@ -7,10 +7,10 @@
 struct GLFWwindow;
 class SUBSYSTEM_API GraphicsSubsystem final : Subsystem
 {
-	SUBSYSTEM_NAME("Graphics subsystem (BGFX)");
+	SUBSYSTEM_NAME("Graphics Subsystem");
 	SUBSYSTEM_ORDER(-1);
 
-	DiligentContext m_ctx;
+	Shared<DiligentContext> m_ctx;
 	GLFWwindow* m_window = nullptr;
 	
 public:

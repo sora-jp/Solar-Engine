@@ -1,14 +1,14 @@
 #include "pch.h"
+#include "fonts/Montserrat_Regular.ttf.h"
 
 #include "GraphicsSubsystem.h"
 #include "core/Log.h"
 
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
-#include "dear-imgui/backends/imgui_impl_glfw.h"
-#include "fonts/Montserrat_Regular.ttf.h"
+#include "diligent/DiligentWindow.h"
 #include "diligent-imgui/ImGuiDiligentRenderer.h"
+#include "GLFW/glfw3.h"
+#include "dear-imgui/backends/imgui_impl_glfw.h"
+#include "diligent/ScopedRendering.h"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
@@ -16,13 +16,14 @@
 GraphicsSubsystem::~GraphicsSubsystem() = default;
 static double _scrollDelta;
 
-void scroll_callback(GLFWwindow * window, double xoffset, double yoffset)
+void ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
     _scrollDelta += yoffset;
 }
 
 void SetupImGuiStyle2();
 static ImGuiDiligentRenderer* s_imguiRenderer;
+static Shared<DiligentWindow> s_window;
 
 void GraphicsSubsystem::Init()
 {
@@ -34,19 +35,21 @@ void GraphicsSubsystem::Init()
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
 	m_window = glfwCreateWindow(WNDW_WIDTH, WNDW_HEIGHT, "Hello, bgfx!", nullptr, nullptr);
 
-	glfwSetScrollCallback(m_window, &scroll_callback);
+	glfwSetScrollCallback(m_window, &ScrollCallback);
 
-	m_ctx.Init(glfwGetWin32Window(m_window));
-	SOLAR_CORE_INFO("Using GPU {} ({})", m_ctx.GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, m_ctx.GetDevice()->GetDeviceCaps().AdapterInfo.Description);
+	m_ctx = MakeShared<DiligentContext>();
+	s_window = m_ctx->Init(m_window);
+	
+	SOLAR_CORE_INFO("Using GPU {} ({})", m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
 
 	auto* ctx = ImGui::CreateContext();
 	ImGui::SetCurrentContext(ctx);
 
-	auto io = ImGui::GetIO();
+	auto& io = ImGui::GetIO();
 	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 18, 18.0f);
 
-	const auto scd = m_ctx.GetMainSwapChain()->GetDesc();
-	s_imguiRenderer = new ImGuiDiligentRenderer(m_ctx.GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
+	const auto& scd = s_window->GetSwapChain()->GetDesc();
+	s_imguiRenderer = new ImGuiDiligentRenderer(m_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
 	
 	ImGui_ImplGlfw_InitForOther(m_window, true);
 	SetupImGuiStyle2();
@@ -66,11 +69,6 @@ void GraphicsSubsystem::Shutdown()
 void GraphicsSubsystem::PreRun()
 {
 	ImGui::UpdatePlatformWindows();
-
-	int w, h;
-	glfwGetWindowSize(m_window, &w, &h);
-	const auto swpDesc = m_ctx.GetMainSwapChain()->GetDesc();
-	if (swpDesc.Width != w || swpDesc.Height != h) m_ctx.GetMainSwapChain()->Resize(w, h);
 	
 	static auto lastFrameTime = std::chrono::high_resolution_clock::now();
 	const auto curFrameTime = std::chrono::high_resolution_clock::now();
@@ -82,10 +80,12 @@ void GraphicsSubsystem::PreRun()
 	ImGui::GetIO().DeltaTime = deltaSeconds.count();
 	
 	//TODO: Diligent new imgui frame
+
+	int w, h;
+	s_window->GetSize(w, h);
 	s_imguiRenderer->NewFrame(w, h, SURFACE_TRANSFORM_IDENTITY);
 	ImGui::NewFrame();
 	
-	//imguiBeginFrame(m_window, deltaSeconds.count(), mx, my, mouseBtns, _scrollDelta, WNDW_WIDTH, WNDW_HEIGHT, -1, 0);
 	_scrollDelta = 0;
 	//ImGui::RootDock(ImVec2(0, 0), ImVec2(WNDW_WIDTH, WNDW_HEIGHT));
 }
@@ -112,17 +112,17 @@ void GraphicsSubsystem::PostRun()
 	s_imguiRenderer->EndFrame();
 	ImGui::Render();
 
-	auto* colorTarget = m_ctx.GetMainSwapChain()->GetCurrentBackBufferRTV();
-	auto* dsTarget = m_ctx.GetMainSwapChain()->GetDepthBufferDSV();
-	m_ctx.GetContext()->SetRenderTargets(1, &colorTarget, dsTarget, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	const auto main = ScopedRenderingContext::Begin(s_window);
 	
-	m_ctx.GetContext()->ClearRenderTarget(colorTarget, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-	m_ctx.GetContext()->ClearDepthStencil(dsTarget, CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, 1.0f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	main->BindRenderTarget();
+	main->Clear(nullptr, 1.0f, 0);
+	
+	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
+	
+	main->End();
 
-	s_imguiRenderer->RenderDrawData(m_ctx.GetContext(), ImGui::GetDrawData());
-
-	m_ctx.GetContext()->Flush();
-	m_ctx.GetMainSwapChain()->Present();
+	m_ctx->GetContext()->Flush();
+	s_window->Present();
 	
 	glfwPollEvents();
 }
