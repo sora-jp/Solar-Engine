@@ -8,7 +8,6 @@
 #include "diligent-imgui/ImGuiDiligentRenderer.h"
 #include "GLFW/glfw3.h"
 #include "dear-imgui/backends/imgui_impl_glfw.h"
-#include "diligent/ScopedRendering.h"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
@@ -33,7 +32,7 @@ void GraphicsSubsystem::Init()
 	SOLAR_CORE_ASSERT_ALWAYS(glfwInitResult == GLFW_TRUE);
 
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
-	m_window = glfwCreateWindow(WNDW_WIDTH, WNDW_HEIGHT, "Hello, bgfx!", nullptr, nullptr);
+	m_window = glfwCreateWindow(WNDW_WIDTH, WNDW_HEIGHT, "Hello, Diligent!", nullptr, nullptr);
 
 	glfwSetScrollCallback(m_window, &ScrollCallback);
 
@@ -42,11 +41,10 @@ void GraphicsSubsystem::Init()
 	
 	SOLAR_CORE_INFO("Using GPU {} ({})", m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
 
-	auto* ctx = ImGui::CreateContext();
-	ImGui::SetCurrentContext(ctx);
+	ImGui::CreateContext();
 
 	auto& io = ImGui::GetIO();
-	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 18, 18.0f);
+	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
 
 	const auto& scd = s_window->GetSwapChain()->GetDesc();
 	s_imguiRenderer = new ImGuiDiligentRenderer(m_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
@@ -112,16 +110,14 @@ void GraphicsSubsystem::PostRun()
 	s_imguiRenderer->EndFrame();
 	ImGui::Render();
 
-	auto main = ScopedRenderingContext::Begin(s_window);
+	m_ctx->BeginFrame();
 	
-	main->BindRenderTarget();
-	main->Clear(nullptr, 1.0f, 0);
+	m_ctx->SetRenderTarget(s_window->GetRenderTarget());
+	m_ctx->Clear(nullptr, 1.0f, 0, false);
 	
 	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
 
-	main.reset();
-
-	m_ctx->GetContext()->Flush();
+	m_ctx->EndFrame();
 	s_window->Present();
 	
 	glfwPollEvents();

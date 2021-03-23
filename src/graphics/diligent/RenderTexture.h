@@ -18,8 +18,11 @@ private:
 	void Rebind(int numColorTargets, ITextureView** colorTargets, ITextureView* depthTarget);
 	
 public:
+	RenderTexture() : m_numColorTargets(-1), m_rawColorTargets(nullptr), m_colorTargets(nullptr) {};
 	RenderTexture(int numColorTargets, ITextureView* colorTargets[], ITextureView* depthTarget);
 	~RenderTexture();
+
+	[[nodiscard]] bool IsValid() const { return m_numColorTargets != 0; }
 };
 
 inline void RenderTexture::Rebind(int numColorTargets, ITextureView** colorTargets, ITextureView* depthTarget)
@@ -40,6 +43,6 @@ inline RenderTexture::RenderTexture(const int numColorTargets, ITextureView* col
 
 inline RenderTexture::~RenderTexture()
 {
-	delete[] m_colorTargets;
-	delete[] m_rawColorTargets;
+	if (m_colorTargets) delete[] m_colorTargets;
+	if (m_rawColorTargets) delete[] m_rawColorTargets;
 }

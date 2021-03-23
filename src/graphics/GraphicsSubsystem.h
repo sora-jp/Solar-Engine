@@ -2,7 +2,7 @@
 
 #include "core/Common.h"
 #include "core/Subsystem.h"
-#include "DiligentInit.h"
+#include "diligent/DiligentInit.h"
 
 struct GLFWwindow;
 class SUBSYSTEM_API GraphicsSubsystem final : Subsystem
