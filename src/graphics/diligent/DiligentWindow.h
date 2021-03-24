@@ -25,7 +25,7 @@ public:
 	DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* swapChain, bool isMainWindow, GLFWwindow* window);
 	~DiligentWindow() noexcept = default;
 
-	void Present();
+	void Present(int vsyncInterval = 1);
 	void Resize(int width, int height);
 	void GetSize(int& width, int& height) const;
 	[[nodiscard]] RenderTexture& GetRenderTarget();

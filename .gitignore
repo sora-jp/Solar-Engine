@@ -25,6 +25,9 @@ imgui.ini
 # Mono auto generated files
 mono_crash.*
 
+# TEMPORARY HACKY HACKY
+vendor/graphics/DiligentCoreRelease.lib
+
 # Build results
 [Bb]uild/
 [Ll]og/

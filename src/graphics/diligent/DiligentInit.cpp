@@ -23,6 +23,13 @@ void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, co
 	transition.UpdateResourceState = true;
 }
 
+void AppendTransitionDesc(std::vector<StateTransitionDesc> arr, IDeviceObject* obj, const RESOURCE_STATE newState)
+{
+	StateTransitionDesc d;
+	SetupTransitionDesc(d, obj, newState);
+	arr.push_back(d);
+}
+
 void DiligentContext::TransitionState(IDeviceObject* obj, const RESOURCE_STATE newState)
 {
 	StateTransitionDesc transition;
@@ -35,29 +42,22 @@ void DiligentContext::TransitionState(RenderTexture* tex, const RESOURCE_STATE n
 {
 	SOLAR_CORE_ASSERT(tex->IsValid() && newState == RESOURCE_STATE_RENDER_TARGET);
 
-	const auto transitions = new StateTransitionDesc[tex->m_numColorTargets + 1];
-
-	auto hasDepth = false;
+	std::vector<StateTransitionDesc> transitions;
 
 	if (tex->m_depthTarget)
-	{
-		SetupTransitionDesc(transitions[0], tex->m_depthTarget, newDepthState);
-		hasDepth = true;
-	}
-	
+		AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
+
 	for (auto i = 0; i < tex->m_numColorTargets; i++)
-		SetupTransitionDesc(transitions[i + hasDepth], tex->m_colorTargets[i], newColorState);
+		if (tex->m_colorTargets[i]) AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
 
-	m_context->TransitionResourceStates(tex->m_numColorTargets + hasDepth, transitions + sizeof(void*) * !hasDepth);
-
-	delete[] transitions;
+	m_context->TransitionResourceStates(transitions.size(), transitions.data());
 }
 
 Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 {
 	if (m_deviceType == -1) m_deviceType = RENDER_DEVICE_TYPE_D3D11;
 
-
+	Shared<DiligentWindow> outWindow;
 	switch (m_deviceType)
 	{
 		case RENDER_DEVICE_TYPE_D3D11:
@@ -96,7 +96,8 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 			ISwapChain* tmp;
 			glFactory->CreateDeviceAndSwapChainGL(glInfo, &m_device, &m_context, swapchain, &tmp);
 
-			return MakeShared<DiligentWindow>(shared_from_this(), tmp, true, window);
+			outWindow = MakeShared<DiligentWindow>(shared_from_this(), tmp, true, window);
+			break;
 		}
 
 		case RENDER_DEVICE_TYPE_VULKAN:
@@ -114,12 +115,20 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 			break;
 	}
 
-	return MakeShared<DiligentWindow>(shared_from_this(), true, window);
+	QueryDesc statsQuery;
+	statsQuery.Name = "Pipeline statistics query";
+	statsQuery.Type = QUERY_TYPE_PIPELINE_STATISTICS;
+	m_statsQuery.reset(new ScopedQueryHelper(m_device, statsQuery, 2));
+
+	m_timerQuery.reset(new DurationQueryHelper(m_device, 2));
+
+	return outWindow ? outWindow : MakeShared<DiligentWindow>(shared_from_this(), true, window);
 }
 
 void DiligentContext::BeginFrame()
 {
-	
+	m_statsQuery->Begin(m_context);
+	m_timerQuery->Begin(m_context);
 }
 
 void DiligentContext::CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain)
@@ -153,7 +162,7 @@ void DiligentContext::SetRenderTarget(RenderTexture& texture, const bool autoTra
 {
 	m_activeTexture = texture;
 	if (autoTransition) TransitionState(&texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
-	
+
 	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, m_activeTexture.m_rawColorTargets, m_activeTexture.m_depthTarget, TRANSITION_MODE);
 }
 
@@ -170,5 +179,8 @@ void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stenci
 
 void DiligentContext::EndFrame()
 {
+	m_statsQuery->End(m_context, &m_pipelineStats, sizeof(m_pipelineStats));
+	m_timerQuery->End(m_context, m_duration);
+	
 	m_context->FinishFrame();
 }

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "fonts/Montserrat_Regular.ttf.h"
+#include "fonts/FiraCode_Regular.ttf.h"
 
 #include "GraphicsSubsystem.h"
 #include "core/Log.h"
@@ -23,6 +24,7 @@ void ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 void SetupImGuiStyle2();
 static ImGuiDiligentRenderer* s_imguiRenderer;
 static Shared<DiligentWindow> s_window;
+static ImFont* s_monoFont;
 
 void GraphicsSubsystem::Init()
 {
@@ -45,7 +47,8 @@ void GraphicsSubsystem::Init()
 
 	auto& io = ImGui::GetIO();
 	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
-
+	s_monoFont = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 18.0f);
+	
 	const auto& scd = s_window->GetSwapChain()->GetDesc();
 	s_imguiRenderer = new ImGuiDiligentRenderer(m_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
 	
@@ -91,7 +94,7 @@ void GraphicsSubsystem::PreRun()
 void GraphicsSubsystem::PostRun()
 {
 	//SOLAR_CORE_TRACE("GraphicsSubsystem::Run()");
-	static auto debugStats = false;
+	static auto debugStats = true;
 	static auto lastState = GLFW_RELEASE;
 	
 	const auto state = glfwGetKey(m_window, GLFW_KEY_F11);
@@ -106,6 +109,47 @@ void GraphicsSubsystem::PostRun()
 	if (stateP == GLFW_PRESS && lastStateP == GLFW_RELEASE) debugProfiler = !debugProfiler;
 	lastStateP = stateP;
 
+	if (debugStats)
+	{
+		const auto& stats = m_ctx->GetPipelineStats();
+		const auto& duration = m_ctx->GetLastDuration();
+
+		auto windowFlags = 
+			ImGuiWindowFlags_NoDecoration | 
+			ImGuiWindowFlags_NoDocking | 
+			ImGuiWindowFlags_AlwaysAutoResize | 
+			ImGuiWindowFlags_NoSavedSettings | 
+			ImGuiWindowFlags_NoFocusOnAppearing | 
+			ImGuiWindowFlags_NoNav |
+			ImGuiWindowFlags_NoInputs |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoBringToFrontOnFocus;
+		
+		const auto pad = 10.0f;
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		
+		ImVec2 windowPos, windowPivot;
+		
+		windowPos.x = (viewport->WorkPos.x + pad);
+		windowPos.y = (viewport->WorkPos.y + pad);
+		
+		windowPivot.x = 0.0f;
+		windowPivot.y = 0.0f;
+		
+		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		//windowFlags |= ImGuiWindowFlags_NoMove;
+
+		ImGui::PushFont(s_monoFont);
+		ImGui::Begin("Pipeline statistics", nullptr, windowFlags);
+		ImGui::Text("Verts: %u, Tris: %u", stats.InputVertices, stats.InputPrimitives);
+		ImGui::Text("Duration: %.1f", duration * 1e6f);
+		ImGui::End();
+		ImGui::PopFont();
+
+	}
+
 	//TODO: Render
 	s_imguiRenderer->EndFrame();
 	ImGui::Render();
@@ -118,7 +162,7 @@ void GraphicsSubsystem::PostRun()
 	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
 
 	m_ctx->EndFrame();
-	s_window->Present();
+	s_window->Present(0);
 	
 	glfwPollEvents();
 }

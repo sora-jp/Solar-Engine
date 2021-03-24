@@ -30,9 +30,9 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 	glfwSetFramebufferSizeCallback(m_window, DiligentResizeWindowCallback);
 }
 
-void DiligentWindow::Present()
+void DiligentWindow::Present(const int vsyncInterval)
 {
-	m_swapchain->Present();
+	m_swapchain->Present(vsyncInterval);
 }
 
 void DiligentWindow::Resize(const int width, const int height)
