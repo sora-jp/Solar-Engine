@@ -6,29 +6,42 @@
 struct ProfilerNode
 {
 	friend class Profiler;
+	friend class Engine;
+	friend Shared<ProfilerNode> CreateChild(const Shared<ProfilerNode>&, std::string, std::string);
 	
-	ProfilerNode* Parent;
+	Weak<ProfilerNode> Parent;
 	const std::string Name;
-	double TimeMs;
-	std::vector<ProfilerNode> Children;
+	const std::string Category;
+	double TimeMs, TotalMs;
+	std::vector<Shared<ProfilerNode>> Children;
 
+	[[nodiscard]] double SelfPercentOfTotal() const { return TimeMs / TotalMs; }
+	[[nodiscard]] double TotalWithoutSelf() const { return TotalMs - TimeMs; }
+	
 private:
-	ProfilerNode(ProfilerNode* const parent, std::string name) : Parent(parent), Name(std::move(name)), TimeMs(-1) {}
-	ProfilerNode* CreateChild(std::string name);
+	ProfilerNode(const Shared<ProfilerNode>& parent, std::string name, std::string category) : Parent(parent), Name(std::move(name)), Category(std::move(category)), TimeMs(-1), TotalMs(-1) {}
 };
 
 class SOLAR_API Profiler
 {
-	static ProfilerNode* _root;
-	static ProfilerNode* _curNode;
+	static Shared<ProfilerNode> _root;
+	static Shared<ProfilerNode> _lastRoot;
+	static Shared<ProfilerNode> _curNode;
+
+	static std::map<std::string, double> _categoryTimes;
 	static std::chrono::high_resolution_clock::time_point _curNodeStart;
 
 public:
 	Profiler() = delete;
 	~Profiler() = delete;
 
-	static void Begin(std::string name);
+	static void Begin(std::string name, std::string category = "Unknown");
 	static void End();
+	
+	static void BeginRoot();
+	static void EndRoot();
 
-	static const ProfilerNode& GetRootNode();
+	static bool HasRootNodes();
+	static std::vector<Shared<ProfilerNode>>& GetRootNodes();
+	static double GetTimeForCategory(const std::string& category);
 };

@@ -19,6 +19,7 @@
 
 template<typename T> using Shared = SOLAR_API std::shared_ptr<T>;
 template<typename T> using Unique = SOLAR_API std::unique_ptr<T>;
+template<typename T> using Weak   = SOLAR_API std::weak_ptr  <T>;
 
 template<typename T, typename ...Args> Shared<T> MakeShared(Args&&... args)
 {

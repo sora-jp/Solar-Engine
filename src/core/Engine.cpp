@@ -5,6 +5,7 @@
 #include "SolarApp.h"
 #include <Windows.h>
 #include "System.h"
+#include "Profiler.h"
 
 namespace fs = std::filesystem;
 
@@ -77,6 +78,7 @@ void Engine::Run(SolarApp* app)
 	
 	while (true)
 	{
+		Profiler::BeginRoot();
 		foreach_reverse(_subsystems, &Subsystem::PreRun);
 		
 		app->Run();
@@ -84,6 +86,7 @@ void Engine::Run(SolarApp* app)
 		
 		foreach(_subsystems, &Subsystem::PostRun);
 		if (any(_subsystems, &Subsystem::RequestedShutdown)) break;
+		Profiler::EndRoot();
 	}
 }
 
