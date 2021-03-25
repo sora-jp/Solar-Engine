@@ -23,7 +23,7 @@ void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, co
 	transition.UpdateResourceState = true;
 }
 
-void AppendTransitionDesc(std::vector<StateTransitionDesc> arr, IDeviceObject* obj, const RESOURCE_STATE newState)
+void AppendTransitionDesc(std::vector<StateTransitionDesc>& arr, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
 	StateTransitionDesc d;
 	SetupTransitionDesc(d, obj, newState);
@@ -40,15 +40,18 @@ void DiligentContext::TransitionState(IDeviceObject* obj, const RESOURCE_STATE n
 
 void DiligentContext::TransitionState(RenderTexture* tex, const RESOURCE_STATE newColorState, const RESOURCE_STATE newDepthState)
 {
-	SOLAR_CORE_ASSERT(tex->IsValid() && newState == RESOURCE_STATE_RENDER_TARGET);
+	SOLAR_CORE_ASSERT(tex->IsValid());
 
 	std::vector<StateTransitionDesc> transitions;
 
-	if (tex->m_depthTarget)
-		AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
+	//AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
+	AppendTransitionDesc(transitions, tex->m_depthTarget->GetTexture(), newDepthState);
 
-	for (auto i = 0; i < tex->m_numColorTargets; i++)
-		if (tex->m_colorTargets[i]) AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
+	for (auto i = 0; i < tex->m_numColorTargets; i++) 
+	{
+		//AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
+		AppendTransitionDesc(transitions, tex->m_colorTargets[i]->GetTexture(), newColorState);
+	}
 
 	m_context->TransitionResourceStates(transitions.size(), transitions.data());
 }
@@ -63,6 +66,8 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 		case RENDER_DEVICE_TYPE_D3D11:
 		{
 			EngineD3D11CreateInfo d3d11Info;
+			d3d11Info.DebugFlags = D3D11_DEBUG_FLAG_CREATE_DEBUG_DEVICE;
+				
 			auto* d3d11Factory = LoadGraphicsEngineD3D11()();
 			m_factory = d3d11Factory;
 			

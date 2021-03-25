@@ -9,6 +9,8 @@
 #include "diligent-imgui/ImGuiDiligentRenderer.h"
 #include "GLFW/glfw3.h"
 #include "dear-imgui/backends/imgui_impl_glfw.h"
+#include "core/Profiler.h"
+#include "ImGuiDebugWindow.h"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
@@ -69,8 +71,6 @@ void GraphicsSubsystem::Shutdown()
 
 void GraphicsSubsystem::PreRun()
 {
-	ImGui::UpdatePlatformWindows();
-	
 	static auto lastFrameTime = std::chrono::high_resolution_clock::now();
 	const auto curFrameTime = std::chrono::high_resolution_clock::now();
 
@@ -111,58 +111,29 @@ void GraphicsSubsystem::PostRun()
 
 	if (debugStats)
 	{
-		const auto& stats = m_ctx->GetPipelineStats();
-		const auto& duration = m_ctx->GetLastDuration();
-
-		auto windowFlags = 
-			ImGuiWindowFlags_NoDecoration | 
-			ImGuiWindowFlags_NoDocking | 
-			ImGuiWindowFlags_AlwaysAutoResize | 
-			ImGuiWindowFlags_NoSavedSettings | 
-			ImGuiWindowFlags_NoFocusOnAppearing | 
-			ImGuiWindowFlags_NoNav |
-			ImGuiWindowFlags_NoInputs |
-			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoBringToFrontOnFocus;
-		
-		const auto pad = 10.0f;
-		const ImGuiViewport* viewport = ImGui::GetMainViewport();
-		
-		ImVec2 windowPos, windowPivot;
-		
-		windowPos.x = (viewport->WorkPos.x + pad);
-		windowPos.y = (viewport->WorkPos.y + pad);
-		
-		windowPivot.x = 0.0f;
-		windowPivot.y = 0.0f;
-		
-		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, windowPivot);
-		ImGui::SetNextWindowViewport(viewport->ID);
-		ImGui::SetNextWindowBgAlpha(0.35f);
-		//windowFlags |= ImGuiWindowFlags_NoMove;
-
-		ImGui::PushFont(s_monoFont);
-		ImGui::Begin("Pipeline statistics", nullptr, windowFlags);
-		ImGui::Text("Verts: %u, Tris: %u", stats.InputVertices, stats.InputPrimitives);
-		ImGui::Text("Duration: %.1f", duration * 1e6f);
-		ImGui::End();
-		ImGui::PopFont();
-
+		DrawDebugWindow(m_ctx, s_monoFont);
 	}
 
 	//TODO: Render
 	s_imguiRenderer->EndFrame();
 	ImGui::Render();
+	
+	ImGui::UpdatePlatformWindows();
 
+	Profiler::Begin("Render", "Rendering");
 	m_ctx->BeginFrame();
 	
-	m_ctx->SetRenderTarget(s_window->GetRenderTarget());
+	m_ctx->SetRenderTarget(s_window->GetRenderTarget(), true);
 	m_ctx->Clear(nullptr, 1.0f, 0, false);
 	
 	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
 
 	m_ctx->EndFrame();
+	Profiler::End();
+
+	Profiler::Begin("VSync", "Rendering");
 	s_window->Present(0);
+	Profiler::End();
 	
 	glfwPollEvents();
 }

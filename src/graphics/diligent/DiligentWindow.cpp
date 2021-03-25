@@ -38,7 +38,11 @@ void DiligentWindow::Present(const int vsyncInterval)
 void DiligentWindow::Resize(const int width, const int height)
 {
 	auto& desc = m_swapchain->GetDesc();
-	if (desc.Width != width || desc.Height != height) m_swapchain->Resize(width, height);
+	if (desc.Width != width || desc.Height != height) 
+	{
+		m_renderTarget.reset();
+		m_swapchain->Resize(width, height);
+	}
 }
 
 void DiligentWindow::GetSize(int& width, int& height) const

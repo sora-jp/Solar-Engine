@@ -79,13 +79,20 @@ void Engine::Run(SolarApp* app)
 	while (true)
 	{
 		Profiler::BeginRoot();
-		foreach_reverse(_subsystems, &Subsystem::PreRun);
 		
+		Profiler::Begin("PreRun", "Engine");
+		foreach_reverse(_subsystems, &Subsystem::PreRun);
+		Profiler::End();
+
+		Profiler::Begin("App", "App");
 		app->Run();
 		foreach(_ecssystems, RunEcsSystem);
-		
+		Profiler::End();
+
+		Profiler::Begin("PostRun", "Engine");
 		foreach(_subsystems, &Subsystem::PostRun);
 		if (any(_subsystems, &Subsystem::RequestedShutdown)) break;
+		Profiler::End();
 		Profiler::EndRoot();
 	}
 }

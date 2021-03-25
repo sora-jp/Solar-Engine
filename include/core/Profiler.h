@@ -2,6 +2,7 @@
 #include "Common.h"
 #include <chrono>
 #include <utility>
+#include <map>
 
 struct ProfilerNode
 {
@@ -19,7 +20,7 @@ struct ProfilerNode
 	[[nodiscard]] double TotalWithoutSelf() const { return TotalMs - TimeMs; }
 	
 private:
-	ProfilerNode(const Shared<ProfilerNode>& parent, std::string name, std::string category) : Parent(parent), Name(std::move(name)), Category(std::move(category)), TimeMs(-1), TotalMs(-1) {}
+	ProfilerNode(const Shared<ProfilerNode>& parent, std::string name, std::string category) : Parent(parent), Name(std::move(name)), Category(std::move(category)), TimeMs(0), TotalMs(0) {}
 };
 
 class SOLAR_API Profiler
@@ -42,6 +43,8 @@ public:
 	static void EndRoot();
 
 	static bool HasRootNodes();
+	static Shared<ProfilerNode> GetNodeFromPath(const std::string& path);
+	static Shared<ProfilerNode> GetRootNode();
 	static std::vector<Shared<ProfilerNode>>& GetRootNodes();
 	static double GetTimeForCategory(const std::string& category);
 };

@@ -30,6 +30,7 @@ mono_crash.*
 
 # TEMPORARY HACKY HACKY
 vendor/graphics/DiligentCoreRelease.lib
+vendor/graphics/DiligentCoreDebug.lib
 
 # Build results
 [Bb]uild/

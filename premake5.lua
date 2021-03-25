@@ -41,6 +41,7 @@ workspace "Solar"
 filter { "platforms:Win64" }
     system "Windows"
     architecture "x64"
+	linkoptions { "/LTCG:INCREMENTAL" }
 	defines { "PLATFORM_WIN32=1", "D3D_SUPPORTED=1" ,"D3D2_SUPPORTED=1" ,"GL_SUPPORTED=1" ,"VULKAN_SUPPORTED=1" }
 
 filter "configurations:Debug"
