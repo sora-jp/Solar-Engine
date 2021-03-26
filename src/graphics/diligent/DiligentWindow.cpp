@@ -52,14 +52,11 @@ void DiligentWindow::GetSize(int& width, int& height) const
 
 RenderTexture& DiligentWindow::GetRenderTarget()
 {
-	//if (!m_renderTarget) 
-	{
-		auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
-		auto* depthBuf = m_swapchain->GetDepthBufferDSV();
+	auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
+	auto* depthBuf = m_swapchain->GetDepthBufferDSV();
 
-		if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
-		else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
-	}
+	if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
+	else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
 	return *m_renderTarget;
 }
 

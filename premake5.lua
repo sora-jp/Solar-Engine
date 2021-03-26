@@ -75,8 +75,8 @@ project "Graphics"
 	kind "SharedLib"
 	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD", "ENGINE_DLL=1" }
 	links { "Core" }
-	files { "vendor/graphics/include/dear-imgui/**.cpp", "vendor/graphics/include/dear-imgui/**.inl", "vendor/graphics/include/dear-imgui/**.h" }
-	includedirs {"vendor/core/include", "vendor/graphics/include/dear-imgui"}
+	files { "vendor/graphics/include/dear-imgui/**.cpp", "vendor/graphics/include/dear-imgui/**.inl", "vendor/graphics/include/dear-imgui/**.h", "vendor/graphics/implot/**.cpp" }
+	includedirs {"vendor/core/include", "vendor/graphics/include/dear-imgui", "vendor/graphics/include/implot"}
 	copytoshared()
 	vendordllcopy()
 	--enginepch()

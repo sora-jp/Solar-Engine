@@ -46,6 +46,7 @@ void GraphicsSubsystem::Init()
 	SOLAR_CORE_INFO("Using GPU {} ({})", m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
 
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 
 	auto& io = ImGui::GetIO();
 	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
