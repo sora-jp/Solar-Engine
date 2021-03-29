@@ -6,7 +6,6 @@
 #include "SolarApp.h"
 #include <iostream>
 #include "System.h"
-#include "TypeRegistry.h"
 
 #ifdef SOLAR_PLATFORM_WINDOWS
 

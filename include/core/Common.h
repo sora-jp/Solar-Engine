@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #if SOLAR_ENGINE_BUILD
 	#define SOLAR_API __declspec(dllexport)
 	#define ENTT_API_EXPORT
@@ -11,6 +12,11 @@
 #if SOLAR_SUBSYSTEM_BUILD
 #define SUBSYSTEM_API __declspec(dllexport)
 #else
+#define SUBSYSTEM_API __declspec(dllimport)
+#endif
+
+#else
+#define SOLAR_API
 #define SUBSYSTEM_API
 #endif
 

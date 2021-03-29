@@ -4,7 +4,7 @@
 #include "Scene.h"
 #include <type_traits>
 
-//#define ENTT_NO_ETO
+#define ENTT_NO_ETO
 #include "entt/entt.hpp"
 
 class SOLAR_API Entity final

@@ -8,44 +8,23 @@
 #include "Profiler.h"
 
 namespace fs = std::filesystem;
+INSTANTIATE_FACTORY(BaseSystem);
 
-#define GET_CREATE_SUBSYSTEM_PROC(hmod) CreateSubsystemFunc(GetProcAddress(hmod, "CreateSubsystem"))
-#define CREATE_SUBSYSTEM(hmod, ctor) std::shared_ptr<Subsystem>(ctor())
-
-std::vector<SubsystemPtr<Subsystem>> Engine::_subsystems;
+std::vector<Shared<Subsystem>> Engine::_subsystems;
 std::vector<Shared<BaseSystem>> Engine::_ecssystems;
 
 bool Engine::Init(SolarApp* app)
 {
 	SOLAR_CORE_TRACE("Initializing engine");
 	SOLAR_CORE_ASSERT(app != nullptr);
-	_subsystems = std::vector<SubsystemPtr<Subsystem>>();
+	_subsystems = GET_SUBSYSTEMS();
 
-	// TODO: Platform independent way of doing this
-	wchar_t path[MAX_PATH] = {0};
-	GetModuleFileName(nullptr, path, MAX_PATH);
-	
-	for (const auto& fsEntry : fs::directory_iterator(fs::path(path).parent_path()))
+	for (const auto sys : _subsystems)
 	{
-		if (fsEntry.path().extension() != ".dll") continue;
-		if (fsEntry.path().filename() == "Core.dll") continue;
-
-		const auto instance = LoadLibrary(fsEntry.path().c_str());
-		const auto ctor = GET_CREATE_SUBSYSTEM_PROC(instance);
-		if (ctor == nullptr)
-		{
-			SOLAR_CORE_TRACE("Library {} did not contain a subsystem", fsEntry.path().filename().string());
-			FreeLibrary(instance);
-			continue;
-		}
-		
-		auto sys = CREATE_SUBSYSTEM(instance, ctor);
 		SOLAR_CORE_ASSERT(sys != nullptr);
 
 		sys->Init();
-		SOLAR_CORE_TRACE("Loaded subsystem \"{}\" ({})", sys->GetName(), fsEntry.path().filename().string());
-
-		_subsystems.push_back(sys);
+		SOLAR_CORE_TRACE("Loaded subsystem \"{}\"", sys->GetName());
 	}
 
 	std::stable_sort(_subsystems.begin(), _subsystems.end());

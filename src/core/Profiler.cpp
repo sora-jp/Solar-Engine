@@ -4,6 +4,7 @@
 SOLAR_API Shared<ProfilerNode> Profiler::_root;
 SOLAR_API Shared<ProfilerNode> Profiler::_lastRoot;
 SOLAR_API Shared<ProfilerNode> Profiler::_curNode;
+SOLAR_API std::map<std::string, double> Profiler::_lastCategoryTimes;
 SOLAR_API std::map<std::string, double> Profiler::_categoryTimes;
 SOLAR_API std::chrono::high_resolution_clock::time_point Profiler::_curNodeStart;
 
@@ -35,8 +36,7 @@ void Profiler::End()
 
 	_curNode->TotalMs += (_curNode->TimeMs += msDiff);
 
-	auto pos = _categoryTimes.try_emplace(_categoryTimes.cbegin(), _curNode->Category, 0);
-	pos->second += msDiff;
+	_categoryTimes[_curNode->Category] += _curNode->TimeMs;
 
 	const auto hasParent = !_curNode->Parent.expired();
 	
@@ -64,6 +64,8 @@ void Profiler::EndRoot()
 	SOLAR_ASSERT(_curNode == _root);
 	_lastRoot = _root;
 	_curNode = nullptr;
+
+	_lastCategoryTimes = _categoryTimes;
 }
 
 bool Profiler::HasRootNodes()
@@ -79,7 +81,6 @@ Shared<ProfilerNode> Profiler::GetNodeFromPath(const std::string& path)
 	
 	while ((next = path.find('/', last)) != std::string::npos && node != nullptr)
 	{
-		
 		const auto nextName = path.substr(last, next - last);
 		node = *std::find_if(node->Children.begin(), node->Children.end(), [&](const Shared<ProfilerNode>& n) { return n->Name == nextName; });
 
@@ -108,5 +109,5 @@ Shared<ProfilerNode> Profiler::GetRootNode()
 
 double Profiler::GetTimeForCategory(const std::string& category)
 {
-	return _categoryTimes[category];
+	return _curNode ? _lastCategoryTimes[category] : _categoryTimes[category];
 }

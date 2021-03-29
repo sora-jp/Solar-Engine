@@ -8,7 +8,7 @@
 
 class SOLAR_API Engine final
 {
-	static std::vector<SubsystemPtr<Subsystem>> _subsystems;
+	static std::vector<Shared<Subsystem>> _subsystems;
 	static std::vector<Shared<BaseSystem>> _ecssystems;
 	
 public:

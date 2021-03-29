@@ -1,7 +1,9 @@
 #pragma once
 
 #include "core/Common.h"
-#include "diligent/RenderTexture.h"
+#include "RenderTexture.h"
+#include "Material.h"
+#include "Mesh.h"
 #include "diligent/Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "diligent/Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "diligent/Graphics/GraphicsEngine/interface/SwapChain.h"
@@ -15,7 +17,7 @@ class DiligentWindow;
 struct GLFWwindow;
 
 class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
-	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_VERIFY;
+	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 	
 	RenderTexture m_activeTexture {};
 	QueryDataPipelineStatistics m_pipelineStats;
@@ -36,8 +38,10 @@ public:
 
 	void BeginFrame();
 	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);
-	void SetRenderTarget(RenderTexture& texture, bool autoTransition = true);
-	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = true);
+	void SetRenderTarget(RenderTexture& texture, bool autoTransition = false);
+	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
+	void BindMaterial(const Shared<Material>& material, int subpass = 0);
+	void Submit(const Shared<Mesh>& mesh);
 	void EndFrame();
 
 	const QueryDataPipelineStatistics& GetPipelineStats() const { return m_pipelineStats; }

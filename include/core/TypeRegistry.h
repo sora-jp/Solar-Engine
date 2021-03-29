@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "Log.h"
 #include <vector>
 
 template <typename Base> class TypeRegistry
@@ -32,13 +33,14 @@ public:
 
 template<typename Base> std::vector<Shared<Base>> TypeRegistry<Base>::Instances;
 
-#define GET(factory) factory::Get()
-#define REGISTER(factory, t) static TypeRegistrar<factory, t> s_ ##t ##Registrar;
+#define GET(factory) Factory ##factory::Get()
+#define REGISTER(factory, t) static TypeRegistrar<Factory ##factory, t> s_ ##t ##Registrar;
 
-#define INSTANTIATE_FACTORY(factorytype) template<> class TypeRegistry<factorytype>  \
+#define INSTANTIATE_FACTORY(factorytype) std::vector<Shared<factorytype>> Factory ##factorytype::Instances;
+#define INSTANTIATE_FACTORY_DEF(factorytype) class Factory ##factorytype : public TypeRegistry<factorytype>  \
 {																			         \
 public:																		         \
-	typedef BaseSystem base;												         \
+	typedef factorytype base;												         \
 	static std::vector<Shared<factorytype>> Instances;								         \
 	static const std::vector<Shared<factorytype>>& Get() { return Instances; }				     \
 	static bool Register(Shared<factorytype> s)									         \
@@ -47,5 +49,3 @@ public:																		         \
 		return true;														         \
 	}																		         \
 };																			         \
-																			         \
-std::vector<Shared<factorytype>> TypeRegistry<factorytype>::Instances

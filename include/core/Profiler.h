@@ -30,6 +30,7 @@ class SOLAR_API Profiler
 	static Shared<ProfilerNode> _curNode;
 
 	static std::map<std::string, double> _categoryTimes;
+	static std::map<std::string, double> _lastCategoryTimes;
 	static std::chrono::high_resolution_clock::time_point _curNodeStart;
 
 public:

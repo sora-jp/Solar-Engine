@@ -5,15 +5,25 @@
 #include "GraphicsSubsystem.h"
 #include "core/Log.h"
 
+#include "core/Engine.h"
 #include "diligent/DiligentWindow.h"
 #include "diligent-imgui/ImGuiDiligentRenderer.h"
 #include "GLFW/glfw3.h"
 #include "dear-imgui/backends/imgui_impl_glfw.h"
 #include "core/Profiler.h"
 #include "ImGuiDebugWindow.h"
+#include "RenderSystem.h"
+#include <diligent/Graphics/GraphicsTools/interface/MapHelper.hpp>
+
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
+
+Shared<DiligentContext> GraphicsSubsystem::_ctx;
+Shared<DiligentWindow> GraphicsSubsystem::_mainWindow;
+RefCntAutoPtr<IBuffer> GraphicsSubsystem::_constantsBuffer;
 
 GraphicsSubsystem::~GraphicsSubsystem() = default;
 static double _scrollDelta;
@@ -23,10 +33,17 @@ void ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
     _scrollDelta += yoffset;
 }
 
-void SetupImGuiStyle2();
+void SetupImGuiStyle();
 static ImGuiDiligentRenderer* s_imguiRenderer;
-static Shared<DiligentWindow> s_window;
-static ImFont* s_monoFont;
+static ImFont *s_monoFont, *s_monoFontSmall;
+static Shared<RenderSystem> s_renderSystem;
+static float _t;
+
+struct ShaderConstants
+{
+	glm::mat4 world;
+	glm::mat4 proj;
+};
 
 void GraphicsSubsystem::Init()
 {
@@ -40,23 +57,37 @@ void GraphicsSubsystem::Init()
 
 	glfwSetScrollCallback(m_window, &ScrollCallback);
 
-	m_ctx = MakeShared<DiligentContext>();
-	s_window = m_ctx->Init(m_window);
+	_ctx = MakeShared<DiligentContext>();
+	_mainWindow = _ctx->Init(m_window);
 	
-	SOLAR_CORE_INFO("Using GPU {} ({})", m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, m_ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
+	SOLAR_CORE_INFO("Using GPU {} ({})", _ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, _ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
 
+	BufferDesc buf;
+	buf.Name = "Shader Constants";
+	buf.Mode = BUFFER_MODE_RAW;
+	buf.BindFlags = BIND_UNIFORM_BUFFER;
+	buf.Usage = USAGE_DYNAMIC;
+	buf.uiSizeInBytes = sizeof(ShaderConstants);
+	buf.CPUAccessFlags = CPU_ACCESS_WRITE;
+	
+	_ctx->GetDevice()->CreateBuffer(buf, nullptr, &_constantsBuffer);
+	
 	ImGui::CreateContext();
 	ImPlot::CreateContext();
 
 	auto& io = ImGui::GetIO();
-	io.FontDefault = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
-	s_monoFont = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 18.0f);
 	
-	const auto& scd = s_window->GetSwapChain()->GetDesc();
-	s_imguiRenderer = new ImGuiDiligentRenderer(m_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
+	io.FontDefault  = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
+	s_monoFont      = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 18.0f);
+	s_monoFontSmall = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 12.0f);
+	
+	const auto& scd = _mainWindow->GetSwapChain()->GetDesc();
+	s_imguiRenderer = new ImGuiDiligentRenderer(_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
+
+	s_renderSystem = MakeShared<RenderSystem>();
 	
 	ImGui_ImplGlfw_InitForOther(m_window, true);
-	SetupImGuiStyle2();
+	SetupImGuiStyle();
 }
 
 void GraphicsSubsystem::Shutdown()
@@ -77,6 +108,7 @@ void GraphicsSubsystem::PreRun()
 
 	const std::chrono::duration<double> deltaSeconds = curFrameTime - lastFrameTime;
 	lastFrameTime = curFrameTime;
+	_t += deltaSeconds.count();
 
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::GetIO().DeltaTime = deltaSeconds.count();
@@ -84,8 +116,9 @@ void GraphicsSubsystem::PreRun()
 	//TODO: Diligent new imgui frame
 
 	int w, h;
-	s_window->GetSize(w, h);
+	_mainWindow->GetSize(w, h);
 	s_imguiRenderer->NewFrame(w, h, SURFACE_TRANSFORM_IDENTITY);
+	
 	ImGui::NewFrame();
 	
 	_scrollDelta = 0;
@@ -112,7 +145,7 @@ void GraphicsSubsystem::PostRun()
 
 	if (debugStats)
 	{
-		DrawDebugWindow(m_ctx, s_monoFont);
+		DrawDebugWindow(_ctx, s_monoFont, s_monoFontSmall);
 	}
 
 	//TODO: Render
@@ -122,18 +155,30 @@ void GraphicsSubsystem::PostRun()
 	ImGui::UpdatePlatformWindows();
 
 	Profiler::Begin("Render", "Rendering");
-	m_ctx->BeginFrame();
+	_ctx->BeginFrame();
 	
-	m_ctx->SetRenderTarget(s_window->GetRenderTarget(), true);
-	m_ctx->Clear(nullptr, 1.0f, 0, false);
-	
-	s_imguiRenderer->RenderDrawData(m_ctx->GetContext(), ImGui::GetDrawData());
+	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget(), true);
+	_ctx->Clear(nullptr, 1.0f, 0, false);
 
-	m_ctx->EndFrame();
+	{
+		MapHelper<glm::mat4> consts(_ctx->GetContext(), _constantsBuffer, MAP_WRITE, MAP_FLAG_DISCARD);
+
+		const auto world = glm::rotate(glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 0, 500)), _t * 2.5f, glm::vec3(0, 1, 0));
+		const auto proj = glm::perspectiveLH_ZO(glm::radians(60.0f), 1280.0f / 720.0f, 0.3f, 1000.0f);
+		
+		consts[0] = (world);
+		consts[1] = (proj);
+	}
+
+	Engine::RunEcsSystem(s_renderSystem);
+	
+	s_imguiRenderer->RenderDrawData(_ctx->GetContext(), ImGui::GetDrawData());
+
+	_ctx->EndFrame();
 	Profiler::End();
 
-	Profiler::Begin("VSync", "Rendering");
-	s_window->Present(0);
+	Profiler::Begin("VSync", "VSync");
+	_mainWindow->Present(1);
 	Profiler::End();
 	
 	glfwPollEvents();
@@ -144,7 +189,7 @@ bool GraphicsSubsystem::RequestedShutdown()
 	return glfwWindowShouldClose(m_window);
 }
 
-void SetupImGuiStyle2()
+void SetupImGuiStyle()
 {
 	auto style = &ImGui::GetStyle();
 
@@ -217,4 +262,4 @@ void SetupImGuiStyle2()
 	style->Colors[ImGuiCol_TabUnfocusedActive] = ImVec4(0.56f, 0.56f, 0.58f, 1.00f);
 }
 
-EXPORT_SUBSYSTEM(GraphicsSubsystem)
+REGISTER_SUBSYSTEM(GraphicsSubsystem)

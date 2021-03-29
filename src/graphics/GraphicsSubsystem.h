@@ -5,12 +5,14 @@
 #include "diligent/DiligentInit.h"
 
 struct GLFWwindow;
-class SUBSYSTEM_API GraphicsSubsystem final : Subsystem
+class SUBSYSTEM_API GraphicsSubsystem final : public Subsystem
 {
 	SUBSYSTEM_NAME("Graphics Subsystem");
 	SUBSYSTEM_ORDER(-1);
 
-	Shared<DiligentContext> m_ctx;
+	static RefCntAutoPtr<IBuffer> _constantsBuffer;
+	static Shared<DiligentWindow> _mainWindow;
+	static Shared<DiligentContext> _ctx;
 	GLFWwindow* m_window = nullptr;
 	
 public:
@@ -20,5 +22,8 @@ public:
 	void PostRun() override;
 	void PreRun() override;
 
+	static RefCntAutoPtr<IBuffer> GetConstantBuffer() { return _constantsBuffer; }
+	static Shared<DiligentContext> GetCurrentContext() { return _ctx; }
+	static Shared<DiligentWindow> GetMainWindow() { return _mainWindow; }
 	bool RequestedShutdown() override;
 };

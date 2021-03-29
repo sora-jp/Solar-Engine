@@ -10,7 +10,7 @@
 
 #include "core/Log.h"
 #include "diligent/DiligentWindow.h"
-#include "diligent/RenderTexture.h"
+#include "RenderTexture.h"
 
 void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
@@ -180,6 +180,25 @@ void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stenci
 
 	for (auto i = 0; i < m_activeTexture.m_numColorTargets; i++)
 		m_context->ClearRenderTarget(m_activeTexture.m_colorTargets[i], rgba, TRANSITION_MODE);
+}
+
+void DiligentContext::BindMaterial(const Shared<Material>& material, const int subpass)
+{
+	m_context->SetPipelineState(material->shader->m_passes[subpass]->m_pipelineState);
+	m_context->CommitShaderResources(material->m_bindings[subpass], TRANSITION_MODE);
+}
+
+void DiligentContext::Submit(const Shared<Mesh>& mesh)
+{
+	m_context->SetVertexBuffers(0, 1, &mesh->m_vertBuf, nullptr, TRANSITION_MODE, SET_VERTEX_BUFFERS_FLAG_RESET);
+	m_context->SetIndexBuffer(mesh->m_idxBuf, 0, TRANSITION_MODE);
+
+	DrawIndexedAttribs m;
+	m.IndexType = VT_UINT32;
+	m.NumIndices = mesh->m_idxCount;
+	m.Flags = DRAW_FLAG_VERIFY_ALL;
+	
+	m_context->DrawIndexed(m);
 }
 
 void DiligentContext::EndFrame()
