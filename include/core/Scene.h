@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "entt/entt.hpp"
+#include <functional>
 
 class Entity;
 class BaseSystem;
@@ -20,6 +21,18 @@ public:
 	static Shared<Scene> Create();
 	void Destroy();
 	static const std::vector<Shared<Scene>>& GetLoadedScenes();
+	template<typename... C, typename F> void IterateEntities(F func);
 
 	Entity CreateEntity(const std::string& name, const Entity& parent );
 };
+
+template <typename... C, typename F>
+void Scene::IterateEntities(F func)
+{
+	auto view = m_registry.view<C...>();
+	for (auto e : view)
+	{
+		std::tuple<C...> components = view.template get<C...>(e);
+		func(Entity(e, shared_from_this()), std::get<C, C...>(components)...);
+	}
+}

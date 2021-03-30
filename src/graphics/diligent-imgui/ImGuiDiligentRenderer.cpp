@@ -25,6 +25,7 @@
  *  of the possibility of such damages.
  */
 
+#include "pch.h"
 #include <cstddef>
 #include "ImGuiDiligentRenderer.h"
 #include "diligent/Graphics/GraphicsEngine/interface/RenderDevice.h"

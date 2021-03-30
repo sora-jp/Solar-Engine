@@ -71,6 +71,7 @@ You can read releases logs https://github.com/epezent/implot/releases for more d
 
 */
 
+#include "pch.h"
 #include "implot.h"
 #include "implot_internal.h"
 

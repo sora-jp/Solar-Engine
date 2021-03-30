@@ -1,3 +1,4 @@
+#include "CameraComponent.h"
 #include "Log.h"
 #include "EntryPoint.h"
 #include "Scene.h"
@@ -20,15 +21,19 @@ public:
 	void Shutdown() override;
 };
 
-class TestSystem final : public System<CommonEntityData>
+static float _time;
+class TestSystem final : public System<TransformComponent>
 {
 public:
-	void Execute(const Entity e, CommonEntityData& c) override
+	void Execute(const Entity e, TransformComponent& c) override
 	{
 		//SOLAR_INFO("{:E} -> {:E}", 
 		//	e, 
 		//	c.GetParent()
 		//);
+		if (e.HasComponent<CameraComponent>()) return;
+		//SOLAR_INFO("{} {} {} {}", c.rotation.x, c.rotation.y, c.rotation.z, c.rotation.w);
+		c.rotation = glm::quat(glm::vec3(0, _time * 2, 0));
 	}
 };
 
@@ -50,13 +55,13 @@ struct PSOutput
 void main(in  PSInput  PSIn,
 	out PSOutput PSOut)
 {
-	PSOut.Color = dot(PSIn.Nrm, normalize(float3(1, 1, -1)));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
+	PSOut.Color = lerp(0.015, 1, saturate(dot(PSIn.Nrm, normalize(float3(1, 1, -1)))));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
 })";
 
 const char* vert = R"(cbuffer Constants
 {
-    float4x4 g_World;
-    float4x4 g_Proj;
+    float4x4 g_Model;
+    float4x4 g_ViewProj;
 };
 
 // Vertex shader takes two inputs: vertex position and uv coordinates.
@@ -82,8 +87,8 @@ struct PSInput
 void main(in  VSInput VSIn,
           out PSInput PSIn) 
 {
-    PSIn.Pos = mul( float4(VSIn.Pos,1.0), transpose(mul(g_Proj, g_World)));
-	PSIn.Nrm = mul(float4(VSIn.Nrm, 0), transpose(g_World)).xyz;
+    PSIn.Pos = mul( float4(VSIn.Pos,1.0), (mul(g_Model, g_ViewProj)));
+	PSIn.Nrm = mul(float4(VSIn.Nrm, 0), (g_Model)).xyz;
     PSIn.UV  = VSIn.UV;
 })";
 
@@ -106,12 +111,22 @@ void TestApp::Init()
 	auto& r = e.AddComponent<RendererComponent>();
 	r.material = m_mat;
 	r.mesh = m_mesh;
+
+	auto ec = scene->CreateEntity("Camera", Entity::null);
+	auto& c = ec.AddComponent<CameraComponent>();
+	c.fov = 60;
+	c.nearClip = 0.3f;
+	c.farClip = 1000.0f;
+
+	auto& t = ec.GetComponent<TransformComponent>();
+	t.position = glm::vec3(0, 0, -500);
+	//t.scale = glm::vec3(1, 1, 1);
 	
-	for (auto i = 0; i < 10; i++) {
-		auto e1 = scene->CreateEntity(fmt::format("Parent ({:03})", i), Entity::null);
-		auto e2 = scene->CreateEntity(fmt::format("Child  ({:03})", i), e1);
-		//e2.AddComponent<TransformComponent>();
-	}
+	//for (auto i = 0; i < 10; i++) {
+	//	auto e1 = scene->CreateEntity(fmt::format("Parent ({:03})", i), Entity::null);
+	//	auto e2 = scene->CreateEntity(fmt::format("Child  ({:03})", i), e1);
+	//	//e2.AddComponent<TransformComponent>();
+	//}
 }
 
 void TestApp::Run()
@@ -120,6 +135,7 @@ void TestApp::Run()
 	
 	static auto demoOpen = true;
 	ImGui::ShowDemoWindow(&demoOpen);
+	_time += 1.0f / 60;
 }
 
 void TestApp::Shutdown()

@@ -29,9 +29,9 @@ imgui.ini
 mono_crash.*
 
 # TEMPORARY HACKY HACKY
-vendor/graphics/DiligentCoreRelease.lib
-vendor/graphics/DiligentCoreDebug.lib
-vendor/graphics/assimp-vc142-mtRelease.lib
+vendor/diligent/DiligentCoreRelease.lib
+vendor/diligent/DiligentCoreDebug.lib
+vendor/assimp/assimp-vc142-mtRelease.lib
 
 # Build results
 [Bb]uild/

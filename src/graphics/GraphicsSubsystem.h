@@ -1,5 +1,7 @@
 #pragma once
 
+
+#include "ShaderConstants.h"
 #include "core/Common.h"
 #include "core/Subsystem.h"
 #include "diligent/DiligentInit.h"
@@ -10,7 +12,6 @@ class SUBSYSTEM_API GraphicsSubsystem final : public Subsystem
 	SUBSYSTEM_NAME("Graphics Subsystem");
 	SUBSYSTEM_ORDER(-1);
 
-	static RefCntAutoPtr<IBuffer> _constantsBuffer;
 	static Shared<DiligentWindow> _mainWindow;
 	static Shared<DiligentContext> _ctx;
 	GLFWwindow* m_window = nullptr;
@@ -21,8 +22,7 @@ public:
 	void Shutdown() override;
 	void PostRun() override;
 	void PreRun() override;
-
-	static RefCntAutoPtr<IBuffer> GetConstantBuffer() { return _constantsBuffer; }
+	
 	static Shared<DiligentContext> GetCurrentContext() { return _ctx; }
 	static Shared<DiligentWindow> GetMainWindow() { return _mainWindow; }
 	bool RequestedShutdown() override;

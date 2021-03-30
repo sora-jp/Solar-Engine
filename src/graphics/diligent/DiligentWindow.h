@@ -23,14 +23,14 @@ class DiligentWindow
 public:
 	DiligentWindow(const Shared<DiligentContext>& ctx, bool isMainWindow, GLFWwindow* window);
 	DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* swapChain, bool isMainWindow, GLFWwindow* window);
-	~DiligentWindow() noexcept = default;
+	~DiligentWindow() noexcept { glfwDestroyWindow(m_window); }
 
 	void Present(int vsyncInterval = 1);
 	void Resize(int width, int height);
 	void GetSize(int& width, int& height) const;
 	[[nodiscard]] RenderTexture& GetRenderTarget();
 
-	Shared<DiligentContext> GetContext() { return m_ctx; }
+	Shared<DiligentContext> GetContext() const { return m_ctx; }
 	ISwapChain* GetSwapChain() { return m_swapchain; }
 	operator GLFWwindow*() const { return m_window; }
 	void InvalidateCachedRenderTarget();

@@ -84,7 +84,7 @@ Shared<Shader> ShaderCompiler::Compile(std::string name, std::string vs, std::st
 	auto pass = MakeUnique<ShaderPass>();
 	
 	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &pass->m_pipelineState);
-	pass->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(GraphicsSubsystem::GetConstantBuffer());
+	pass->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants")->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
 	
 	shader->m_passes.push_back(std::move(pass));
 	return shader;

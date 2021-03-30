@@ -22,6 +22,7 @@
 
 // ImPlot v0.10 WIP
 
+#include "pch.h"
 #include "implot.h"
 #include "implot_internal.h"
 

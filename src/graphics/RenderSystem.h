@@ -3,10 +3,10 @@
 #include "core/Entity.h"
 #include "core/System.h"
 #include "core/TransformComponent.h"
-#include "RendererComponent.h"
+#include "CameraComponent.h"
 
-class RenderSystem final : public System<RendererComponent, TransformComponent>
+class RenderSystem final : public System<CameraComponent, TransformComponent>
 {
 public:
-	void Execute(Entity e, RendererComponent& r, TransformComponent& t) override;
+	void Execute(Entity e, CameraComponent& r, TransformComponent& t) override;
 };

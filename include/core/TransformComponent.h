@@ -1,14 +1,18 @@
 #pragma once
 #include "Common.h"
-//#include "glm/vec3.hpp"
-//#include "glm/ext/quaternion_float.hpp"
+#include "glm/glm.hpp"
+#include "glm/ext.hpp"
 
 struct SOLAR_API TransformComponent
 {
-	float nempty;
-	//glm::vec3 position;
-	//glm::quat rotation;
-	//glm::vec3 scale;
+	glm::vec3 position = glm::vec3(0, 0, 0);
+	glm::quat rotation = glm::quat(glm::vec3(0, 0, 0));
+	glm::vec3 scale = glm::vec3(1, 1, 1);
 
-	//glm::mat4x4 GetTransformMatrix() const { return glm::translate(static_cast<glm::mat4x4>(rotation) * glm::scale(glm::identity<glm::mat4x4>(), scale), position); }
+	[[nodiscard]] glm::mat4x4 GetTransformMatrix() const
+	{
+		return glm::translate(glm::mat4(1.0f), position)
+		     * static_cast<glm::mat4>(rotation)
+		     * glm::scale(glm::mat4(1.0f), scale);
+	}
 };

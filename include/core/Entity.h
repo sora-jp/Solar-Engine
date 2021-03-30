@@ -4,7 +4,6 @@
 #include "Scene.h"
 #include <type_traits>
 
-#define ENTT_NO_ETO
 #include "entt/entt.hpp"
 
 class SOLAR_API Entity final
@@ -19,7 +18,7 @@ public:
 	Entity(entt::entity handle, const Shared<Scene>& scene);
 	
 	template<class T, typename... Args, std::enable_if_t<std::is_constructible_v<T, Args...>, bool> = true>
-	std::conditional_t<std::is_empty_v<T>, void, T&> AddComponent(Args&&... args)
+	T& AddComponent(Args&&... args)
 	{
 		SOLAR_ASSERT(!HasComponent<T>());
 		return m_scene->m_registry.emplace<T, Args...>(m_handle, std::forward<Args>(args)...);

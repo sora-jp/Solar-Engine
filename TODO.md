@@ -1,24 +1,22 @@
 # Todo
 
 - Move shader variable definitions for Diligent to somewhere user-controllable (think shaderlab)
+- Time class in src/core for deltatime and more
+- Inputs (InputProviders registering to a global Input class)
 - Allow user control of PSO description
 - Custom HLSL preprocessor to allow for CG-like code (shaderlab)
-- Tiered cbuffers (PerScene, PerCamera, PerObject)
+- Tiered cbuffers? (PerScene, PerCamera, PerObject)
 - Default hlsl include for cbuffer defs + other misc stuff
-- FIX THE FUCKING VENDOR FILE STRUCTURE PLEASE
 - SHORTEN THE GODDAMN COMPILATION TIMES AAAAAAAAAAAH
 - Texture loading
 - Refactor RenderTexture? Maybe??
-- Actual camera components
 - Remove wierd shit from GraphicsSubsystem
 - Maybe make DiligentContext purely static?
 - Allow loading shaders from file
 - Figure out wtf is wrong with relative paths in Assimp
-- CBuffer structs in cpp code, instead of writing raw elements (how tho)
 - Wrap buffer creation API
 - Higher level rendering API (DrawRenderer?)
 - Split DiligentInit.cpp into multiple files, one for init / deinit, one for draw-related commands
 - Refactor ImGuiDiligentRenderer to use DiligentContext instead of raw IDeviceContext
 - Threaded rendering?
-- Disable ENTT Empty Type Optimization (just define ENTT_NO_ETO=1 globally)
 - Cleanup literally all the code in src/graphics, and look through src/core

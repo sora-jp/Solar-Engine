@@ -33,7 +33,7 @@
 
 #else
 
-#define SOLAR_ASSERT(...) (void)0;
+#define SOLAR_ASSERT(...) (void)0
 
 #endif
 
@@ -43,6 +43,6 @@
 
 #else
 
-#define SOLAR_CORE_ASSERT(...) (void)0;
+#define SOLAR_CORE_ASSERT(...) (void)0
 
 #endif

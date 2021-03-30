@@ -116,17 +116,26 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 		}
 
 		default:
-			SOLAR_CORE_DIE("Unknown graphics device type");
-			break;
+			SOLAR_CORE_DIE("Unknown/unsupported graphics device type");
 	}
 
 	QueryDesc statsQuery;
 	statsQuery.Name = "Pipeline statistics query";
 	statsQuery.Type = QUERY_TYPE_PIPELINE_STATISTICS;
 	m_statsQuery.reset(new ScopedQueryHelper(m_device, statsQuery, 2));
-
+	
 	m_timerQuery.reset(new DurationQueryHelper(m_device, 2));
 
+	BufferDesc buf;
+	buf.Name = "Shader Constants";
+	buf.Mode = BUFFER_MODE_RAW;
+	buf.BindFlags = BIND_UNIFORM_BUFFER;
+	buf.Usage = USAGE_DYNAMIC;
+	buf.uiSizeInBytes = sizeof(ShaderConstants);
+	buf.CPUAccessFlags = CPU_ACCESS_WRITE;
+
+	m_device->CreateBuffer(buf, nullptr, &m_constants);
+	
 	return outWindow ? outWindow : MakeShared<DiligentWindow>(shared_from_this(), true, window);
 }
 
@@ -159,7 +168,6 @@ void DiligentContext::CreateSwapChain(const SwapChainDesc& desc, void* windowHan
 			break;
 		default:
 			SOLAR_CORE_DIE("Invalid device type {}", m_device->GetDeviceCaps().DevType);
-			break;
 	}
 }
 
@@ -168,7 +176,7 @@ void DiligentContext::SetRenderTarget(RenderTexture& texture, const bool autoTra
 	m_activeTexture = texture;
 	if (autoTransition) TransitionState(&texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, m_activeTexture.m_rawColorTargets, m_activeTexture.m_depthTarget, TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, &m_activeTexture.m_colorTargets[0], m_activeTexture.m_depthTarget, TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
@@ -188,7 +196,7 @@ void DiligentContext::BindMaterial(const Shared<Material>& material, const int s
 	m_context->CommitShaderResources(material->m_bindings[subpass], TRANSITION_MODE);
 }
 
-void DiligentContext::Submit(const Shared<Mesh>& mesh)
+void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh)
 {
 	m_context->SetVertexBuffers(0, 1, &mesh->m_vertBuf, nullptr, TRANSITION_MODE, SET_VERTEX_BUFFERS_FLAG_RESET);
 	m_context->SetIndexBuffer(mesh->m_idxBuf, 0, TRANSITION_MODE);
@@ -199,6 +207,12 @@ void DiligentContext::Submit(const Shared<Mesh>& mesh)
 	m.Flags = DRAW_FLAG_VERIFY_ALL;
 	
 	m_context->DrawIndexed(m);
+}
+
+void DiligentContext::SetModelMatrix(const glm::mat4 matrix)
+{
+	auto map = MapConstants();
+	map->model = glm::transpose(matrix);
 }
 
 void DiligentContext::EndFrame()

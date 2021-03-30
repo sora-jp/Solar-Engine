@@ -1,9 +1,12 @@
 #pragma once
 
+#include <diligent/Graphics/GraphicsTools/interface/MapHelper.hpp>
+
 #include "core/Common.h"
 #include "RenderTexture.h"
 #include "Material.h"
 #include "Mesh.h"
+#include "ShaderConstants.h"
 #include "diligent/Graphics/GraphicsEngine/interface/DeviceContext.h"
 #include "diligent/Graphics/GraphicsEngine/interface/RenderDevice.h"
 #include "diligent/Graphics/GraphicsEngine/interface/SwapChain.h"
@@ -26,6 +29,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	RefCntAutoPtr<IEngineFactory> m_factory;
 	RefCntAutoPtr<IRenderDevice>  m_device;
 	RefCntAutoPtr<IDeviceContext> m_context;
+	RefCntAutoPtr<IBuffer> m_constants;
 	std::unique_ptr<ScopedQueryHelper>	  m_statsQuery;
 	std::unique_ptr<DurationQueryHelper>	  m_timerQuery;
 	RENDER_DEVICE_TYPE            m_deviceType = static_cast<RENDER_DEVICE_TYPE>(-1);
@@ -41,7 +45,8 @@ public:
 	void SetRenderTarget(RenderTexture& texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
-	void Submit(const Shared<Mesh>& mesh);
+	void SubmitMesh(const Shared<Mesh>& mesh);
+	void SetModelMatrix(const glm::mat4 matrix);
 	void EndFrame();
 
 	const QueryDataPipelineStatistics& GetPipelineStats() const { return m_pipelineStats; }
@@ -53,4 +58,6 @@ public:
 	[[nodiscard]] auto GetDeviceType() const { return m_deviceType; }
 	[[nodiscard]] IRenderDevice* GetDevice() { return m_device; }
 	[[nodiscard]] IDeviceContext* GetContext() { return m_context; }
+	[[nodiscard]] MapHelper<ShaderConstants> MapConstants() { return MapHelper<ShaderConstants>(m_context, m_constants, MAP_WRITE, MAP_FLAG_DISCARD); }
+	[[nodiscard]] RefCntAutoPtr<IBuffer> GetConstantBuffer() const { return m_constants; }
 };

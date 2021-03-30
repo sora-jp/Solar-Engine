@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DiligentWindow.h"
 #include "RenderTexture.h"
 
@@ -55,6 +56,8 @@ RenderTexture& DiligentWindow::GetRenderTarget()
 	auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
 	auto* depthBuf = m_swapchain->GetDepthBufferDSV();
 
+	if (colorBuf == nullptr || depthBuf == nullptr) return *m_renderTarget;
+	
 	if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
 	else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
 	return *m_renderTarget;

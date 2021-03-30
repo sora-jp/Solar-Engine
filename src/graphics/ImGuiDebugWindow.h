@@ -1,9 +1,8 @@
 #pragma once
-#include <string>
 #include "imgui.h"
+#include "implot/implot.h"
 #include "diligent/DiligentInit.h"
 #include "core/Profiler.h"
-#include <algorithm>
 #include <vector>
 #include <cmath>
 
@@ -133,6 +132,7 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 		
 		ImGui::Text("Total time: %.1fms", s_dataQueue.MaxTime(t - 4));
 		ImGui::Text("Frame usage: %.1f%%", s_frameBudgetUsage);
+		data.totalFrameTime -= data.vsyncTime;
 
 		//if (ImGui::BeginTable("Profiler", 2, ImGuiTableFlags_SizingStretchProp, ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
 		//	DrawProfilerBar(data.engineTime, data.totalFrameTime);
@@ -170,7 +170,7 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 			const auto& data1 = s_dataQueue.Data[0];
 
 			//ImPlot::SetNextFillStyle(ImVec4(0.372, 0.827, 0.443, -1));
-			ImPlot::PlotShaded("Vsync",  &data1.timestamp, &data1.vsyncTime , size, -INFINITY, offset, stride);
+			//ImPlot::PlotShaded("Vsync",  &data1.timestamp, &data1.vsyncTime , size, -INFINITY, offset, stride);
 			
 			//ImPlot::SetNextFillStyle(ImVec4(0.827, 0.619, 0.372, -1));
 			ImPlot::PlotShaded("Render", &data1.timestamp, &data1.renderTime, size, -INFINITY, offset, stride);

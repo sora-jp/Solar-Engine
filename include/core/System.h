@@ -21,10 +21,6 @@ inline void BaseSystem::ExecuteInScene(Shared<Scene> scene)
 
 template <typename... TComponents> class System : public BaseSystem
 {
-	template<class ...Args> void ExecMiddleman(Shared<Scene> scene, entt::entity e, Args... args)
-	{
-	}
-	
 public:
 	System() = default;
 	~System() override = default;
@@ -32,11 +28,11 @@ public:
 	void ExecuteInScene(Shared<Scene> scene, entt::registry& reg) override
 	{
 		auto& view = reg.view<TComponents...>();
-		for (auto entRaw : view) 
+		for (auto entRaw : view)
 		{
-			std::tuple<TComponents...> components = view.get(entRaw);
+			std::tuple<TComponents&...> components = view.get(entRaw);
 			//ExecMiddleman<TComponents...>(scene, entRaw, std::get<TComponents>(components)...);
-			Execute(Entity(entRaw, scene), std::get<TComponents, TComponents...>(components)...);
+			Execute(Entity(entRaw, scene), std::forward<TComponents&&>(std::get<TComponents&, TComponents&...>(components))...);
 			//std::apply(&System::ExecMiddleman, std::tuple_cat(scene, components));
 		}
 	}
