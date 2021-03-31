@@ -5,6 +5,7 @@
 #include "core/Profiler.h"
 #include <vector>
 #include <cmath>
+#include <implot/implot_internal.h>
 
 //inline std::string DurationText(double timeMs)
 //{
@@ -15,12 +16,44 @@
 
 struct DebugProfilerData
 {
+	static int ci;
 	double timestamp;
 	double totalFrameTime;
-	double engineTime;
-	double renderTime;
-	double vsyncTime;
+
+	std::vector<double> times;
+
+	void PushTime(const double& time) { times.push_back(time); }
+	double GetTime(const int idx) const
+	{
+		double t = 0;
+		for (auto i = 0; i <= idx; i++)
+		{
+			if (ImPlot::GetCurrentContext()->CurrentPlot->GetLegendItem(i)->Show) t += times[i];
+		}
+		return t;
+	}
+
+	static ImPlotPoint GetPoint(void* data, int idx)
+	{
+		auto* d = static_cast<DebugProfilerData*>(data);
+		return ImPlotPoint(d[idx].timestamp, d[idx].GetTime(ci));
+	}
+
+	static ImPlotPoint GetPoint2(void* data, int idx)
+	{
+		auto* d = static_cast<DebugProfilerData*>(data);
+		double y = 0;//d[idx].GetTime(ci);
+		if (ci - 1 >= 0) y = d[idx].GetTime(ci - 1);
+		
+		return ImPlotPoint(d[idx].timestamp, y);
+	}
+	
+	double& operator[](const int i)
+	{
+		return times[i];
+	}
 };
+int DebugProfilerData::ci;
 
 struct ScrollingBuffer {
 	uint64_t MaxSize;
@@ -51,7 +84,8 @@ struct ScrollingBuffer {
 			while (idx < 0) idx += MaxSize;
 
 			auto& d = Data[idx];
-			if (d.totalFrameTime > max) max = d.totalFrameTime;
+			auto t = d.totalFrameTime;//d.GetTime(2);
+			if (t > max) max = t;
 			if (d.timestamp < timeLimit) break;
 		}
 
@@ -79,9 +113,10 @@ inline void DrawProfilerBar(const double duration, const double totalTime)
 const static double SmoothFactor = .25f;
 static double s_frameBudgetUsage = -1;
 
-static ScrollingBuffer s_dataQueue;
+static ScrollingBuffer s_dataQueue(220);
 static unsigned int s_idx;
 static unsigned int s_length;
+static int _i = 0;
 
 inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* smallFont)
 {
@@ -123,16 +158,23 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 		DebugProfilerData data {};
 		data.timestamp = t;
 		data.totalFrameTime = Profiler::GetRootNode()->TotalMs;
-		data.engineTime = Profiler::GetTimeForCategory("Engine");
-		data.renderTime = Profiler::GetTimeForCategory("Rendering");
-		data.vsyncTime  = Profiler::GetTimeForCategory("VSync");
 
-		if (s_frameBudgetUsage < 0) s_frameBudgetUsage = (1.0f - data.vsyncTime / data.totalFrameTime) * 100;
-		else s_frameBudgetUsage = ((1.0f - data.vsyncTime / data.totalFrameTime) * 100) * SmoothFactor + s_frameBudgetUsage * (1.0f - SmoothFactor);
+		static const char* labels[3] = {
+			"Engine",
+			"Rendering",
+			"VSync"
+		};
+		
+		data.PushTime(Profiler::GetTimeForCategory("Engine"));
+		data.PushTime(Profiler::GetTimeForCategory("Rendering"));
+		data.PushTime(Profiler::GetTimeForCategory("VSync"));
+
+		if (s_frameBudgetUsage < 0) s_frameBudgetUsage = (1.0f - data[2] / data.totalFrameTime) * 100;
+		else s_frameBudgetUsage = ((1.0f - data[2] / data.totalFrameTime) * 100) * SmoothFactor + s_frameBudgetUsage * (1.0f - SmoothFactor);
 		
 		ImGui::Text("Total time: %.1fms", s_dataQueue.MaxTime(t - 4));
 		ImGui::Text("Frame usage: %.1f%%", s_frameBudgetUsage);
-		data.totalFrameTime -= data.vsyncTime;
+		//data.totalFrameTime -= data[2];
 
 		//if (ImGui::BeginTable("Profiler", 2, ImGuiTableFlags_SizingStretchProp, ImVec2(ImGui::GetContentRegionAvailWidth(), 0))) {
 		//	DrawProfilerBar(data.engineTime, data.totalFrameTime);
@@ -141,15 +183,14 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 
 		//	ImGui::EndTable();
 		//}
-
-		data.renderTime += data.engineTime;
-		data.vsyncTime += data.renderTime;
+		
 		s_dataQueue.Add(data);
 		
 		static const auto FLAGS = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoDecorations;
 
 		ImPlot::SetNextPlotLimitsX(t - 4.f, t, ImGuiCond_Always);
-		ImPlot::SetNextPlotLimitsY(0, s_dataQueue.MaxTime(t - 4), ImGuiCond_Always);
+		ImPlot::FitNextPlotAxes(false);
+		//ImPlot::SetNextPlotLimitsY(0, s_dataQueue.MaxTime(t - 4), ImGuiCond_Always);
 		
 		ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0.f);
 		ImPlot::PushStyleVar(ImPlotStyleVar_LegendPadding, ImVec2(0, 0));
@@ -162,21 +203,25 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 		
 		if (ImPlot::BeginPlot("##Scrolling", nullptr, nullptr, ImVec2(ImGui::GetWindowContentRegionWidth(), 100), ImPlotFlags_NoMousePos | ImPlotFlags_NoMenus, FLAGS, FLAGS)) {
 			ImPlot::SetLegendLocation(ImPlotLocation_South, ImPlotOrientation_Horizontal, true);
-
+			
 			const auto stride = sizeof(DebugProfilerData);
 			const auto offset = s_dataQueue.Offset;
 			const auto size = s_dataQueue.Data.size();
 
-			const auto& data1 = s_dataQueue.Data[0];
+			auto* data1 = &s_dataQueue.Data[0];
 
 			//ImPlot::SetNextFillStyle(ImVec4(0.372, 0.827, 0.443, -1));
 			//ImPlot::PlotShaded("Vsync",  &data1.timestamp, &data1.vsyncTime , size, -INFINITY, offset, stride);
 			
 			//ImPlot::SetNextFillStyle(ImVec4(0.827, 0.619, 0.372, -1));
-			ImPlot::PlotShaded("Render", &data1.timestamp, &data1.renderTime, size, -INFINITY, offset, stride);
+			for (auto i = 0; i < data1->times.size(); i++)
+			{
+				DebugProfilerData::ci = i;
+				ImPlot::PlotShadedG(labels[i], &DebugProfilerData::GetPoint, data1, &DebugProfilerData::GetPoint2, data1, size, offset);
+			}
 			
 			//ImPlot::SetNextFillStyle(ImVec4(0.372, 0.717, 0.827, -1));
-			ImPlot::PlotShaded("PreRun", &data1.timestamp, &data1.engineTime, size, -INFINITY, offset, stride);
+			//ImPlot::PlotShaded("PreRun", data1.timestamp, data1.engineTime, size, -INFINITY, offset, stride);
 			
 			ImPlot::EndPlot();
 		}
@@ -186,7 +231,7 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 		ImPlot::PopStyleColor(2);
 		ImPlot::PopStyleVar(3);
 		
-		t += 1.f / 75;//ImGui::GetIO().DeltaTime;
+		t += 4.f / ImGui::GetWindowContentRegionWidth();//ImGui::GetIO().DeltaTime;
 	}
 	
 	ImGui::End();

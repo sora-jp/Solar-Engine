@@ -1,6 +1,7 @@
 # Todo
 
 - Move shader variable definitions for Diligent to somewhere user-controllable (think shaderlab)
+- Render pipelines (think SRP api + implementation for forward rendering)
 - Time class in src/core for deltatime and more
 - Inputs (InputProviders registering to a global Input class)
 - Allow user control of PSO description

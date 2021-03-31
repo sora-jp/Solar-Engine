@@ -14,7 +14,7 @@ public:
 
 	~Material();
 
-	static Shared<Material> Create(const Shared<Shader> shader) { return Shared<Material>(new Material(shader)); }
+	static Shared<Material> Create(const Shared<Shader>& shader) { return Shared<Material>(new Material(shader)); }
 	
 private:
 	explicit Material(Shared<Shader> shader);

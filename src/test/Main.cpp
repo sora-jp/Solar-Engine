@@ -103,7 +103,7 @@ void TestApp::Init()
 	m_shader = ShaderCompiler::Compile("Test Shader", vert, frag);
 	m_mat = Material::Create(m_shader);
 
-	m_mesh = Mesh::Create("D:\\Projects\\Solar Engine\\src\\test\\test.fbx");
+	m_mesh = Mesh::Load("D:\\Projects\\Solar Engine\\src\\test\\test.fbx");
 	
 	auto scene = Scene::Create();
 

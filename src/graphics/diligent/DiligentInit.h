@@ -46,7 +46,7 @@ public:
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh);
-	void SetModelMatrix(const glm::mat4 matrix);
+	void SetModelMatrix(glm::mat4 matrix);
 	void EndFrame();
 
 	const QueryDataPipelineStatistics& GetPipelineStats() const { return m_pipelineStats; }

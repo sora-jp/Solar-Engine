@@ -23,5 +23,5 @@ class Mesh
 	RefCntAutoPtr<IBuffer> m_idxBuf;
 	
 public:
-	static Shared<Mesh> Create(std::string filename);
+	static Shared<Mesh> Load(std::string filename);
 };

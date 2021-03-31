@@ -8,7 +8,7 @@
 
 using namespace Assimp;
 
-Shared<Mesh> Mesh::Create(std::string filename)
+Shared<Mesh> Mesh::Load(std::string filename)
 {
 	Importer imp;
 	auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes);
