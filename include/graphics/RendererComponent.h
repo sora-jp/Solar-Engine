@@ -7,4 +7,5 @@ struct RendererComponent
 {
 	Shared<Mesh> mesh;
 	Shared<Material> material;
+	Bounds GetBounds();
 };

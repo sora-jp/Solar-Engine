@@ -22,6 +22,7 @@ public:
 	void Destroy();
 	static const std::vector<Shared<Scene>>& GetLoadedScenes();
 	template<typename... C, typename F> void IterateEntities(F func);
+	template<typename C> size_t CountEntities();
 
 	Entity CreateEntity(const std::string& name, const Entity& parent );
 };
@@ -35,4 +36,10 @@ void Scene::IterateEntities(F func)
 		std::tuple<C...> components = view.template get<C...>(e);
 		func(Entity(e, shared_from_this()), std::get<C, C...>(components)...);
 	}
+}
+
+template <typename C>
+size_t Scene::CountEntities()
+{
+	return m_registry.size<C>();
 }
