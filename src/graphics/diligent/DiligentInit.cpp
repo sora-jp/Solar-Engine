@@ -193,7 +193,7 @@ ITexture* DiligentContext::CreateDepthTexture()
 {
 	TextureDesc texDesc;
 	texDesc.Type = RESOURCE_DIM_TEX_2D;
-	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_D32_FLOAT;
+	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_D16_UNORM;
 	texDesc.Usage = USAGE_DEFAULT;
 	texDesc.BindFlags = BIND_DEPTH_STENCIL | BIND_SHADER_RESOURCE;
 	texDesc.CPUAccessFlags = CPU_ACCESS_NONE;

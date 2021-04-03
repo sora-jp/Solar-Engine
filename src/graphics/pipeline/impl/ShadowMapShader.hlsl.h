@@ -18,13 +18,18 @@ struct appdata
 struct v2f
 {
 	float4 pos : SV_POSITION;
+	float depth : TEX_COORD0;
 };
 
 void vert(in appdata v, out v2f o)
 {
 	o.pos = mul(float4(v.pos, 1), mul(g_Model, g_ViewProj));
+	o.depth = o.pos.z / o.pos.w;
 }
 
-void frag(in v2f i) {}
+float4 frag(in v2f i) : SV_TARGET
+{
+	return float4(i.depth, i.depth * i.depth, 0, 1);
+}
 
 )";

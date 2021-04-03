@@ -32,6 +32,8 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 	{
 		desc.RTVFormats[0] = TEX_FORMAT_UNKNOWN;
 		desc.NumRenderTargets = 0;
+		//desc.RasterizerDesc.SlopeScaledDepthBias = 2;
+		//desc.RasterizerDesc.DepthBias = 2;
 	}));
 
 	m_compositeMat = Material::Create(ShaderCompiler::Compile("Composite", GBufferCompositeHlsl, "vert", "frag"));
@@ -75,8 +77,8 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.Draw(culled, { nullptr });
 
 	const auto shadowmatrix = 
-		glm::orthoLH_ZO(-10.f, 10.f, -10.f, 10.f, 0.f, 100.f) * 
-		(glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 0, 50)) * 
+		glm::orthoLH_ZO(-6.f, 6.f, -6.f, 6.f, 0.f, 50.f) * 
+		(glm::translate(glm::identity<glm::mat4>(), glm::vec3(0, 0, 25)) * 
 			static_cast<glm::mat4>(glm::inverse(glm::quat(glm::vec3(glm::radians(45.f), glm::radians(45.f), 0.f)))));
 	
 	RenderLight(culled, shadowmatrix, m_shadowmapRt, ctx);
