@@ -1,4 +1,5 @@
 #pragma once
+#include "core/Bounds.h"
 #include "core/Common.h"
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"
 #include "diligent/Graphics/GraphicsEngine/interface/Buffer.h"
@@ -23,5 +24,6 @@ class Mesh
 	RefCntAutoPtr<IBuffer> m_idxBuf;
 	
 public:
+	Bounds bounds;
 	static Shared<Mesh> Load(std::string filename);
 };

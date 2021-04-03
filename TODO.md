@@ -1,10 +1,9 @@
 # Todo
 
-- Move shader variable definitions for Diligent to somewhere user-controllable (think shaderlab)
-- Render pipelines (think SRP api + implementation for forward rendering)
+- Move shader variable definitions for Diligent to somewhere user-controllable (think shaderlab) (HACKY FIX DONE, still need to use #pragma for this tho)
 - Time class in src/core for deltatime and more
 - Inputs (InputProviders registering to a global Input class)
-- Allow user control of PSO description
+- Allow user control of PSO description (HACKY FIX DONE, still need to use #pragma for this tho)
 - Custom HLSL preprocessor to allow for CG-like code (shaderlab)
 - Tiered cbuffers? (PerScene, PerCamera, PerObject)
 - Default hlsl include for cbuffer defs + other misc stuff
@@ -16,7 +15,7 @@
 - Allow loading shaders from file
 - Figure out wtf is wrong with relative paths in Assimp
 - Wrap buffer creation API
-- Higher level rendering API (DrawRenderer?)
+- Higher level rendering API (DrawRenderer?) (SORTA done through RenderPipelines, but still)
 - Split DiligentInit.cpp into multiple files, one for init / deinit, one for draw-related commands
 - Refactor ImGuiDiligentRenderer to use DiligentContext instead of raw IDeviceContext
 - Threaded rendering?

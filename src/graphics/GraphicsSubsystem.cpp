@@ -18,6 +18,7 @@
 
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
+#include "pipeline/impl/SimplePipeline.h"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
@@ -44,8 +45,14 @@ void GraphicsSubsystem::Init()
 
 	_ctx = MakeShared<DiligentContext>();
 	_mainWindow = _ctx->Init(m_window);
+
+	auto& devcaps = _ctx->GetDevice()->GetDeviceCaps();
 	
-	SOLAR_CORE_INFO("Using GPU {} ({})", _ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, _ctx->GetDevice()->GetDeviceCaps().AdapterInfo.Description);
+	SOLAR_CORE_INFO("Using GPU {} ({})", _ctx->GetDevice()->GetDeviceCaps().AdapterInfo.DeviceId, devcaps.AdapterInfo.Description);
+
+	auto& ndc = devcaps.GetNDCAttribs();
+
+	SOLAR_CORE_INFO("Depth bias: {}, Min depth: {}, Z to Depth scale: {}, Y to V scale: {}", ndc.GetZtoDepthBias(), ndc.MinZ, ndc.ZtoDepthScale, ndc.YtoVScale);
 	
 	ImGui::CreateContext();
 	ImPlot::CreateContext();
@@ -60,6 +67,8 @@ void GraphicsSubsystem::Init()
 	s_imguiRenderer = new ImGuiDiligentRenderer(_ctx->GetDevice(), scd.ColorBufferFormat, scd.DepthBufferFormat, 1024, 1024);
 
 	s_renderSystem = MakeShared<RenderSystem>();
+	s_renderSystem->SetContext(PipelineContext(_ctx));
+	s_renderSystem->SetPipeline(MakeUnique<SimplePipeline>());
 	
 	ImGui_ImplGlfw_InitForOther(m_window, true);
 	SetupImGuiStyle();
@@ -122,11 +131,13 @@ void GraphicsSubsystem::PostRun()
 	Profiler::Begin("Render", "Rendering");
 	_ctx->BeginFrame();
 	
-	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget(), true);
-	_ctx->Clear(nullptr, 1.0f, 0, false);
+	//_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
+	//_ctx->Clear(nullptr, 1.0f, 0);
 
+	s_renderSystem->SetTarget(&_mainWindow->GetRenderTarget());
 	Engine::RunEcsSystem(s_renderSystem);
 	
+	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
 	s_imguiRenderer->RenderDrawData(_ctx->GetContext(), ImGui::GetDrawData());
 
 	_ctx->EndFrame();

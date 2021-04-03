@@ -110,7 +110,7 @@ inline void DrawProfilerBar(const double duration, const double totalTime)
 	ImGui::ProgressBar(duration / totalTime);
 }
 
-const static double SmoothFactor = .25f;
+const static double SmoothFactor = .05f;
 static double s_frameBudgetUsage = -1;
 
 static ScrollingBuffer s_dataQueue(220);
@@ -172,7 +172,7 @@ inline void DrawDebugWindow(Shared<DiligentContext> ctx, ImFont* font, ImFont* s
 		if (s_frameBudgetUsage < 0) s_frameBudgetUsage = (1.0f - data[2] / data.totalFrameTime) * 100;
 		else s_frameBudgetUsage = ((1.0f - data[2] / data.totalFrameTime) * 100) * SmoothFactor + s_frameBudgetUsage * (1.0f - SmoothFactor);
 		
-		ImGui::Text("Total time: %.1fms", s_dataQueue.MaxTime(t - 4));
+		ImGui::Text("Total time: %.1fms", data.totalFrameTime);
 		ImGui::Text("Frame usage: %.1f%%", s_frameBudgetUsage);
 		//data.totalFrameTime -= data[2];
 

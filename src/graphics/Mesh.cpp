@@ -16,8 +16,11 @@ Shared<Mesh> Mesh::Load(std::string filename)
 	SOLAR_CORE_ASSERT(scene->HasMeshes());
 
 	const auto* m = scene->mMeshes[0];
-	const auto vs = new Vertex[m->mNumVertices];
-	const auto is = new uint32_t[m->mNumFaces * 3u];
+	auto* const vs = new Vertex[m->mNumVertices];
+	auto* const is = new uint32_t[m->mNumFaces * 3u];
+
+	auto min = glm::vec3(INFINITY);
+	auto max = glm::vec3(-INFINITY);
 	
 	for (auto i = 0; i < m->mNumVertices; i++)
 	{
@@ -31,6 +34,9 @@ Shared<Mesh> Mesh::Load(std::string filename)
 
 		vs[i].uv.x = m->mTextureCoords[0][i].x;
 		vs[i].uv.y = m->mTextureCoords[0][i].y;
+
+		min = glm::min(min, vs[i].pos);
+		max = glm::max(max, vs[i].pos);
 	}
 
 	for (auto i = 0; i < m->mNumFaces; i++)
@@ -42,6 +48,7 @@ Shared<Mesh> Mesh::Load(std::string filename)
 
 	auto mesh = MakeShared<Mesh>();
 	mesh->m_idxCount = m->mNumFaces * 3;
+	mesh->bounds = { min, max };
 	
 	BufferDesc vsDesc;
 	vsDesc.Name = "VS Buf";

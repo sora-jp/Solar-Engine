@@ -21,7 +21,8 @@ struct GLFWwindow;
 
 class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
-	
+
+	ShaderConstants m_constants;
 	RenderTexture m_activeTexture {};
 	QueryDataPipelineStatistics m_pipelineStats;
 	double m_duration = 0;
@@ -29,7 +30,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	RefCntAutoPtr<IEngineFactory> m_factory;
 	RefCntAutoPtr<IRenderDevice>  m_device;
 	RefCntAutoPtr<IDeviceContext> m_context;
-	RefCntAutoPtr<IBuffer> m_constants;
+	RefCntAutoPtr<IBuffer> m_constantsBuf;
 	std::unique_ptr<ScopedQueryHelper>	  m_statsQuery;
 	std::unique_ptr<DurationQueryHelper>	  m_timerQuery;
 	RENDER_DEVICE_TYPE            m_deviceType = static_cast<RENDER_DEVICE_TYPE>(-1);
@@ -41,14 +42,17 @@ public:
 	Shared<DiligentWindow> Init(GLFWwindow* window);
 
 	void BeginFrame();
-	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);
 	void SetRenderTarget(RenderTexture& texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
+	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh);
-	void SetModelMatrix(glm::mat4 matrix);
 	void EndFrame();
 
+	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);
+	ITexture* CreateTexture();
+	ITexture* CreateDepthTexture();
+	
 	const QueryDataPipelineStatistics& GetPipelineStats() const { return m_pipelineStats; }
 	const double& GetLastDuration() const { return m_duration; }
 	
@@ -58,6 +62,6 @@ public:
 	[[nodiscard]] auto GetDeviceType() const { return m_deviceType; }
 	[[nodiscard]] IRenderDevice* GetDevice() { return m_device; }
 	[[nodiscard]] IDeviceContext* GetContext() { return m_context; }
-	[[nodiscard]] MapHelper<ShaderConstants> MapConstants() { return MapHelper<ShaderConstants>(m_context, m_constants, MAP_WRITE, MAP_FLAG_DISCARD); }
-	[[nodiscard]] RefCntAutoPtr<IBuffer> GetConstantBuffer() const { return m_constants; }
+	[[nodiscard]] ShaderConstants* GetConstants() { return &m_constants; }
+	[[nodiscard]] RefCntAutoPtr<IBuffer> GetConstantBuffer() const { return m_constantsBuf; }
 };

@@ -45,12 +45,12 @@ void DiligentContext::TransitionState(RenderTexture* tex, const RESOURCE_STATE n
 	std::vector<StateTransitionDesc> transitions;
 
 	//AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
-	AppendTransitionDesc(transitions, tex->m_depthTarget->GetTexture(), newDepthState);
+	if (tex->m_depthTarget) AppendTransitionDesc(transitions, tex->m_depthTarget->GetTexture(), newDepthState);
 
 	for (auto i = 0; i < tex->m_numColorTargets; i++) 
 	{
 		//AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
-		AppendTransitionDesc(transitions, tex->m_colorTargets[i]->GetTexture(), newColorState);
+		if (tex->m_colorTargets[i]) AppendTransitionDesc(transitions, tex->m_colorTargets[i]->GetTexture(), newColorState);
 	}
 
 	m_context->TransitionResourceStates(transitions.size(), transitions.data());
@@ -134,7 +134,7 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 	buf.uiSizeInBytes = sizeof(ShaderConstants);
 	buf.CPUAccessFlags = CPU_ACCESS_WRITE;
 
-	m_device->CreateBuffer(buf, nullptr, &m_constants);
+	m_device->CreateBuffer(buf, nullptr, &m_constantsBuf);
 	
 	return outWindow ? outWindow : MakeShared<DiligentWindow>(shared_from_this(), true, window);
 }
@@ -171,12 +171,48 @@ void DiligentContext::CreateSwapChain(const SwapChainDesc& desc, void* windowHan
 	}
 }
 
+ITexture* DiligentContext::CreateTexture()
+{
+	TextureDesc texDesc;
+	texDesc.Type = RESOURCE_DIM_TEX_2D;
+	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_RGBA32_FLOAT;
+	texDesc.Usage = USAGE_DEFAULT;
+	texDesc.BindFlags = BIND_RENDER_TARGET | BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = CPU_ACCESS_NONE;
+	texDesc.SampleCount = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Width = 1280;
+	texDesc.Height = 720;
+
+	ITexture* out;
+	m_device->CreateTexture(texDesc, nullptr, &out);
+	return out;
+}
+
+ITexture* DiligentContext::CreateDepthTexture()
+{
+	TextureDesc texDesc;
+	texDesc.Type = RESOURCE_DIM_TEX_2D;
+	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_D32_FLOAT;
+	texDesc.Usage = USAGE_DEFAULT;
+	texDesc.BindFlags = BIND_DEPTH_STENCIL | BIND_SHADER_RESOURCE;
+	texDesc.CPUAccessFlags = CPU_ACCESS_NONE;
+	texDesc.SampleCount = 1;
+	texDesc.MipLevels = 1;
+	texDesc.Width = 1280;
+	texDesc.Height = 720;
+
+	ITexture* out;
+	m_device->CreateTexture(texDesc, nullptr, &out);
+	return out;
+}
+
 void DiligentContext::SetRenderTarget(RenderTexture& texture, const bool autoTransition)
 {
 	m_activeTexture = texture;
 	if (autoTransition) TransitionState(&texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, &m_activeTexture.m_colorTargets[0], m_activeTexture.m_depthTarget, TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, m_activeTexture.m_rct, m_activeTexture.m_depthTarget, TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
@@ -207,12 +243,6 @@ void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh)
 	m.Flags = DRAW_FLAG_VERIFY_ALL;
 	
 	m_context->DrawIndexed(m);
-}
-
-void DiligentContext::SetModelMatrix(const glm::mat4 matrix)
-{
-	auto map = MapConstants();
-	map->model = glm::transpose(matrix);
 }
 
 void DiligentContext::EndFrame()

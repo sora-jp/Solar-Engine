@@ -11,13 +11,14 @@ struct RenderTexture
 	
 private:
 	int m_numColorTargets;
+	ITextureView** m_rct;
 	RefCntAutoPtr<ITextureView>* m_colorTargets;
 	RefCntAutoPtr<ITextureView> m_depthTarget;
 
 	void Rebind(int numColorTargets, ITextureView** colorTargets, ITextureView* depthTarget);
 	
 public:
-	RenderTexture() : m_numColorTargets(-1), m_colorTargets(nullptr) {}
+	RenderTexture() : m_numColorTargets(-1), m_rct(nullptr), m_colorTargets(nullptr) {}
 	RenderTexture(int numColorTargets, ITextureView* colorTargets[], ITextureView* depthTarget);
 	~RenderTexture();
 
@@ -27,19 +28,23 @@ public:
 inline void RenderTexture::Rebind(int numColorTargets, ITextureView** colorTargets, ITextureView* depthTarget)
 {
 	m_numColorTargets = numColorTargets;
-	for (auto i = 0; i < numColorTargets; i++) m_colorTargets[i] = colorTargets[i];
+	for (auto i = 0; i < numColorTargets; i++) m_rct[i] = m_colorTargets[i] = colorTargets[i];
 	m_depthTarget = depthTarget;
 }
 
 inline RenderTexture::RenderTexture(const int numColorTargets, ITextureView* colorTargets[], ITextureView* depthTarget)
 {
 	m_numColorTargets = numColorTargets;
-	m_colorTargets = new RefCntAutoPtr<ITextureView>[numColorTargets];
-	for (auto i = 0; i < numColorTargets; i++) m_colorTargets[i] = colorTargets[i];
+	if (numColorTargets > 0) {
+		m_colorTargets = new RefCntAutoPtr<ITextureView>[numColorTargets];
+		m_rct = new ITextureView* [numColorTargets];
+		for (auto i = 0; i < numColorTargets; i++) m_rct[i] = m_colorTargets[i] = colorTargets[i];
+	}
 	m_depthTarget = depthTarget;
 }
 
 inline RenderTexture::~RenderTexture()
 {
+	delete[] m_rct;
 	delete[] m_colorTargets;
 }

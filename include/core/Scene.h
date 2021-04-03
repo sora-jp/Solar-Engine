@@ -33,8 +33,8 @@ void Scene::IterateEntities(F func)
 	auto view = m_registry.view<C...>();
 	for (auto e : view)
 	{
-		std::tuple<C...> components = view.template get<C...>(e);
-		func(Entity(e, shared_from_this()), std::get<C, C...>(components)...);
+		std::tuple<C&...> components = view.get(e);
+		func(Entity(e, shared_from_this()), std::get<C&, C&...>(components)...);
 	}
 }
 

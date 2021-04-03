@@ -29,5 +29,5 @@ class Shader
 class ShaderCompiler
 {
 public:
-	static Shared<Shader> Compile(std::string name, std::string vs, std::string fs);
+	static Shared<Shader> Compile(std::string name, std::string src, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc) = nullptr);
 };
