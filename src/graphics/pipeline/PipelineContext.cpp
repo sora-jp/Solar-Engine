@@ -55,7 +55,33 @@ void PipelineContext::Draw(const CullingResults& culled, const DrawSettings& set
 		consts->model = r.modelMatrix;
 
 		m_ctx->FlushConstants();
-		if (!settings.overrideMaterial) m_ctx->BindMaterial(r.renderer->material);
-		m_ctx->SubmitMesh(r.renderer->mesh);
+		
+		for (auto s = 0; s < r.renderer->mesh->GetSubMeshCount(); s++) 
+		{
+			if (!settings.overrideMaterial) m_ctx->BindMaterial(r.renderer->GetMaterial(s));
+			m_ctx->SubmitMesh(r.renderer->mesh, s);
+		}
 	}
+}
+
+void PipelineContext::BlitFullscreenQuad(ITexture* src, ITexture* dest, const Shared<Material>& mat) const
+{
+	auto* view = dest->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET);
+	
+	m_ctx->GetContext()->SetRenderTargets(1, &view, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	mat->GetProperties().Set("_MainTex", src->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+
+	m_ctx->BindMaterial(mat);
+
+	const DrawAttribs attribs {3, DRAW_FLAG_VERIFY_ALL };
+	
+	m_ctx->GetContext()->Draw(attribs);
+}
+
+void PipelineContext::RenderFullscreenQuad(const Shared<Material>& mat) const
+{
+	m_ctx->BindMaterial(mat);
+
+	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };
+	m_ctx->GetContext()->Draw(attribs);
 }

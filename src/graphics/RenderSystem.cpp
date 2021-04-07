@@ -16,7 +16,7 @@ void RenderSystem::Execute(Entity e, CameraComponent& camera, TransformComponent
 	*/
 	for (const auto& loadedScene : Scene::GetLoadedScenes())
 	{
-		m_pipeline->RenderCamera(loadedScene, camera, transform, m_pipelineCtx, *m_target);
+		m_pipeline->RenderCamera(loadedScene, camera, transform, m_pipelineCtx, m_target);
 		//loadedScene->IterateEntities<RendererComponent, TransformComponent>([=](Entity ee, RendererComponent& r, TransformComponent& t) -> void
 		//{
 		//	{

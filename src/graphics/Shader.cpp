@@ -3,11 +3,12 @@
 #include "GraphicsSubsystem.h"
 #include "diligent/DiligentWindow.h"
 #include "diligent/Graphics/GraphicsEngine/interface/EngineFactory.h"
+#include "shadertools/HLSLReflector.h"
+#include <filesystem>
 
-IShader* CompileSingle(ShaderCreateInfo info, std::string source, std::string entry, SHADER_TYPE type)
+IShader* CompileSingle(ShaderCreateInfo& info, const std::string& entry, const SHADER_TYPE type)
 {
 	info.Desc.ShaderType = type;
-	info.Source = source.c_str();
 	info.EntryPoint = entry.c_str();
 
 	IShader* shader;
@@ -15,11 +16,11 @@ IShader* CompileSingle(ShaderCreateInfo info, std::string source, std::string en
 	return shader;
 }
 
-Shared<Shader> ShaderCompiler::Compile(std::string name, std::string src, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc))
+Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc))
 {
 	GraphicsPipelineStateCreateInfo pipelineInfo;
 
-	pipelineInfo.PSODesc.Name = name.c_str();
+	pipelineInfo.PSODesc.Name = path.c_str();
 	pipelineInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
 
 	pipelineInfo.GraphicsPipeline.NumRenderTargets = 1;
@@ -29,24 +30,30 @@ Shared<Shader> ShaderCompiler::Compile(std::string name, std::string src, std::s
 	
 	pipelineInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = true;
 	if (configure != nullptr) configure(pipelineInfo.GraphicsPipeline);
+	
+	auto p0 = std::filesystem::current_path();
+	auto p1 = std::filesystem::current_path() / "shaders";
+	auto p2 = std::filesystem::current_path() / "shaders" / "builtin";
 
-	//RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
-	//GraphicsSubsystem::GetCurrentContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(nullptr, &pShaderSourceFactory);
+	auto res = p0.string().append(";").append(p1.string().append(";").append(p2.string()));
+	
+	RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
+	GraphicsSubsystem::GetCurrentContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
 	
 	ShaderCreateInfo shaderInfo;
-	shaderInfo.EntryPoint = "main";
+	shaderInfo.FilePath = path.c_str();
 	shaderInfo.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
 	shaderInfo.UseCombinedTextureSamplers = true;
-	//shaderInfo.pShaderSourceStreamFactory = pShaderSourceFactory;
+	shaderInfo.pShaderSourceStreamFactory = pShaderSourceFactory;
 
 	if (!vs.empty()) {
-		pipelineInfo.pVS = CompileSingle(shaderInfo, src, vs, SHADER_TYPE_VERTEX);
+		pipelineInfo.pVS = CompileSingle(shaderInfo, vs, SHADER_TYPE_VERTEX);
 	}
 
 	if (!fs.empty()) {
-		pipelineInfo.pPS = CompileSingle(shaderInfo, src, fs, SHADER_TYPE_PIXEL);
+		pipelineInfo.pPS = CompileSingle(shaderInfo, fs, SHADER_TYPE_PIXEL);
 	}
-
+	
 	LayoutElement layout[] = {
 		LayoutElement {0, 0, 3, VT_FLOAT32, false}, // Vertex position
 		LayoutElement {1, 0, 3, VT_FLOAT32, true}, // Vertex normal
@@ -56,68 +63,58 @@ Shared<Shader> ShaderCompiler::Compile(std::string name, std::string src, std::s
 	pipelineInfo.GraphicsPipeline.InputLayout.LayoutElements = layout;
 	pipelineInfo.GraphicsPipeline.InputLayout.NumElements = _countof(layout);
 
-	pipelineInfo.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+	pipelineInfo.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
 
-	//if (!fs.empty()) {
-		// clang-format off
-		// Shader variables should typically be mutable, which means they are expected
-		// to change on a per-instance basis
-		ShaderResourceVariableDesc Vars[] =
-		{
-			{SHADER_TYPE_PIXEL, "_MainTex", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_GBufferDiffuse", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_GBufferPosition", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_GBufferNormal", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_GBufferSpecMetal", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_GBufferDepth", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC},
-			{SHADER_TYPE_PIXEL, "_ShadowMap", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC}
-		};
-		// clang-format on
-		pipelineInfo.PSODesc.ResourceLayout.Variables = Vars;
-		pipelineInfo.PSODesc.ResourceLayout.NumVariables = _countof(Vars);
+	ReflectionResult reflRes;
+	if (!HLSLReflector::Reflect(path, vs, fs, pShaderSourceFactory, reflRes)) return nullptr; // TODO: Return error shader instead
 
-		// clang-format off
-		// Define immutable sampler for _MainTex. Immutable samplers should be used whenever possible
-		SamplerDesc SamLinearClampDesc
-		{
-			FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR,
-			TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP
-		};
+	const auto varCount = reflRes.buffers.size() + reflRes.textures.size();
+	auto* vars = new ShaderResourceVariableDesc[varCount];
 
-		SamplerDesc SamShadowCmpDesc
-		{
-			FILTER_TYPE_COMPARISON_ANISOTROPIC, FILTER_TYPE_COMPARISON_ANISOTROPIC, FILTER_TYPE_COMPARISON_ANISOTROPIC,
-			TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP,
-		};
+	for (auto i = 0; i < varCount; i++)
+	{
+		auto* data = reflRes.GetData(i);
 
-		SamShadowCmpDesc.ComparisonFunc = COMPARISON_FUNC_LESS;
+		auto varType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
+		if (reflRes.IsBuffer(i)) varType = data->name == "Constants" ? SHADER_RESOURCE_VARIABLE_TYPE_STATIC : SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
+		
+		vars[i] = ShaderResourceVariableDesc {data->usages, data->name.c_str(), varType};
+	}
 	
-		ImmutableSamplerDesc ImtblSamplers[] =
-		{
-			{SHADER_TYPE_PIXEL, "_MainTex", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_GBufferDiffuse", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_GBufferPosition", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_GBufferNormal", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_GBufferSpecMetal", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_GBufferDepth", SamLinearClampDesc},
-			{SHADER_TYPE_PIXEL, "_ShadowMap", SamLinearClampDesc}
-		};
-		// clang-format on
-		pipelineInfo.PSODesc.ResourceLayout.ImmutableSamplers = ImtblSamplers;
-		pipelineInfo.PSODesc.ResourceLayout.NumImmutableSamplers = _countof(ImtblSamplers);
-	//}
+	pipelineInfo.PSODesc.ResourceLayout.Variables = vars;
+	pipelineInfo.PSODesc.ResourceLayout.NumVariables = varCount;
+
+	SamplerDesc defaultSampler
+	{
+		FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC,
+		TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, 0, 16
+	};
+
+	auto* samplers = new ImmutableSamplerDesc[reflRes.textures.size()];
+
+	for (auto i = 0; i < reflRes.textures.size(); i++)
+	{
+		auto& tex = reflRes.textures[i];
+		samplers[i] = ImmutableSamplerDesc {tex.usages, tex.name.c_str(), defaultSampler};
+	}
+	
+	// clang-format on
+	pipelineInfo.PSODesc.ResourceLayout.ImmutableSamplers = samplers;
+	pipelineInfo.PSODesc.ResourceLayout.NumImmutableSamplers = reflRes.textures.size();
 
 	auto shader = MakeShared<Shader>();
-	auto pass = MakeUnique<ShaderPass>();
+
+	shader->m_reflectionInfo = reflRes;
+	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &shader->m_pipelineState);
 	
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &pass->m_pipelineState);
-	
-	auto* consts = pass->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants");
+	auto* consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants");
 	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
 
-	consts = pass->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_PIXEL, "Constants");
+	consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_PIXEL, "Constants");
 	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+
+	delete[] vars;
+	delete[] samplers;
 	
-	shader->m_passes.push_back(std::move(pass));
 	return shader;
 }

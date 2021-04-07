@@ -23,7 +23,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
 	ShaderConstants m_constants;
-	RenderTexture m_activeTexture {};
+	RenderTexture* m_activeTexture;
 	QueryDataPipelineStatistics m_pipelineStats;
 	double m_duration = 0;
 	
@@ -42,16 +42,15 @@ public:
 	Shared<DiligentWindow> Init(GLFWwindow* window);
 
 	void BeginFrame();
-	void SetRenderTarget(RenderTexture& texture, bool autoTransition = false);
+	void SetRenderTarget(RenderTexture* texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
-	void SubmitMesh(const Shared<Mesh>& mesh);
+	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
 	void EndFrame();
 
 	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);
-	ITexture* CreateTexture();
-	ITexture* CreateDepthTexture();
+	ITexture* CreateTexture(uint32_t width, uint32_t height, TEXTURE_FORMAT format, Diligent::BIND_FLAGS bindFlags, uint32_t mipLevels = 1, uint32_t msaa = 1);
 	
 	const QueryDataPipelineStatistics& GetPipelineStats() const { return m_pipelineStats; }
 	const double& GetLastDuration() const { return m_duration; }

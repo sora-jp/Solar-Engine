@@ -20,9 +20,13 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 		glfwGetWindowSize(window, &w, &h);
 		
 		SwapChainDesc swapChainDesc;
+		swapChainDesc.PreTransform = SURFACE_TRANSFORM_OPTIMAL;
+		swapChainDesc.BufferCount = 2;
+		//swapChainDesc.ColorBufferFormat = TEX_FORMAT_RGBA8_UNORM_SRGB;
 		swapChainDesc.IsPrimary = isMainWindow;
 		swapChainDesc.Width = w;
 		swapChainDesc.Height = h;
+		
 		m_ctx->CreateSwapChain(swapChainDesc, glfwGetWin32Window(window), &m_swapchain);
 	}
 	else m_swapchain = swapChain;
@@ -38,7 +42,7 @@ void DiligentWindow::Present(const int vsyncInterval)
 
 void DiligentWindow::Resize(const int width, const int height)
 {
-	auto& desc = m_swapchain->GetDesc();
+	const auto& desc = m_swapchain->GetDesc();
 	if (desc.Width != width || desc.Height != height) 
 	{
 		m_renderTarget.reset();
@@ -51,16 +55,17 @@ void DiligentWindow::GetSize(int& width, int& height) const
 	glfwGetWindowSize(m_window, &width, &height);
 }
 
-RenderTexture& DiligentWindow::GetRenderTarget()
+RenderTexture* DiligentWindow::GetRenderTarget()
 {
 	auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
 	auto* depthBuf = m_swapchain->GetDepthBufferDSV();
 
-	if (colorBuf == nullptr || depthBuf == nullptr) return *m_renderTarget;
+	if (colorBuf == nullptr || depthBuf == nullptr) 
+		return m_renderTarget.get();
 	
 	if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
 	else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
-	return *m_renderTarget;
+	return m_renderTarget.get();
 }
 
 void DiligentWindow::InvalidateCachedRenderTarget()

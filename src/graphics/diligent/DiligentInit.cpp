@@ -171,75 +171,57 @@ void DiligentContext::CreateSwapChain(const SwapChainDesc& desc, void* windowHan
 	}
 }
 
-ITexture* DiligentContext::CreateTexture()
+ITexture* DiligentContext::CreateTexture(uint32_t width, uint32_t height, TEXTURE_FORMAT format, Diligent::BIND_FLAGS bindFlags, uint32_t mipLevels, uint32_t msaa)
 {
 	TextureDesc texDesc;
 	texDesc.Type = RESOURCE_DIM_TEX_2D;
-	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_RGBA32_FLOAT;
+	texDesc.Format = format;
 	texDesc.Usage = USAGE_DEFAULT;
-	texDesc.BindFlags = BIND_RENDER_TARGET | BIND_SHADER_RESOURCE;
+	texDesc.BindFlags = bindFlags;
 	texDesc.CPUAccessFlags = CPU_ACCESS_NONE;
-	texDesc.SampleCount = 1;
-	texDesc.MipLevels = 1;
-	texDesc.Width = 1280;
-	texDesc.Height = 720;
+	texDesc.SampleCount = msaa;
+	texDesc.MipLevels = mipLevels;
+	texDesc.Width = width;
+	texDesc.Height = height;
 
 	ITexture* out;
 	m_device->CreateTexture(texDesc, nullptr, &out);
 	return out;
 }
 
-ITexture* DiligentContext::CreateDepthTexture()
-{
-	TextureDesc texDesc;
-	texDesc.Type = RESOURCE_DIM_TEX_2D;
-	texDesc.Format = TEXTURE_FORMAT::TEX_FORMAT_D16_UNORM;
-	texDesc.Usage = USAGE_DEFAULT;
-	texDesc.BindFlags = BIND_DEPTH_STENCIL | BIND_SHADER_RESOURCE;
-	texDesc.CPUAccessFlags = CPU_ACCESS_NONE;
-	texDesc.SampleCount = 1;
-	texDesc.MipLevels = 1;
-	texDesc.Width = 1280;
-	texDesc.Height = 720;
-
-	ITexture* out;
-	m_device->CreateTexture(texDesc, nullptr, &out);
-	return out;
-}
-
-void DiligentContext::SetRenderTarget(RenderTexture& texture, const bool autoTransition)
+void DiligentContext::SetRenderTarget(RenderTexture* texture, const bool autoTransition)
 {
 	m_activeTexture = texture;
-	if (autoTransition) TransitionState(&texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
+	//if (autoTransition) TransitionState(texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture.m_numColorTargets, m_activeTexture.m_rct, m_activeTexture.m_depthTarget, TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture->m_numColorTargets, m_activeTexture->m_rct, m_activeTexture->m_depthTarget, TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
 {
-	if (autoTransition) TransitionState(&m_activeTexture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
+	//if (autoTransition) TransitionState(m_activeTexture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 	
-	if (m_activeTexture.m_depthTarget)
-		m_context->ClearDepthStencil(m_activeTexture.m_depthTarget, CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
+	if (m_activeTexture->m_depthTarget)
+		m_context->ClearDepthStencil(m_activeTexture->m_depthTarget, CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
 
-	for (auto i = 0; i < m_activeTexture.m_numColorTargets; i++)
-		m_context->ClearRenderTarget(m_activeTexture.m_colorTargets[i], rgba, TRANSITION_MODE);
+	for (auto i = 0; i < m_activeTexture->m_numColorTargets; i++)
+		m_context->ClearRenderTarget(m_activeTexture->m_colorTargets[i], rgba, TRANSITION_MODE);
 }
 
 void DiligentContext::BindMaterial(const Shared<Material>& material, const int subpass)
 {
-	m_context->SetPipelineState(material->shader->m_passes[subpass]->m_pipelineState);
-	m_context->CommitShaderResources(material->m_bindings[subpass], TRANSITION_MODE);
+	m_context->SetPipelineState(material->shader->m_pipelineState);
+	m_context->CommitShaderResources(material->m_mpb->m_resourceBinding, TRANSITION_MODE);
 }
 
-void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh)
+void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh, const int subMesh)
 {
-	m_context->SetVertexBuffers(0, 1, &mesh->m_vertBuf, nullptr, TRANSITION_MODE, SET_VERTEX_BUFFERS_FLAG_RESET);
-	m_context->SetIndexBuffer(mesh->m_idxBuf, 0, TRANSITION_MODE);
+	m_context->SetVertexBuffers(0, 1, &mesh->m_subMeshes[subMesh]->m_vertBuf, nullptr, TRANSITION_MODE, SET_VERTEX_BUFFERS_FLAG_RESET);
+	m_context->SetIndexBuffer(mesh->m_subMeshes[subMesh]->m_idxBuf, 0, TRANSITION_MODE);
 
 	DrawIndexedAttribs m;
 	m.IndexType = VT_UINT32;
-	m.NumIndices = mesh->m_idxCount;
+	m.NumIndices = mesh->m_subMeshes[subMesh]->m_idxCount;
 	m.Flags = DRAW_FLAG_VERIFY_ALL;
 	
 	m_context->DrawIndexed(m);
@@ -250,5 +232,6 @@ void DiligentContext::EndFrame()
 	m_statsQuery->End(m_context, &m_pipelineStats, sizeof(m_pipelineStats));
 	m_timerQuery->End(m_context, m_duration);
 	
+	m_context->Flush();
 	m_context->FinishFrame();
 }

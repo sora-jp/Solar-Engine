@@ -4,30 +4,23 @@
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"
 #include "diligent/Graphics/GraphicsEngine/interface/Shader.h"
 #include "diligent/Graphics/GraphicsEngine/interface/ShaderBindingTable.h"
-#include <vector>
+#include "shadertools/HLSLReflectionTypes.h"
 
 using namespace Diligent;
-
-class ShaderPass
-{
-	friend class ShaderCompiler;
-	friend class Material;
-	friend class DiligentContext;
-
-	RefCntAutoPtr<IPipelineState> m_pipelineState;
-};
 
 class Shader
 {
 	friend class ShaderCompiler;
 	friend class Material;
+	friend class MaterialPropertyBlock;
 	friend class DiligentContext;
 
-	std::vector<Unique<ShaderPass>> m_passes;
+	ReflectionResult m_reflectionInfo;
+	RefCntAutoPtr<IPipelineState> m_pipelineState;
 };
 
 class ShaderCompiler
 {
 public:
-	static Shared<Shader> Compile(std::string name, std::string src, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc) = nullptr);
+	static Shared<Shader> Compile(std::string path, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc) = nullptr);
 };

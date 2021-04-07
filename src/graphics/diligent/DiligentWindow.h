@@ -28,7 +28,7 @@ public:
 	void Present(int vsyncInterval = 1);
 	void Resize(int width, int height);
 	void GetSize(int& width, int& height) const;
-	[[nodiscard]] RenderTexture& GetRenderTarget();
+	[[nodiscard]] RenderTexture* GetRenderTarget();
 
 	Shared<DiligentContext> GetContext() const { return m_ctx; }
 	ISwapChain* GetSwapChain() { return m_swapchain; }

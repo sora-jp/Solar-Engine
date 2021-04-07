@@ -8,6 +8,12 @@ function copytoshared()
 	}
 end
 
+function copyshaders()
+	prebuildcommands {
+		"{COPY} src/%{prj.name:lower()}/shaders %{cfg.targetdir}/shaders"
+	}
+end
+
 function enginepch()
 	pchheader "pch.h"
 	pchsource "src/%{prj.name:lower()}/pch.cpp"
@@ -40,15 +46,21 @@ workspace "Solar"
 	platforms { "Win64" }
 	configurations { "Debug", "Release" }
 	targetdir "build/%{prj.name:lower()}/bin/%{cfg.buildcfg}"
+	debugdir "%{cfg.targetdir}"
 	objdir "build/%{prj.name:lower()}/obj/%{cfg.buildcfg}"
 	includedirs { "include", "include/%{prj.name:lower()}/", "src/%{prj.name:lower()}/"}
-	files { "include/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp" }
+	files { "include/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp", "src/%{prj.name:lower()}/**.hlsl" }
 	defines { "ENTT_NO_ETO=1" }
 	vpaths {
 		["Source/*"] = {"src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp"},
 		["Include/*"] = {"include/%{prj.name:lower()}/**.h"}
 	}
-
+	
+filter { "files:**.hlsl" }
+	buildmessage "copy /B /Y %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}"
+	buildcommands { "cp -f %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}" }
+	buildoutputs { "%{cfg.targetdir}/%{file.name}" }
+	
 filter { "platforms:Win64" }
     system "Windows"
     architecture "x64"
@@ -74,18 +86,19 @@ project "Core"
 	
 project "Graphics"
 	kind "StaticLib"
-	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD", "ENGINE_DLL=1" }
+	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD", "ENGINE_DLL=1", "ENABLE_HLSL" }
 	links { "Core", "ImGui" }
 	files { "vendor/implot/**.cpp" }
 	includedirs {"vendor/spdlog", "vendor/dear-imgui"}
+	--copyshaders()
 	copytoshared()
 	enginepch()
-	vendor {"entt", "spdlog", "assimp", "compat", "diligent", "GLFW", "glm", "iconfontheaders", "implot", "stb", "tinystl"}
+	vendor {"entt", "spdlog", "assimp", "compat", "diligent", "GLFW", "glm", "iconfontheaders", "implot", "stb", "tinystl", "glslang"}
 	--enginepch()
 	
 project "Test"
 	kind "ConsoleApp"
 	links { "Core", "Graphics" }
-	
+	--copyshaders()
 	includedirs { "include/*", "vendor/", "vendor/*" }
 	-- prebuildcommands { "{COPY} \"%{sharedBuildLoc}\" \"%{cfg.targetdir}\"" }

@@ -1,21 +1,19 @@
 #pragma once
 #include "core/Common.h"
 #include "Shader.h"
-#include "diligent/Graphics/GraphicsEngine/interface/ShaderResourceBinding.h"
+#include "MaterialPropertyBlock.h"
 
 class Material
 {
 	friend class DiligentContext;
-	RefCntAutoPtr<IShaderResourceBinding>* const m_bindings = nullptr;
+	Unique<MaterialPropertyBlock> m_mpb;
 
 public:
 	const Shared<Shader> shader;
-	[[nodiscard]] IShaderResourceBinding* GetBindingsForPass(const int pass) const { return m_bindings[pass]; }
+	[[nodiscard]] MaterialPropertyBlock& GetProperties() const { return *m_mpb; }
 
-	~Material();
+	static Shared<Material> Create(const Shared<Shader>& shader, const bool autoInit = true) { return Shared<Material>(new Material(shader, autoInit)); }
 
-	static Shared<Material> Create(const Shared<Shader>& shader) { return Shared<Material>(new Material(shader)); }
-	
 private:
-	explicit Material(Shared<Shader> shader);
+	explicit Material(Shared<Shader> shader, bool autoInit);
 };

@@ -19,6 +19,7 @@
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 #include "pipeline/impl/SimplePipeline.h"
+#include "glslang/Public/ShaderLang.h"
 
 #define WNDW_WIDTH 1280
 #define WNDW_HEIGHT 720
@@ -36,6 +37,7 @@ static double s_time;
 void GraphicsSubsystem::Init()
 {
 	SOLAR_CORE_TRACE("GraphicsSubsystem::Init()");
+	glslang::InitializeProcess();
 
 	const auto glfwInitResult = glfwInit();
 	SOLAR_CORE_ASSERT_ALWAYS(glfwInitResult == GLFW_TRUE);
@@ -85,6 +87,7 @@ void GraphicsSubsystem::Shutdown()
 	_ctx.reset();
 	
 	glfwTerminate();
+	glslang::FinalizeProcess();
 }
 
 void GraphicsSubsystem::PreRun()
@@ -130,21 +133,22 @@ void GraphicsSubsystem::PostRun()
 
 	Profiler::Begin("Render", "Rendering");
 	_ctx->BeginFrame();
-	
-	//_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
-	//_ctx->Clear(nullptr, 1.0f, 0);
 
-	s_renderSystem->SetTarget(&_mainWindow->GetRenderTarget());
+	auto* const rt = _mainWindow->GetRenderTarget();
+	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
+	_ctx->Clear(nullptr, 1.0f, 0);
+
+	s_renderSystem->SetTarget(rt);
 	Engine::RunEcsSystem(s_renderSystem);
 	
-	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
+	_ctx->SetRenderTarget(rt);
 	s_imguiRenderer->RenderDrawData(_ctx->GetContext(), ImGui::GetDrawData());
 
 	_ctx->EndFrame();
 	Profiler::End();
 
 	Profiler::Begin("VSync", "VSync");
-	_mainWindow->Present(1);
+	_mainWindow->Present(0);
 	Profiler::End();
 	
 	glfwPollEvents();
