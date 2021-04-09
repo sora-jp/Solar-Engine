@@ -16,6 +16,7 @@ cbuffer Constants
 {
 	float4x4 g_Model;
 	float4x4 g_ViewProj;
+	float3 g_WorldSpaceCameraPos;
 };
 
 #endif //_COMMON_HLSL_

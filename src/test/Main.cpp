@@ -10,6 +10,7 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "RendererComponent.h"
+#include "Cubemap.h"
 
 class TestApp final : public SolarApp
 {
@@ -22,24 +23,21 @@ public:
 };
 
 static float _time;
-class TestSystem final : public System<TransformComponent>
+class TestSystem final : public System<CameraComponent, TransformComponent>
 {
 public:
-	void Execute(const Entity e, TransformComponent& c) override
+	void Execute(const Entity e, CameraComponent& c, TransformComponent& t) override
 	{
-		//SOLAR_INFO("{:E} -> {:E}", 
-		//	e, 
-		//	c.GetParent()
-		//);
-		if (e.HasComponent<CameraComponent>()) return;
-		//SOLAR_INFO("{} {} {} {}", c.rotation.x, c.rotation.y, c.rotation.z, c.rotation.w);
-
+		const auto y = _time * 7 / (2 * glm::pi<float>());
+		t.rotation = glm::quat(glm::vec3(glm::radians(15.f), y, 0));
+		t.position = glm::vec3(0, 3.5f, -10) * glm::inverse(glm::quat(glm::vec3(0, y, 0)));
 	}
 };
 
 static Shared<Shader> m_shader;
 static Shared<Material> m_mat;
 static Shared<Mesh> m_mesh, m_mesh2;
+static Shared<Cubemap> m_environ, m_diffuseIBL;
 static Entity trans(entt::null, nullptr);
 
 void TestApp::Init()
@@ -49,10 +47,12 @@ void TestApp::Init()
 	m_shader = ShaderCompiler::Compile("DefaultDeferred.hlsl", "vert", "frag");
 	m_mat = Material::Create(m_shader);
 
-	auto cc = glm::vec4(114, 206, 224, 255) / 255.f;
+	auto cc = glm::vec4(200, 38, 38, 255) / 255.f;
 	m_mat->GetProperties().Set("_Tint", &cc);
 	m_mat->GetProperties().Set("_SMXX", &cc);
-
+	//m_environ = Cubemap::Load("D:\\Projects\\Solar Engine\\src\\test\\HdrOutdoorCityPathDayClear001_HDR_4K.exr");
+	m_diffuseIBL = Cubemap::Load("D:\\Projects\\Solar Engine\\src\\test\\HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png");
+	
 	m_mesh = Mesh::Load("D:\\Projects\\Solar Engine\\src\\test\\nissan\\nissan.obj");
 	m_mesh2 = Mesh::Load("D:\\Projects\\Solar Engine\\src\\test\\plane2.fbx");
 	
@@ -63,6 +63,7 @@ void TestApp::Init()
 	r.material = m_mat;
 	r.mesh = m_mesh;
 	trans.GetComponent<TransformComponent>().scale = glm::vec3(4.f);
+	trans.GetComponent<TransformComponent>().position = glm::vec3(-1.481f, -0.5058f, -0.734f) * 4.f;
 	
 	e = scene->CreateEntity("Render test 2", Entity::null);
 	auto& r2 = e.AddComponent<RendererComponent>();
@@ -76,6 +77,8 @@ void TestApp::Init()
 	c.nearClip = 0.3f;
 	c.farClip = 1000.0f;
 	c.aspect = 1280.0f / 720;
+	//c.skybox = m_environ;
+	c.skybox = m_diffuseIBL;
 
 	auto& t = ec.GetComponent<TransformComponent>();
 	t.position = glm::vec3(0, 3.5f, -10);
@@ -92,8 +95,8 @@ void TestApp::Init()
 void TestApp::Run()
 {
 	//SOLAR_INFO("TestApp::Run()");
-	trans.GetComponent<TransformComponent>().rotation = glm::quat(glm::vec3(0, _time * 2, 0));
-	trans.GetComponent<TransformComponent>().position = (glm::vec3(-1.481f, -0.5058f, -0.734f) * 4.f) * glm::inverse(trans.GetComponent<TransformComponent>().rotation);
+	//trans.GetComponent<TransformComponent>().rotation = glm::quat(glm::vec3(0, _time * 2, 0));
+	//trans.GetComponent<TransformComponent>().position = (glm::vec3(-1.481f, -0.5058f, -0.734f) * 4.f) * glm::inverse(trans.GetComponent<TransformComponent>().rotation);
 	
 	static auto demoOpen = true;
 	ImGui::ShowDemoWindow(&demoOpen);

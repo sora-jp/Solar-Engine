@@ -5,6 +5,8 @@
 #include "core/Plane.h"
 #include <algorithm>
 
+#include "Cubemap.h"
+
 struct Frustum
 {
 	Plane planes[6]; // front, back, left, right, up, down
@@ -45,6 +47,8 @@ struct CameraComponent
 	float fov;
 	float nearClip, farClip;
 	float aspect;
+	Shared<Cubemap> skybox;
+	Shared<Cubemap> indirectIBL;
 
 	[[nodiscard]] glm::mat4 GetCameraMatrix() const
 	{

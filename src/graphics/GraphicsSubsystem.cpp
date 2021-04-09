@@ -21,8 +21,8 @@
 #include "pipeline/impl/SimplePipeline.h"
 #include "glslang/Public/ShaderLang.h"
 
-#define WNDW_WIDTH 1280
-#define WNDW_HEIGHT 720
+#define WNDW_WIDTH 1920
+#define WNDW_HEIGHT 1080
 
 Shared<DiligentContext> GraphicsSubsystem::_ctx;
 Shared<DiligentWindow> GraphicsSubsystem::_mainWindow;
@@ -148,7 +148,7 @@ void GraphicsSubsystem::PostRun()
 	Profiler::End();
 
 	Profiler::Begin("VSync", "VSync");
-	_mainWindow->Present(0);
+	_mainWindow->Present(1);
 	Profiler::End();
 	
 	glfwPollEvents();

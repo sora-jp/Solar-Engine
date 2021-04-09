@@ -1,6 +1,6 @@
 #include "FullScreenQuad.hlsl"
 
-#define RADIUS 2
+#define RADIUS 5
 
 cbuffer Data {
 	int _Offset;

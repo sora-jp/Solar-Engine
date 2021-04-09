@@ -22,7 +22,7 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 		SwapChainDesc swapChainDesc;
 		swapChainDesc.PreTransform = SURFACE_TRANSFORM_OPTIMAL;
 		swapChainDesc.BufferCount = 2;
-		//swapChainDesc.ColorBufferFormat = TEX_FORMAT_RGBA8_UNORM_SRGB;
+		swapChainDesc.ColorBufferFormat = TEX_FORMAT_RGBA8_UNORM_SRGB;
 		swapChainDesc.IsPrimary = isMainWindow;
 		swapChainDesc.Width = w;
 		swapChainDesc.Height = h;

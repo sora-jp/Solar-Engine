@@ -93,7 +93,7 @@ project "Graphics"
 	--copyshaders()
 	copytoshared()
 	enginepch()
-	vendor {"entt", "spdlog", "assimp", "compat", "diligent", "GLFW", "glm", "iconfontheaders", "implot", "stb", "tinystl", "glslang"}
+	vendor {"entt", "spdlog", "assimp", "compat", "diligent", "GLFW", "glm", "iconfontheaders", "implot", "stb", "tinystl", "glslang", "freeimage"}
 	--enginepch()
 	
 project "Test"

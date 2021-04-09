@@ -86,8 +86,8 @@ Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, s
 
 	SamplerDesc defaultSampler
 	{
-		FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC,
-		TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, 0, 16
+		FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR,
+		TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP
 	};
 
 	auto* samplers = new ImmutableSamplerDesc[reflRes.textures.size()];
