@@ -64,6 +64,39 @@ float FresnelSchlick(float SpecularColor, float3 E, float3 H)
 	//return SpecularColor + (1.0f - SpecularColor) * exp2(-8.656170 * saturate(dot(E, H)));
 }
 
+float FresnelCookTorrance(float f0, float vdoth) 
+{
+	float n = (1 + sqrt(f0)) / (1 - sqrt(f0));
+	float c2 = vdoth * vdoth;
+	float g = sqrt(n * n + c2 - 1);
+
+	float t1 = (g - vdoth) / (g + vdoth);
+	t1 *= t1;
+
+	float gc = g * vdoth;
+	float t2 = (gc + c2 - 1) / (gc - c2 + 1);
+	t2 = 1 + t2 * t2;
+
+	return (t1 * t2) / 2;
+}
+
+inline float GGXPartialShadowingTerm(float hdotv, float alpha) 
+{
+	float a2 = alpha * alpha;
+
+	return 2 * hdotv / (hdotv + sqrt(a2 + (1 - a2) * hdotv * hdotv));
+}
+
+inline float GGXDistributionTerm(float ndoth, float alpha) 
+{
+	float ndh2 = ndoth * ndoth;
+	float a2 = alpha * alpha;
+
+	float denom = ndh2 * ndh2 * (a2 - 1) + 1;
+
+	return a2 / (3.1415 * denom * denom);
+}
+
 // TODO: READ http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html PLES
 // Also look at https://www.iquilezles.org/www/index.htm
 float specular(float3 pos, float3 nrm, float3 dirToLight, float3 viewDir, float roughness, float x) 
@@ -76,7 +109,7 @@ float specular(float3 pos, float3 nrm, float3 dirToLight, float3 viewDir, float 
 
 	float vdoth = dot(viewDir, halfVec);
 
-	float m2 = roughness * roughness;
+	float m2 = roughness/* * roughness*/;
 
 	float kspec = exp(-(1 - ndh2) / (ndh2 * m2));
 	kspec /= 3.1415 * m2 * ndh2 * ndh2;
@@ -95,10 +128,13 @@ float specular(float3 pos, float3 nrm, float3 dirToLight, float3 viewDir, float 
 	}
 	g = saturate(g);
 
+	g = saturate(GGXPartialShadowingTerm(vdoth, m2) * GGXPartialShadowingTerm(dot(halfVec, dirToLight), m2));
+	kspec = GGXDistributionTerm(ndoth, m2);
+
 	float n = 1.25;
 	float r0 = pow((1 - n) / (1 + n), 2);
 	float fresnel = r0 + (1 - r0) * pow(1 - dot(nrm, dirToLight), 5);
-	fresnel = FresnelSchlick(r0, dirToLight, nrm);
+	fresnel = FresnelCookTorrance(r0, vdotn);
 
 	float spec = kspec * g * fresnel / (3.1415 * vdotn * dot(dirToLight, nrm));
 	return spec;//float3(kspec, g, fresnel);
@@ -181,7 +217,7 @@ float4 frag(in v2f i) : SV_TARGET
 	//return _SAMPLE(_Skybox, radialCoords(refl));
 	//return float4(ambientCol / (ambientCol + 1), 1);
 	//return float4(ambientCol, 1);
-	float fres = FresnelSchlick(0.025, nrm, rawVDir);
+	float fres = FresnelCookTorrance(0.025, dot(nrm, rawVDir));
 	float3 final = color * (ambientCol + saturate(diffuseContrib * shadow)).rgb + specularContrib * shadow + reflCol * fres * lerp(color, 1, fres) /* * lerp(saturate(dot(refl, lightDir)), 1, shadow)*/;
 	return float4((final), 1);
 	//return float4(p, p, p, (color * lerp(0.1, 1, saturate(dot(nrm, lightDir)) * shadow)).r);

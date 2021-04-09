@@ -57,8 +57,8 @@ workspace "Solar"
 	}
 	
 filter { "files:**.hlsl" }
-	buildmessage "copy /B /Y %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}"
-	buildcommands { "cp -f %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}" }
+	buildmessage "copy /B /Y \"%{file.relpath:gsub('/', '\\')}\" \"%{cfg.targetdir:gsub('/', '\\')}\\%{file.name}\""
+	buildcommands {"copy /B /Y \"%{file.relpath:gsub('/', '\\')}\" \"%{cfg.targetdir:gsub('/', '\\')}\\%{file.name}\""}--{ "bash cp -f %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}" }
 	buildoutputs { "%{cfg.targetdir}/%{file.name}" }
 	
 filter { "platforms:Win64" }

@@ -11,6 +11,7 @@
 #include "Mesh.h"
 #include "RendererComponent.h"
 #include "Cubemap.h"
+#include <filesystem>
 
 class TestApp final : public SolarApp
 {
@@ -28,7 +29,7 @@ class TestSystem final : public System<CameraComponent, TransformComponent>
 public:
 	void Execute(const Entity e, CameraComponent& c, TransformComponent& t) override
 	{
-		const auto y = _time * 7 / (2 * glm::pi<float>());
+		const auto y = _time * 3.5f / (2 * glm::pi<float>());
 		t.rotation = glm::quat(glm::vec3(glm::radians(15.f), y, 0));
 		t.position = glm::vec3(0, 3.5f, -10) * glm::inverse(glm::quat(glm::vec3(0, y, 0)));
 	}
@@ -51,10 +52,12 @@ void TestApp::Init()
 	m_mat->GetProperties().Set("_Tint", &cc);
 	m_mat->GetProperties().Set("_SMXX", &cc);
 	//m_environ = Cubemap::Load("D:\\Projects\\Solar Engine\\src\\test\\HdrOutdoorCityPathDayClear001_HDR_4K.exr");
-	m_diffuseIBL = Cubemap::Load("D:\\Projects\\Solar Engine\\src\\test\\HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png");
+	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
-	m_mesh = Mesh::Load("D:\\Projects\\Solar Engine\\src\\test\\nissan\\nissan.obj");
-	m_mesh2 = Mesh::Load("D:\\Projects\\Solar Engine\\src\\test\\plane2.fbx");
+	m_diffuseIBL = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png").string());
+	
+	m_mesh = Mesh::Load((path / "nissan" / "nissan.obj").string());
+	m_mesh2 = Mesh::Load((path / "plane2.fbx").string());
 	
 	auto scene = Scene::Create();
 
@@ -62,8 +65,8 @@ void TestApp::Init()
 	auto& r = e.AddComponent<RendererComponent>();
 	r.material = m_mat;
 	r.mesh = m_mesh;
-	trans.GetComponent<TransformComponent>().scale = glm::vec3(4.f);
-	trans.GetComponent<TransformComponent>().position = glm::vec3(-1.481f, -0.5058f, -0.734f) * 4.f;
+	//trans.GetComponent<TransformComponent>().scale = glm::vec3(4.f);
+	//trans.GetComponent<TransformComponent>().position = glm::vec3(-1.481f, -0.5058f, -0.734f) * 4.f;
 	
 	e = scene->CreateEntity("Render test 2", Entity::null);
 	auto& r2 = e.AddComponent<RendererComponent>();
