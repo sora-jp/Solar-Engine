@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 #include "core/Plane.h"
+#include "editor/EditorGUI.h"
 #include <algorithm>
 
 #include "Cubemap.h"
@@ -44,7 +45,7 @@ private:
 
 struct CameraComponent
 {
-	float fov;
+	Range fov { 0, 90 };
 	float nearClip, farClip;
 	float aspect;
 	Shared<Cubemap> skybox;
@@ -52,6 +53,13 @@ struct CameraComponent
 
 	[[nodiscard]] glm::mat4 GetCameraMatrix() const
 	{
-		return glm::perspectiveLH_ZO(glm::radians(fov), aspect, nearClip, farClip);
+		return glm::perspectiveLH_ZO(glm::radians<float>(fov), aspect, nearClip, farClip);
+	}
+
+	void OnInspectorGUI()
+	{
+		EditorGUI::Field(fov, "Field of View");
+		EditorGUI::Field(nearClip, "Near clip plane");
+		EditorGUI::Field(farClip, "Far clip plane");
 	}
 };

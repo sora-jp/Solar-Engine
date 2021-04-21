@@ -24,6 +24,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, s
 	pipelineInfo.PSODesc.PipelineType = PIPELINE_TYPE_GRAPHICS;
 
 	pipelineInfo.GraphicsPipeline.NumRenderTargets = 1;
+	pipelineInfo.GraphicsPipeline.SmplDesc.Count = 8;
 	pipelineInfo.GraphicsPipeline.RTVFormats[0] = GraphicsSubsystem::GetMainWindow()->GetSwapChain()->GetDesc().ColorBufferFormat;
 	pipelineInfo.GraphicsPipeline.DSVFormat = GraphicsSubsystem::GetMainWindow()->GetSwapChain()->GetDesc().DepthBufferFormat;
 	pipelineInfo.GraphicsPipeline.PrimitiveTopology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;

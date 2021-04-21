@@ -8,9 +8,12 @@
 
 using namespace Assimp;
 
-Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m)
+Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh)
 {
 	auto mesh = MakeUnique<SubMesh>();
+
+	mesh->materialIndex = m->mMaterialIndex;
+	mesh->m_parentMesh = parentMesh;
 	
 	auto* const vs = new Vertex[m->mNumVertices];
 	auto* const is = new uint32_t[m->mNumFaces * 3u];
@@ -81,15 +84,43 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m)
 Shared<Mesh> Mesh::Load(const std::string filename)
 {
 	Importer imp;
-	auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FixInfacingNormals | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes);
+	auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals);
 	SOLAR_CORE_ASSERT_ALWAYS(scene != nullptr);
 	SOLAR_CORE_ASSERT(scene->HasMeshes());
 
 	auto mesh = MakeShared<Mesh>();
+
+	if (scene->HasMaterials()) 
+	{
+		for (auto i = 0u; i < scene->mNumMaterials; i++)
+		{
+			auto* mat = scene->mMaterials[i];
+
+			SOLAR_CORE_INFO("{}", mat->GetName().C_Str());
+
+			MeshMaterialData data;
+
+			aiColor3D tmp;
+			mat->Get(AI_MATKEY_COLOR_DIFFUSE, tmp);
+			data.diffuse.r = tmp.r;
+			data.diffuse.g = tmp.g;
+			data.diffuse.b = tmp.b;
+
+			mat->Get(AI_MATKEY_COLOR_EMISSIVE, tmp);
+			data.emissive.r = tmp.r;
+			data.emissive.g = tmp.g;
+			data.emissive.b = tmp.b;
+
+			mat->Get("$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0, data.roughness);
+			mat->Get("$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0, data.metallicity);
+
+			mesh->m_materials.push_back(data);
+		}
+	}
 	
 	for (auto i = 0u; i < scene->mNumMeshes; i++)
 	{
-		mesh->m_subMeshes.push_back(SubMesh::LoadFrom(scene->mMeshes[i]));
+		mesh->m_subMeshes.push_back(SubMesh::LoadFrom(scene->mMeshes[i], mesh));
 	}
 	
 	return mesh;

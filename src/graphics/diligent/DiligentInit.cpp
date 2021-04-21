@@ -10,7 +10,6 @@
 
 #include "core/Log.h"
 #include "diligent/DiligentWindow.h"
-#include "RenderTexture.h"
 
 void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
@@ -38,7 +37,7 @@ void DiligentContext::TransitionState(IDeviceObject* obj, const RESOURCE_STATE n
 	m_context->TransitionResourceStates(1, &transition);
 }
 
-void DiligentContext::TransitionState(RenderTexture* tex, const RESOURCE_STATE newColorState, const RESOURCE_STATE newDepthState)
+void DiligentContext::TransitionState(RenderTargetBase* tex, const RESOURCE_STATE newColorState, const RESOURCE_STATE newDepthState)
 {
 	SOLAR_CORE_ASSERT(tex->IsValid());
 
@@ -47,10 +46,10 @@ void DiligentContext::TransitionState(RenderTexture* tex, const RESOURCE_STATE n
 	//AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
 	if (tex->m_depthTarget) AppendTransitionDesc(transitions, tex->m_depthTarget->GetTexture(), newDepthState);
 
-	for (auto i = 0; i < tex->m_numColorTargets; i++) 
+	for (auto i = 0; i < tex->GetColorTargetCount(); i++)
 	{
 		//AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
-		if (tex->m_colorTargets[i]) AppendTransitionDesc(transitions, tex->m_colorTargets[i]->GetTexture(), newColorState);
+		if (tex->GetColorTargets()[i]) AppendTransitionDesc(transitions, tex->GetColorTargets()[i]->GetTexture(), newColorState);
 	}
 
 	m_context->TransitionResourceStates(transitions.size(), transitions.data());
@@ -189,23 +188,38 @@ ITexture* DiligentContext::CreateTexture(uint32_t width, uint32_t height, TEXTUR
 	return out;
 }
 
-void DiligentContext::SetRenderTarget(RenderTexture* texture, const bool autoTransition)
+void DiligentContext::ResolveMSAA(RenderTargetBase* source, RenderTargetBase* dest)
+{
+	ResolveTextureSubresourceAttribs a;
+	a.SrcTextureTransitionMode = a.DstTextureTransitionMode = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
+
+	SOLAR_CORE_ASSERT(source->GetColorTargetCount() != dest->GetColorTargetCount());
+
+	auto* src = source->GetColorTargets();
+	auto* dst = dest->GetColorTargets();
+	for (auto i = 0; i < source->GetColorTargetCount(); i++)
+	{
+		m_context->ResolveTextureSubresource(src[i]->GetTexture(), dst[i]->GetTexture(), a);
+	}
+}
+
+void DiligentContext::SetRenderTarget(RenderTargetBase* texture, const bool autoTransition)
 {
 	m_activeTexture = texture;
 	//if (autoTransition) TransitionState(texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture->m_numColorTargets, m_activeTexture->m_rct, m_activeTexture->m_depthTarget, TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture->GetColorTargetCount(), m_activeTexture->GetColorTargets(), m_activeTexture->GetDepthTarget(), TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
 {
 	//if (autoTransition) TransitionState(m_activeTexture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 	
-	if (m_activeTexture->m_depthTarget)
-		m_context->ClearDepthStencil(m_activeTexture->m_depthTarget, CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
+	if (m_activeTexture->GetDepthTarget())
+		m_context->ClearDepthStencil(m_activeTexture->GetDepthTarget(), CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
 
-	for (auto i = 0; i < m_activeTexture->m_numColorTargets; i++)
-		m_context->ClearRenderTarget(m_activeTexture->m_colorTargets[i], rgba, TRANSITION_MODE);
+	for (auto i = 0; i < m_activeTexture->GetColorTargetCount(); i++)
+		m_context->ClearRenderTarget(m_activeTexture->GetColorTargets()[i], rgba, TRANSITION_MODE);
 }
 
 void DiligentContext::BindMaterial(const Shared<Material>& material, const int subpass)

@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "ComponentWrapper.h"
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
 
@@ -14,5 +15,10 @@ struct SOLAR_API TransformComponent
 		return glm::translate(glm::mat4(1.0f), position)
 		     * static_cast<glm::mat4>(rotation)
 		     * glm::scale(glm::mat4(1.0f), scale);
+	}
+
+	void TestInheritance()
+	{
+		SOLAR_TRACE("Test inheritance :D, pos is {} {} {}", position.x, position.y, position.z);
 	}
 };

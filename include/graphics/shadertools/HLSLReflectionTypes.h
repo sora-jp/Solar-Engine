@@ -5,6 +5,16 @@
 #include <string>
 #include <diligent/Graphics/GraphicsEngine/interface/Shader.h>
 
+enum class CBufferBasicType
+{
+	Int, UInt, Float, Bool, Unknown
+};
+
+enum class CBufferViewType
+{
+	Scalar, Vector, Matrix, Array, Unknown
+};
+
 struct CommonVariableData
 {
 	std::string name;
@@ -20,6 +30,12 @@ struct CBufferVariable : public CommonVariableData
 {
 	int byteOffset;
 	int byteSize;
+
+	CBufferBasicType baseType;
+	CBufferViewType viewType;
+
+	int baseTypeByteSize;
+	int matrixCols, matrixRows, componentCount;
 };
 
 struct CBufferReflection : public CommonVariableData
@@ -27,6 +43,7 @@ struct CBufferReflection : public CommonVariableData
 	int index;
 	int byteSize;
 	std::map<std::string, CBufferVariable> variables;
+	std::vector<CBufferVariable> rawVars;
 };
 
 struct ReflectionResult

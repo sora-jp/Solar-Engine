@@ -29,7 +29,7 @@ inline bool AddShader(std::vector<TShader*>& shaders, const char* const* src, co
 
 	TBuiltInResource r{};
 
-	if (shd->parse(&r, 0, false, static_cast<EShMessages>(EShMsgReadHlsl | EShMsgRelaxedErrors | EShMsgDefault), includer))
+	if (shd->parse(&r, 0, false, static_cast<EShMessages>(EShMsgReadHlsl | EShMsgDefault), includer))
 		shaders.push_back(shd);
 	else
 	{
@@ -54,28 +54,28 @@ inline int GetByteSize(const TBasicType type)
 {
 	switch (type)
 	{
-	case EbtInt8:
-	case EbtUint8:
-	case EbtBool:
-		return 1;
-		
-	case EbtFloat16:
-	case EbtInt16:
-	case EbtUint16:
-		return 2;
-		
-	case EbtInt:
-	case EbtUint:
-	case EbtFloat:
-		return 4;
-		
-	case EbtInt64:
-	case EbtUint64:
-	case EbtDouble:
-		return 8;
-		
-	default: 
-		return 0;
+		case EbtInt8:
+		case EbtUint8:
+		case EbtBool:
+			return 1;
+			
+		case EbtFloat16:
+		case EbtInt16:
+		case EbtUint16:
+			return 2;
+			
+		case EbtInt:
+		case EbtUint:
+		case EbtFloat:
+			return 4;
+			
+		case EbtInt64:
+		case EbtUint64:
+		case EbtDouble:
+			return 8;
+			
+		default: 
+			return 0;
 	}
 }
 
@@ -90,12 +90,51 @@ inline int GetByteSize(const TType* type)
 	return 0;
 }
 
+inline CBufferBasicType GetBasicType(const TType* type)
+{
+	switch (type->getBasicType())
+	{
+		case EbtInt8:
+		case EbtInt16:
+		case EbtInt:
+		case EbtInt64:
+			return CBufferBasicType::Int;
+		
+		case EbtUint8:
+		case EbtUint16:
+		case EbtUint:
+		case EbtUint64:
+			return CBufferBasicType::UInt;
+
+		case EbtBool:
+			return CBufferBasicType::Bool;
+
+		case EbtFloat16:
+		case EbtFloat:
+		case EbtDouble:
+			return CBufferBasicType::Float;
+
+		default:
+			return CBufferBasicType::Unknown;
+	}
+}
+
+inline CBufferViewType GetViewType(const TType* type)
+{
+	if (type->isScalarOrVec1()) return CBufferViewType::Scalar;
+	if (type->isVector()) return CBufferViewType::Vector;
+	if (type->isMatrix()) return CBufferViewType::Matrix;
+	if (type->isArray()) return CBufferViewType::Array;
+
+	return CBufferViewType::Unknown;
+}
+
 bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps, IShaderSourceInputStreamFactory* sourceResolver, ReflectionResult& outResult)
 {
 	auto includer = DiligentIncluder(sourceResolver);
 	auto* src = includer.includeLocal(filename.c_str(), nullptr, 0);
 
-	SOLAR_CORE_INFO("Reflecting on shader {}", filename);
+	//SOLAR_CORE_INFO("Reflecting on shader {}", filename);
 
 	std::vector<TShader*> shaders;
 
@@ -108,12 +147,12 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 		TProgram prog;
 		for (auto* s : shaders) prog.addShader(s);
 
-		if (prog.link(static_cast<EShMessages>(EShMsgReadHlsl | EShMsgDefault)))
+		if (prog.link(static_cast<EShMessages>(EShMsgReadHlsl | EShMsgDebugInfo | EShMsgDefault)))
 		{
-			if (prog.buildReflection(EShReflectionAllBlockVariables | EShReflectionDefault))
+			if (prog.buildReflection(EShReflectionAllBlockVariables | EShReflectionDefault | EShReflectionSeparateBuffers | EShReflectionAllIOVariables))
 			{
-				prog.dumpReflection();
-
+				//prog.dumpReflection();
+				
 				const auto numUBOs = prog.getNumUniformBlocks();
 				outResult.buffers.resize(numUBOs);
 
@@ -135,23 +174,38 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 				for (auto i = 0; i < numUniforms; i++)
 				{
 					const auto& uniform = prog.getUniform(i);
-					const auto size = GetByteSize(uniform.getType());
-					SOLAR_CORE_INFO("Uniform {}: {} (opaque: {}, size: {})", uniform.name.c_str(), uniform.getType()->getBasicTypeString().c_str(), uniform.getType()->isOpaque(), size);
-
+					const auto* type = uniform.getType();
+					const auto size = GetByteSize(type);
+					
+					SOLAR_CORE_INFO("Uniform {}: {} (size: {}, offset: {})", uniform.name.c_str(), uniform.getType()->getCompleteString().c_str(), size, uniform.offset);
+					
 					if (uniform.index != -1)
 					{
-						outResult.buffers[uniform.index].variables[uniform.name] = CBufferVariable
-						{
-							uniform.name, MapToDiligent(uniform.stages), uniform.offset, size
+						CBufferVariable v = {
+							{uniform.name, MapToDiligent(uniform.stages)},
+							uniform.offset, size,
+							GetBasicType(type), GetViewType(type),
+							GetByteSize(type->getBasicType()),
+							type->getMatrixCols(), type->getMatrixRows(), type->getVectorSize()
 						};
+						
+						outResult.buffers[uniform.index].variables[uniform.name] = v;
+						outResult.buffers[uniform.index].rawVars.push_back(v);
 					}
 					else if (uniform.getType()->isTexture())
 					{
 						outResult.textures.push_back({
-							uniform.name,
-							MapToDiligent(uniform.stages)
+							{ uniform.name, MapToDiligent(uniform.stages) }
 						});
 					}
+				}
+
+				for (auto& buf : outResult.buffers)
+				{	
+					std::sort(
+						buf.rawVars.begin(),
+						buf.rawVars.end(),
+						[](const CBufferVariable& a, const CBufferVariable& b){ return a.byteOffset < b.byteOffset; });
 				}
 			}
 			else

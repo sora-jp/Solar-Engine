@@ -10,7 +10,7 @@ class Material
 
 public:
 	const Shared<Shader> shader;
-	[[nodiscard]] MaterialPropertyBlock& GetProperties() const { return *m_mpb; }
+	[[nodiscard]] MaterialPropertyBlock& GetProperties() { return *m_mpb.get(); }
 
 	static Shared<Material> Create(const Shared<Shader>& shader, const bool autoInit = true) { return Shared<Material>(new Material(shader, autoInit)); }
 

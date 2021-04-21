@@ -1,11 +1,8 @@
 #include "pch.h"
-#include "fonts/Montserrat_Regular.ttf.h"
-#include "fonts/FiraCode_Regular.ttf.h"
 
 #include "GraphicsSubsystem.h"
 #include "RenderSystem.h"
 
-#include "core/Log.h"
 #include "core/Engine.h"
 #include "core/Profiler.h"
 
@@ -16,8 +13,6 @@
 #include "ImGuiDebugWindow.h"
 #include "ImGuiStyle.h"
 
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
 #include "pipeline/impl/SimplePipeline.h"
 #include "glslang/Public/ShaderLang.h"
 
@@ -61,8 +56,8 @@ void GraphicsSubsystem::Init()
 
 	auto& io = ImGui::GetIO();
 	
-	io.FontDefault  = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 18.0f);
-	s_monoFont      = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 18.0f);
+	io.FontDefault  = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 16.0f);
+	s_monoFont      = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 16.0f);
 	s_monoFontSmall = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 12.0f);
 	
 	const auto& scd = _mainWindow->GetSwapChain()->GetDesc();
@@ -134,14 +129,13 @@ void GraphicsSubsystem::PostRun()
 	Profiler::Begin("Render", "Rendering");
 	_ctx->BeginFrame();
 
-	auto* const rt = _mainWindow->GetRenderTarget();
 	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
 	_ctx->Clear(nullptr, 1.0f, 0);
 
-	s_renderSystem->SetTarget(rt);
+	s_renderSystem->SetTarget(_mainWindow->GetRenderTarget());
 	Engine::RunEcsSystem(s_renderSystem);
 	
-	_ctx->SetRenderTarget(rt);
+	_ctx->SetRenderTarget(_mainWindow->GetRenderTarget());
 	s_imguiRenderer->RenderDrawData(_ctx->GetContext(), ImGui::GetDrawData());
 
 	_ctx->EndFrame();

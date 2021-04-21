@@ -27,7 +27,6 @@
 
 #pragma once
 
-#include <memory>
 #include "diligent/Primitives/interface/BasicTypes.h"
 #include "diligent/Common/interface/BasicMath.hpp"
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"

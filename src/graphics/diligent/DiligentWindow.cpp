@@ -1,12 +1,28 @@
 #include "pch.h"
 #include "DiligentWindow.h"
-#include "RenderTexture.h"
+#include <GLFW/glfw3native.h>
+
+class WindowRenderTarget final : RenderTargetBase
+{
+	RefCntWeakPtr<ISwapChain> m_swapchain;
+	ITextureView* m_curBackbuffer;	
+
+	[[nodiscard]] size_t GetColorTargetCount() override { return 1; }
+	[[nodiscard]] Diligent::ITextureView** GetColorTargets() override
+	{
+		m_curBackbuffer = m_swapchain.IsValid() ? m_swapchain.Lock()->GetCurrentBackBufferRTV() : nullptr;
+		return &m_curBackbuffer;
+	}
+	[[nodiscard]] Diligent::ITextureView* GetDepthTarget() override { return m_swapchain.IsValid() ? m_swapchain.Lock()->GetDepthBufferDSV() : nullptr; }
+
+public:
+	WindowRenderTarget(ISwapChain* swapChain) : m_swapchain(swapChain), m_curBackbuffer(swapChain->GetCurrentBackBufferRTV()) {}
+};
 
 void DiligentResizeWindowCallback(GLFWwindow* window, int width, int height)
 {
-	auto owner = static_cast<DiligentWindow*>(glfwGetWindowUserPointer(window));
+	auto* owner = static_cast<DiligentWindow*>(glfwGetWindowUserPointer(window));
 	owner->Resize(width, height);
-	owner->InvalidateCachedRenderTarget();
 }
 
 DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, const bool isMainWindow, GLFWwindow* window) : DiligentWindow(ctx, nullptr, isMainWindow, window) {}
@@ -30,6 +46,8 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 		m_ctx->CreateSwapChain(swapChainDesc, glfwGetWin32Window(window), &m_swapchain);
 	}
 	else m_swapchain = swapChain;
+
+	m_renderTarget = Unique<RenderTarget>(reinterpret_cast<RenderTarget*>(new WindowRenderTarget(m_swapchain)));
 	
 	glfwSetWindowUserPointer(m_window, this);
 	glfwSetFramebufferSizeCallback(m_window, DiligentResizeWindowCallback);
@@ -45,7 +63,6 @@ void DiligentWindow::Resize(const int width, const int height)
 	const auto& desc = m_swapchain->GetDesc();
 	if (desc.Width != width || desc.Height != height) 
 	{
-		m_renderTarget.reset();
 		m_swapchain->Resize(width, height);
 	}
 }
@@ -55,20 +72,7 @@ void DiligentWindow::GetSize(int& width, int& height) const
 	glfwGetWindowSize(m_window, &width, &height);
 }
 
-RenderTexture* DiligentWindow::GetRenderTarget()
+RenderTarget* DiligentWindow::GetRenderTarget() const
 {
-	auto* colorBuf = m_swapchain->GetCurrentBackBufferRTV();
-	auto* depthBuf = m_swapchain->GetDepthBufferDSV();
-
-	if (colorBuf == nullptr || depthBuf == nullptr) 
-		return m_renderTarget.get();
-	
-	if (m_renderTarget) m_renderTarget->Rebind(1, &colorBuf, depthBuf);
-	else m_renderTarget = MakeUnique<RenderTexture>(1, &colorBuf, depthBuf);
 	return m_renderTarget.get();
-}
-
-void DiligentWindow::InvalidateCachedRenderTarget()
-{
-	//m_renderTarget.reset();
 }

@@ -1,27 +1,7 @@
 #ifndef _UNITY_PBS_FUNCTIONS
 #define _UNITY_PBS_FUNCTIONS
 
-float PerceptualRoughnessToRoughness(float perceptualRoughness)
-{
-	return perceptualRoughness * perceptualRoughness;
-}
 
-half RoughnessToPerceptualRoughness(half roughness)
-{
-	return sqrt(roughness);
-}
-
-// Smoothness is the user facing name
-// it should be perceptualSmoothness but we don't want the user to have to deal with this name
-half SmoothnessToRoughness(half smoothness)
-{
-	return (1 - smoothness) * (1 - smoothness);
-}
-
-float SmoothnessToPerceptualRoughness(float smoothness)
-{
-	return (1 - smoothness);
-}
 
 // Ref: http://jcgt.org/published/0003/02/03/paper.pdf
 inline float SmithJointGGXVisibilityTerm(float NdotL, float NdotV, float roughness)

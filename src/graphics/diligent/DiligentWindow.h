@@ -1,6 +1,6 @@
 #pragma once
 #include "core/Common.h"
-#include "RenderTexture.h"
+#include "TextureBase.h"
 #include "DiligentInit.h"
 
 #include "diligent/Graphics/GraphicsEngine/interface/DeviceContext.h"
@@ -9,7 +9,6 @@
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "GLFW/glfw3.h"
-#include "GLFW/glfw3native.h"
 
 using namespace Diligent;
 
@@ -18,7 +17,7 @@ class DiligentWindow
 	GLFWwindow* m_window;
 	RefCntAutoPtr<ISwapChain> m_swapchain;
 	Shared<DiligentContext> m_ctx;
-	Unique<RenderTexture> m_renderTarget;
+	Unique<RenderTarget> m_renderTarget;
 
 public:
 	DiligentWindow(const Shared<DiligentContext>& ctx, bool isMainWindow, GLFWwindow* window);
@@ -28,10 +27,9 @@ public:
 	void Present(int vsyncInterval = 1);
 	void Resize(int width, int height);
 	void GetSize(int& width, int& height) const;
-	[[nodiscard]] RenderTexture* GetRenderTarget();
+	[[nodiscard]] RenderTarget* GetRenderTarget() const;
 
 	Shared<DiligentContext> GetContext() const { return m_ctx; }
 	ISwapChain* GetSwapChain() { return m_swapchain; }
 	operator GLFWwindow*() const { return m_window; }
-	void InvalidateCachedRenderTarget();
 };

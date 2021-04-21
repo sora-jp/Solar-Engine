@@ -1,8 +1,8 @@
 #include "Common.hlsl"
 
-#pragma vertex vert
-#pragma fragment frag
-#pragma mode deferred
+//#pragma vertex vert
+//#pragma fragment frag
+//#pragma mode deferred
 
 struct appdata
 {
@@ -21,16 +21,17 @@ struct v2f
 
 struct psout
 {
-    float4 Color : SV_TARGET0;
-    float4 Normal : SV_TARGET1;
-    float4 Position : SV_TARGET2;
-    float4 SpecMetal : SV_TARGET3;
+    float4 ColorRough : SV_TARGET0;
+    float4 EmissMetal : SV_TARGET1;
+    float4 Normal : SV_TARGET2;
+    float4 Position : SV_TARGET3;
 };
 
 PerMaterial
 
-float4 _Tint; // Material tint
-float4 _SMXX; // Specular, Metal, _, _
+color     _Tint; // Material tint
+hdr_color _Emission; // Material emission
+float2    _SmoothnessMetal; // Specular, Metal, _, _
 
 End
 
@@ -42,10 +43,14 @@ void vert(in appdata v, out v2f o)
     o.UV = v.UV;
 }
 
-void frag(in v2f i, out psout o)
+void frag(in v2f i, in bool ff : SV_IsFrontFace, out psout o)
 {
-    o.Color = _Tint;//lerp(0.015, 1, saturate(dot(PSIn.Nrm, normalize(float3(1, 1, -1)))));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
-    o.Normal = float4(normalize(i.Nrm), 1);
+    o.ColorRough = float4(_Tint.rgb, _SmoothnessMetal.r);//lerp(0.015, 1, saturate(dot(PSIn.Nrm, normalize(float3(1, 1, -1)))));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
+    o.EmissMetal = float4(_Emission.rgb, _SmoothnessMetal.g);
+
+    float3 nrm;
+    faceforward(nrm, -normalize(i.WorldPos - g_WorldSpaceCameraPos), normalize(i.Nrm));
+    o.Normal = float4(normalize(i.Nrm) * (ff * 2 - 1), 1);
+
     o.Position = float4(i.WorldPos, 1);
-    o.SpecMetal = float4(_SMXX.rg, 0, 0);
 }

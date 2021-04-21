@@ -32,6 +32,16 @@ const std::vector<Shared<Scene>>& Scene::GetLoadedScenes()
 	return _loadedScenes;
 }
 
+void Scene::IterateTopLevelEntities(const std::function<void(const Entity&&, const CommonEntityData&)>& func)
+{
+	const auto es = m_registry.view<const CommonEntityData>();
+	for (auto&& [e, data] : es.each())
+	{
+		if (data.GetParent() != Entity::null) continue;
+		func({e, shared_from_this()}, data);
+	}
+}
+
 Entity Scene::CreateEntity(const std::string& name = std::string(), const Entity& parent = { entt::null, nullptr })
 {
 	Entity e = { m_registry.create(), shared_from_this() };

@@ -61,18 +61,18 @@ void PipelineContext::Draw(const CullingResults& culled, const DrawSettings& set
 		
 		for (auto s = 0; s < r.renderer->mesh->GetSubMeshCount(); s++) 
 		{
-			if (!settings.overrideMaterial) m_ctx->BindMaterial(r.renderer->GetMaterial(s));
+			if (!settings.overrideMaterial) m_ctx->BindMaterial(r.renderer->GetMaterialForSubmesh(s));
 			m_ctx->SubmitMesh(r.renderer->mesh, s);
 		}
 	}
 }
 
-void PipelineContext::BlitFullscreenQuad(ITexture* src, ITexture* dest, const Shared<Material>& mat) const
+void PipelineContext::BlitFullscreenQuad(TextureBase src, TextureBase dest, const Shared<Material>& mat) const
 {
-	auto* view = dest->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET);
+	auto* destView = dest.GetView(TEXTURE_VIEW_RENDER_TARGET);
 	
-	m_ctx->GetContext()->SetRenderTargets(1, &view, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-	mat->GetProperties().Set("_MainTex", src->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+	m_ctx->GetContext()->SetRenderTargets(1, &destView, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	mat->GetProperties().SetTexture("_MainTex", src);
 
 	m_ctx->BindMaterial(mat);
 

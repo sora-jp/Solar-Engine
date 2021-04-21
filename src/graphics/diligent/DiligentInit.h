@@ -3,7 +3,7 @@
 #include <diligent/Graphics/GraphicsTools/interface/MapHelper.hpp>
 
 #include "core/Common.h"
-#include "RenderTexture.h"
+#include "TextureBase.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "ShaderConstants.h"
@@ -23,7 +23,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
 	ShaderConstants m_constants;
-	RenderTexture* m_activeTexture;
+	RenderTargetBase* m_activeTexture;
 	QueryDataPipelineStatistics m_pipelineStats;
 	double m_duration = 0;
 	
@@ -36,13 +36,13 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	RENDER_DEVICE_TYPE            m_deviceType = static_cast<RENDER_DEVICE_TYPE>(-1);
 
 	void TransitionState(IDeviceObject* obj, RESOURCE_STATE newState);
-	void TransitionState(RenderTexture* tex, RESOURCE_STATE newColorState, RESOURCE_STATE newDepthState);
+	void TransitionState(RenderTargetBase* tex, RESOURCE_STATE newColorState, RESOURCE_STATE newDepthState);
 
 public:
 	Shared<DiligentWindow> Init(GLFWwindow* window);
 
 	void BeginFrame();
-	void SetRenderTarget(RenderTexture* texture, bool autoTransition = false);
+	void SetRenderTarget(RenderTargetBase* texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
@@ -63,4 +63,5 @@ public:
 	[[nodiscard]] IDeviceContext* GetContext() { return m_context; }
 	[[nodiscard]] ShaderConstants* GetConstants() { return &m_constants; }
 	[[nodiscard]] RefCntAutoPtr<IBuffer> GetConstantBuffer() const { return m_constantsBuf; }
+	void ResolveMSAA(RenderTargetBase* source, RenderTargetBase* dest);
 };

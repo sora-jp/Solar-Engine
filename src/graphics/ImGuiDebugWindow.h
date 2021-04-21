@@ -4,7 +4,6 @@
 #include "diligent/DiligentInit.h"
 #include "core/Profiler.h"
 #include <vector>
-#include <cmath>
 #include <implot/implot_internal.h>
 
 //inline std::string DurationText(double timeMs)
@@ -135,7 +134,7 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 
 	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, ImVec2(0, 0));
 	ImGui::SetNextWindowViewport(viewport->ID);
-	ImGui::SetNextWindowBgAlpha(0.35f);
+	ImGui::SetNextWindowBgAlpha(0.75f);
 
 	ImGui::PushFont(font);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5, 5));

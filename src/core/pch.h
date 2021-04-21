@@ -11,4 +11,3 @@
 #include "BuildPlatform.h"
 #include "Common.h"
 #include "Log.h"
-#include "Entity.h"

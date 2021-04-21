@@ -1,7 +1,9 @@
 #pragma once
-#include "core/Common.h"
-#include "core/Log.h"
 #include "Material.h"
+#include "TextureBase.h"
+#include "core/Common.h"
+#include "core/Assert.h"
+#include "core/Log.h"
 
 class MaterialPropertyBlock
 {
@@ -18,18 +20,9 @@ public:
 	
 	static Unique<MaterialPropertyBlock> Create(Shared<Shader> shader);
 
-	template<typename T, std::enable_if_t<std::is_base_of_v<IDeviceObject, T>, bool> = true>
-	bool Set(const std::string& name, T* val)
-	{
-		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_PIXEL, name.c_str());
-		if (!var)
-			return false;
+	bool SetTexture(const std::string& name, TextureBase val);
 
-		var->Set(val);
-		return true;
-	}
-	
-	template <typename T, std::enable_if_t<!std::is_base_of_v<IDeviceObject, T>, bool> = true>
+	template <typename T, std::enable_if_t<!std::is_base_of_v<IDeviceObject, T> && std::is_pod_v<T> && !std::is_pointer_v<T>, bool> = true>
 	bool Set(const std::string& name, T* val)
 	{
 		if (!m_hasGlobals || !m_globalsData.variables.count(name)) return false;
@@ -42,10 +35,36 @@ public:
 		return true;
 	}
 
-	template <typename T>
+	template <typename T, std::enable_if_t<!std::is_base_of_v<IDeviceObject, std::remove_all_extents_t<T>> && std::is_pod_v<std::remove_all_extents_t<T>> && !std::is_pointer_v<T>, bool> = true>
 	bool Set(const std::string& name, T val)
 	{
-		return Set<T>(name, &val);
+		if (!m_hasGlobals || !m_globalsData.variables.count(name)) return false;
+		auto& var = m_globalsData.variables[name];
+
+		SOLAR_CORE_ASSERT(sizeof(T) == var.byteSize);
+
+		WriteGlobal(var, &val);
+
+		return true;
+	}
+
+	template<typename T>
+	T* Property(const std::string& name)
+	{
+		//if (!m_hasGlobals || !m_globalsData.variables.count(name)) return T();
+		auto& var = m_globalsData.variables[name];
+
+		//SOLAR_CORE_ASSERT(sizeof(T) == var.byteSize);
+		return reinterpret_cast<T*>(m_backing + var.byteOffset);
+	}
+
+	void Iterate(std::function<void(CBufferVariable&)> func)
+	{
+		if (!m_hasGlobals) return;
+		for (auto& desc : m_globalsData.rawVars)
+		{
+			func(desc);
+		}
 	}
 
 private:

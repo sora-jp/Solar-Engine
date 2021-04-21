@@ -3,24 +3,25 @@
 #include "Log.h"
 #include <vector>
 
-template <typename Base> class TypeRegistry
-{
-public:
-	typedef Base base;
-	
-	static std::vector<Shared<Base>> Instances;
-	static bool Register(Shared<Base> instance)
-	{
-		Instances.push_back(instance);
-		SOLAR_TRACE("Register() {}", (void*)Instances.back().get());
-		return true;
-	};
-
-	static const std::vector<Shared<Base>>& Get()
-	{
-		return Instances;
-	}
-};
+//template <typename Base> class TypeRegistry
+//{
+//public:
+//	typedef Base base;
+//	
+//	static std::vector<Shared<Base>> Instances;
+//	static bool Register(Shared<Base> instance)
+//	{
+//		Instances.push_back(instance);
+//		SOLAR_TRACE("Register() {}", (void*)Instances.back().get());
+//		return true;
+//	};
+//
+//	static const std::vector<Shared<Base>>& Get()
+//	{
+//		SOLAR_TRACE("Get()");
+//		return Instances;
+//	}
+//};
 
 template<typename Factory, typename Type, std::enable_if_t<std::is_base_of_v<typename Factory::base, Type>, bool> = true> class TypeRegistrar
 {
@@ -31,13 +32,13 @@ public:
 	};
 };
 
-template<typename Base> std::vector<Shared<Base>> TypeRegistry<Base>::Instances;
+//template<typename Base> std::vector<Shared<Base>> TypeRegistry<Base>::Instances;
 
 #define GET(factory) Factory ##factory::Get()
-#define REGISTER(factory, t) static TypeRegistrar<Factory ##factory, t> s_ ##t ##Registrar;
+#define REGISTER(factory, t) [[maybe_unused]] static const bool s_ ##t ##Registered = Factory ## factory ## ::Register(MakeShared<t>());
 
 #define INSTANTIATE_FACTORY(factorytype) std::vector<Shared<factorytype>> Factory ##factorytype::Instances;
-#define INSTANTIATE_FACTORY_DEF(factorytype) class Factory ##factorytype : public TypeRegistry<factorytype>  \
+#define INSTANTIATE_FACTORY_DEF(factorytype) class Factory ##factorytype  \
 {																			         \
 public:																		         \
 	typedef factorytype base;												         \
@@ -46,6 +47,7 @@ public:																		         \
 	static bool Register(Shared<factorytype> s)									         \
 	{																		         \
 		Instances.push_back(s);												         \
+		SOLAR_TRACE("Register<{}> 0x{}", #factorytype, (void*)s.get());                 \
 		return true;														         \
 	}																		         \
 };																			         \

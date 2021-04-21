@@ -82,18 +82,11 @@ Shared<Cubemap> Cubemap::Load(const std::string& file)
 	subResource.Stride = FreeImage_GetPitch(bitmap);
 	subResource.pData = FreeImage_GetBits(bitmap);
 
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &result->m_texture);
-
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateTexture(result->m_texture, 0, 0, Box(0, desc.Width, 0, desc.Height), subResource, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-	
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->GenerateMips(result->m_texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
+	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateTexture(result->texture, 0, 0, Box(0, desc.Width, 0, desc.Height), subResource, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	GraphicsSubsystem::GetCurrentContext()->GetContext()->GenerateMips(result->texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
 
 	FreeImage_Unload(bitmap);
 
 	return result;
-}
-
-ITextureView* Cubemap::GetTextureView()
-{
-	return m_texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
 }

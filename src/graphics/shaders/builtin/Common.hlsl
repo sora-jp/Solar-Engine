@@ -19,4 +19,16 @@ cbuffer Constants
 	float3 g_WorldSpaceCameraPos;
 };
 
+inline float2 RadialCoords(float3 a_coords)
+{
+	float3 a_coords_n = normalize(a_coords);
+	float lon = atan2(a_coords_n.z, a_coords_n.x);
+	float lat = acos(a_coords_n.y);
+	float2 sphereCoords = float2(lon, lat) * (1.0 / 3.141592653589793);
+	return float2(sphereCoords.x * 0.5 + 0.5, sphereCoords.y);
+}
+
+typedef float4 color;
+typedef float4 hdr_color;
+
 #endif //_COMMON_HLSL_

@@ -51,14 +51,14 @@ workspace "Solar"
 	includedirs { "include", "include/%{prj.name:lower()}/", "src/%{prj.name:lower()}/"}
 	files { "include/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp", "src/%{prj.name:lower()}/**.hlsl" }
 	defines { "ENTT_NO_ETO=1" }
-	vpaths {
-		["Source/*"] = {"src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp"},
-		["Include/*"] = {"include/%{prj.name:lower()}/**.h"}
-	}
+	--vpaths {
+	--	["Source/*"] = {"src/%{prj.name:lower()}/**.h", "src/%{prj.name:lower()}/**.cpp"},
+	--	["Include/*"] = {"include/%{prj.name:lower()}/**.h"}
+	--}
 	
 filter { "files:**.hlsl" }
 	buildmessage "copy /B /Y \"%{file.relpath:gsub('/', '\\')}\" \"%{cfg.targetdir:gsub('/', '\\')}\\%{file.name}\""
-	buildcommands {"copy /B /Y \"%{file.relpath:gsub('/', '\\')}\" \"%{cfg.targetdir:gsub('/', '\\')}\\%{file.name}\""}--{ "bash cp -f %{file.relpath:gsub('\\', '/')} %{cfg.targetdir}/%{file.name}" }
+	buildcommands {"copy /B /Y \"%{file.relpath:gsub('/', '\\')}\" \"%{cfg.targetdir:gsub('/', '\\')}\\%{file.name}\""}
 	buildoutputs { "%{cfg.targetdir}/%{file.name}" }
 	
 filter { "platforms:Win64" }
@@ -96,9 +96,18 @@ project "Graphics"
 	vendor {"entt", "spdlog", "assimp", "compat", "diligent", "GLFW", "glm", "iconfontheaders", "implot", "stb", "tinystl", "glslang", "freeimage"}
 	--enginepch()
 	
+project "Editor"
+	kind "StaticLib"
+	links { "Core", "ImGui" }
+	includedirs { "vendor/dear-imgui", "vendor/diligent" }
+	defines { "SOLAR_SUBSYSTEM_BUILD" }
+	copytoshared()
+	enginepch()
+	vendor { "entt", "spdlog", "glm" }
+	
 project "Test"
 	kind "ConsoleApp"
-	links { "Core", "Graphics" }
+	links { "Core", "Graphics", "Editor" }
 	--copyshaders()
 	includedirs { "include/*", "vendor/", "vendor/*" }
 	-- prebuildcommands { "{COPY} \"%{sharedBuildLoc}\" \"%{cfg.targetdir}\"" }

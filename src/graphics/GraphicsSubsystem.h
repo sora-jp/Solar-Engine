@@ -1,7 +1,6 @@
 #pragma once
 
 
-#include "ShaderConstants.h"
 #include "core/Common.h"
 #include "core/Subsystem.h"
 #include "diligent/DiligentInit.h"

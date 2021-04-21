@@ -1,11 +1,7 @@
 #include "pch.h"
 #include "RenderSystem.h"
 #include "GraphicsSubsystem.h"
-#include "RendererComponent.h"
 #include "core/Entity.h"
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
-#include "core/Log.h"
 
 void RenderSystem::Execute(Entity e, CameraComponent& camera, TransformComponent& transform)
 {

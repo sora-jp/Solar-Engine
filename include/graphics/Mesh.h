@@ -16,26 +16,21 @@ struct Vertex
 	glm::vec2 uv;
 };
 
-class SubMesh
+struct MeshMaterialData
 {
-	friend class DiligentContext;
-	friend class Mesh;
-	
-	uint32_t m_idxCount;
-	RefCntAutoPtr<IBuffer> m_vertBuf;
-	RefCntAutoPtr<IBuffer> m_idxBuf;
-
-	static Unique<SubMesh> LoadFrom(const aiMesh* m);
-
-public:
-	Bounds bounds;
+	glm::vec3 diffuse;
+	glm::vec3 emissive;
+	float roughness;
+	float metallicity;
 };
 
 class Mesh
 {
 	friend class DiligentContext;
+	friend class SubMesh;
 
 	std::vector<Unique<SubMesh>> m_subMeshes;
+	std::vector<MeshMaterialData> m_materials;
 	
 public:
 	Bounds bounds;
@@ -43,4 +38,27 @@ public:
 
 	int GetSubMeshCount() const { return m_subMeshes.size(); }
 	const SubMesh& GetSubMesh(const int idx) const { return *m_subMeshes[idx]; }
+
+	int GetMaterialCount() const { return m_materials.size(); }
+	const MeshMaterialData& GetMaterialData(const int idx) const { return m_materials[idx]; }
+	const std::vector<MeshMaterialData>& GetMaterials() const { return m_materials; }
+};
+
+class SubMesh
+{
+	friend class DiligentContext;
+	friend class Mesh;
+
+	uint32_t m_idxCount;
+	std::weak_ptr<Mesh> m_parentMesh;
+	RefCntAutoPtr<IBuffer> m_vertBuf;
+	RefCntAutoPtr<IBuffer> m_idxBuf;
+
+	static Unique<SubMesh> LoadFrom(const aiMesh* m, Shared<Mesh> parentMesh);
+
+public:
+	Bounds bounds;
+	int materialIndex;
+
+	const MeshMaterialData& GetMaterial() const { return m_parentMesh.lock()->GetMaterialData(materialIndex); }
 };
