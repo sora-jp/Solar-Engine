@@ -17,12 +17,12 @@ extern SolarApp* CreateApp();
 void main(int argc, char** argv)
 {
 	const auto app = CreateApp();
+	
 	if (!Engine::Init(app))
 	{
 		SOLAR_CRITICAL("Failed to initialize engine");
 	}
-
-	Engine::RegisterEcsSystems(GET_SYSTEMS());
+	
 	Engine::Run(app);
 	Engine::Shutdown(app);
 }

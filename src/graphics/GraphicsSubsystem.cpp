@@ -1,6 +1,8 @@
 #include "pch.h"
 
 #include "GraphicsSubsystem.h"
+#include "diligent/DiligentInit.h"
+
 #include "RenderSystem.h"
 
 #include "core/Engine.h"
@@ -152,5 +154,3 @@ bool GraphicsSubsystem::RequestedShutdown()
 {
 	return glfwWindowShouldClose(m_window);
 }
-
-REGISTER_SUBSYSTEM(GraphicsSubsystem)

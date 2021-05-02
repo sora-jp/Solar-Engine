@@ -67,6 +67,8 @@ public:
 		}
 	}
 
+	void Flush();
+
 private:
 	void WriteGlobal(const CBufferVariable& var, void* val);
 };

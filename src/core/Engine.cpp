@@ -7,9 +7,6 @@
 #include "System.h"
 #include "Profiler.h"
 
-namespace fs = std::filesystem;
-INSTANTIATE_FACTORY(BaseSystem);
-
 std::vector<Shared<Subsystem>> Engine::_subsystems;
 std::vector<Shared<BaseSystem>> Engine::_ecssystems;
 
@@ -17,9 +14,10 @@ bool Engine::Init(SolarApp* app)
 {
 	SOLAR_CORE_TRACE("Initializing engine");
 	SOLAR_CORE_ASSERT(app != nullptr);
-	_subsystems = GET_SUBSYSTEMS();
 
-	for (const auto sys : _subsystems)
+	app->UseSubsystems();
+
+	for (const auto& sys : _subsystems)
 	{
 		SOLAR_CORE_ASSERT(sys != nullptr);
 
@@ -32,13 +30,6 @@ bool Engine::Init(SolarApp* app)
 	SOLAR_CORE_INFO("Initialized app \"{}\"", app->GetName());
 
 	return true;
-}
-
-void Engine::RegisterEcsSystems(const std::vector<Shared<BaseSystem>>& systems)
-{
-	SOLAR_CORE_TRACE("Registering {} ECS systems", systems.size());
-	std::copy(systems.cbegin(), systems.cend(), std::back_inserter(_ecssystems));
-	//for (auto sys : (std::make_move_iterator(systems.begin()), std::make_move_iterator(systems.end()))) _ecssystems.push_back(sys);
 }
 
 inline void Engine::RunEcsSystem(const Shared<BaseSystem>& sys)

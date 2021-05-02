@@ -1,6 +1,5 @@
 #pragma once
 #include "Common.h"
-#include "TypeRegistry.h"
 
 class SUBSYSTEM_API Subsystem
 {
@@ -21,6 +20,6 @@ public:
 #define SUBSYSTEM_ORDER(order) int GetOrder() const override { return order; }
 #define SUBSYSTEM_NAME(name) const char* GetName() const override { return name; }
 
-INSTANTIATE_FACTORY_DEF(Subsystem)
-#define REGISTER_SUBSYSTEM(sys) REGISTER(Subsystem, sys)
-#define GET_SUBSYSTEMS() GET(Subsystem)
+//INSTANTIATE_FACTORY_DEF(Subsystem)
+//#define REGISTER_SUBSYSTEM(sys) REGISTER(Subsystem, sys)
+//#define GET_SUBSYSTEMS() GET(Subsystem)

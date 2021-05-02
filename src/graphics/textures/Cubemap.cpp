@@ -3,6 +3,7 @@
 #include "core/Log.h"
 #include "freeimage/FreeImage.h"
 #include "GraphicsSubsystem.h"
+#include "diligent/DiligentInit.h"
 
 using namespace Diligent;
 

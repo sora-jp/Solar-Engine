@@ -2,6 +2,7 @@
 #include "MaterialPropertyBlock.h"
 
 #include "GraphicsSubsystem.h"
+#include "diligent/DiligentInit.h"
 #include "diligent/Graphics/GraphicsAccessories/interface/GraphicsAccessories.hpp"
 #include "diligent/Graphics/GraphicsEngineD3D11/interface/ShaderResourceBindingD3D11.h"
 #include "diligent/Graphics/GraphicsEngineD3DBase/interface/ShaderResourceVariableD3D.h"
@@ -69,8 +70,13 @@ bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val)
 	return false;
 }
 
+void MaterialPropertyBlock::Flush()
+{
+	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateBuffer(m_globalsBuffer, 0, m_globalsBuffer->GetDesc().uiSizeInBytes, m_backing, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+}
+
 void MaterialPropertyBlock::WriteGlobal(const CBufferVariable& var, void* val)
 {
 	memcpy(m_backing + var.byteOffset, val, var.byteSize);
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateBuffer(m_globalsBuffer, 0, m_globalsBuffer->GetDesc().uiSizeInBytes, m_backing, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	Flush();
 }

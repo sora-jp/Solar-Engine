@@ -13,7 +13,7 @@
 #include "Cubemap.h"
 #include <filesystem>
 
-
+#include "GraphicsSubsystem.h"
 #include "InspectorWindow.h"
 #include "SceneGraphWindow.h"
 
@@ -25,6 +25,7 @@ public:
 	void Init() override;
 	void Run() override;
 	void Shutdown() override;
+	void UseSubsystems() override;
 };
 
 static float _time;
@@ -46,6 +47,7 @@ static Shared<Cubemap> m_diffuseIBL;
 void TestApp::Init()
 {
 	SOLAR_INFO("TestApp::Init()");
+	Engine::UseSystem<TestSystem>();
 
 	m_shader = ShaderCompiler::Compile("DefaultDeferred.hlsl", "vert", "frag", [](GraphicsPipelineDesc& desc)
 	{
@@ -110,5 +112,9 @@ void TestApp::Shutdown()
 	SOLAR_INFO("TestApp::Shutdown()");
 }
 
-REGISTER_SYSTEM(TestSystem)
+void TestApp::UseSubsystems()
+{
+	Engine::UseSubsystem<GraphicsSubsystem>();
+}
+
 REGISTER_APPLICATION(TestApp)

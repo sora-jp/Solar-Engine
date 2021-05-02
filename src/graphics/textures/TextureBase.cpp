@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TextureBase.h"
 #include "GraphicsSubsystem.h"
+#include "diligent/DiligentInit.h"
 
 using namespace Diligent;
 

@@ -27,8 +27,7 @@ public:
 	template<class T, typename... Args, std::enable_if_t<std::is_constructible_v<T, Args...>, bool> = true>
 	T& AddComponent(Args&&... args)
 	{
-		static auto isInitialized = false;
-		if (!isInitialized)
+		if (static auto isInitialized = false; !isInitialized)
 		{
 			//if constexpr (std::is_base_of_v<ComponentBase, T>) {
 			//}
@@ -56,8 +55,8 @@ public:
 	{
 		m_scene->m_registry.visit(m_handle, [this, &msg](const entt::type_info info)
 		{
-			auto [wrapper, instance] = GetComponent(info);
-			if (wrapper != nullptr) wrapper->Call(instance, msg);
+			if (auto [wrapper, instance] = GetComponent(info); wrapper != nullptr) 
+				wrapper->Call(instance, msg);
 		});
 	}
 	
@@ -111,36 +110,5 @@ public:
 	CommonEntityData(const Entity& entity, std::string name, const Entity& parent) : m_parent(parent.m_handle), m_scene(entity.m_scene), Name(std::move(name))
 	{
 		if (parent) parent.GetComponent<CommonEntityData>().m_children.push_back(entity);
-	}
-};
-
-template <>
-struct fmt::formatter<Entity> {
-	// Presentation format: 'e' - Entity name only, 'i' - Id only, 'E' - Entity name with id.
-	char presentation = 'E';
-
-	// Parses format specifications of the form ['e' | 'i' | 'E'].
-	constexpr auto parse(format_parse_context& ctx)
-	{
-		auto it = ctx.begin(), end = ctx.end();
-		if (it != end && (*it == 'e' || *it == 'i' || *it == 'E')) presentation = *it++;
-		
-		if (it != end && *it != '}')
-			throw format_error("invalid format");
-		
-		return it;
-	}
-	
-	template <typename FormatContext> auto format(const Entity& e, FormatContext& ctx)
-	{
-		switch (presentation)
-		{
-			case 'e':
-				return format_to(ctx.out(), "[ent: {}]", e ? e.GetComponent<CommonEntityData>().Name : "null");
-			case 'i':
-				return format_to(ctx.out(), "[ent] ({:04x})", e ? static_cast<entt::entity>(e) : static_cast<entt::entity>(-1));
-			default:
-				return e ? format_to(ctx.out(), "[ent:{}] ({:04x})", e.GetComponent<CommonEntityData>().Name, static_cast<entt::entity>(e)) : format_to(ctx.out(), "[ent:null]");
-		}
 	}
 };

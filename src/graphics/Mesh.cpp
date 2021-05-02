@@ -5,6 +5,7 @@
 #include "assimp/scene.h"
 #include "core/Assert.h"
 #include "GraphicsSubsystem.h"
+#include "diligent/DiligentInit.h"
 
 using namespace Assimp;
 
@@ -81,10 +82,10 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 	return std::move(mesh);
 }
 
-Shared<Mesh> Mesh::Load(const std::string filename)
+Shared<Mesh> Mesh::Load(const std::string& filename)
 {
 	Importer imp;
-	auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals);
+	const auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals);
 	SOLAR_CORE_ASSERT_ALWAYS(scene != nullptr);
 	SOLAR_CORE_ASSERT(scene->HasMeshes());
 
@@ -110,7 +111,7 @@ Shared<Mesh> Mesh::Load(const std::string filename)
 			data.emissive.r = tmp.r;
 			data.emissive.g = tmp.g;
 			data.emissive.b = tmp.b;
-
+			
 			mat->Get("$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0, data.roughness);
 			mat->Get("$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0, data.metallicity);
 

@@ -3,9 +3,11 @@
 
 #include "core/Common.h"
 #include "core/Subsystem.h"
-#include "diligent/DiligentInit.h"
 
 struct GLFWwindow;
+class DiligentContext;
+class DiligentWindow;
+
 class SUBSYSTEM_API GraphicsSubsystem final : public Subsystem
 {
 	SUBSYSTEM_NAME("Graphics Subsystem");

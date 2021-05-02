@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Subsystem.h"
 
-INSTANTIATE_FACTORY(Subsystem);
+//INSTANTIATE_FACTORY(Subsystem);
 
 bool Subsystem::operator<(const Subsystem& b) const
 {

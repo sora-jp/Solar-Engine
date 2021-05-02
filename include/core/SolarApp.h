@@ -12,6 +12,7 @@ public:
 	virtual void Shutdown() = 0;
 
 	[[nodiscard]] virtual const char* GetName() const { return "New Solar App"; }
+	virtual void UseSubsystems() = 0;
 };
 
 #define SOLAR_APPNAME(name) const char* GetName() const override { return name; }

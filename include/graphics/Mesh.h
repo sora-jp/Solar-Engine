@@ -34,7 +34,7 @@ class Mesh
 	
 public:
 	Bounds bounds;
-	static Shared<Mesh> Load(std::string filename);
+	static Shared<Mesh> Load(const std::string& filename);
 
 	int GetSubMeshCount() const { return m_subMeshes.size(); }
 	const SubMesh& GetSubMesh(const int idx) const { return *m_subMeshes[idx]; }

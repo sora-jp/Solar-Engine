@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Common.h"
-#include "TypeRegistry.h"
 #include "Scene.h"
 #include <tuple>
 #include <utility>
@@ -39,7 +38,3 @@ public:
 	
 	virtual void Execute(Entity e, TComponents&... components) = 0;
 };
-
-INSTANTIATE_FACTORY_DEF(BaseSystem)
-#define REGISTER_SYSTEM(sys) REGISTER(BaseSystem, sys)
-#define GET_SYSTEMS() GET(BaseSystem)

@@ -190,6 +190,7 @@ void EditorGUI::InlineEditor(Shared<Material>& material, const std::string& labe
 		}
 	});
 
+	if (modified) mpb.Flush();
 	EndField();
 }
 
