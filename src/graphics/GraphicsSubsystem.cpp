@@ -14,6 +14,9 @@
 #include "imbackends/imgui_impl_glfw.h"
 #include "ImGuiDebugWindow.h"
 #include "ImGuiStyle.h"
+#include "Keyboard.h"
+#include "Mouse.h"
+#include "core/Input.h"
 
 #include "pipeline/impl/SimplePipeline.h"
 #include "glslang/Public/ShaderLang.h"
@@ -41,9 +44,15 @@ void GraphicsSubsystem::Init()
 
 	glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
 	m_window = glfwCreateWindow(WNDW_WIDTH, WNDW_HEIGHT, "Hello, Diligent!", nullptr, nullptr);
+	
+	glfwSetInputMode(m_window, GLFW_STICKY_KEYS, GLFW_TRUE);
+	if (glfwRawMouseMotionSupported()) glfwSetInputMode(m_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
 
 	_ctx = MakeShared<DiligentContext>();
 	_mainWindow = _ctx->Init(m_window);
+
+	Input::AddDevice<Keyboard>(m_window);
+	Input::AddDevice<Mouse>(m_window);
 
 	auto& devcaps = _ctx->GetDevice()->GetDeviceCaps();
 	
@@ -105,6 +114,8 @@ void GraphicsSubsystem::PreRun()
 	s_imguiRenderer->NewFrame(w, h, SURFACE_TRANSFORM_IDENTITY);
 	
 	ImGui::NewFrame();
+
+	Input::UpdateAll();
 }
 
 void GraphicsSubsystem::PostRun()

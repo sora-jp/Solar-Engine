@@ -14,7 +14,10 @@
 #include <filesystem>
 
 #include "GraphicsSubsystem.h"
+#include "Input.h"
 #include "InspectorWindow.h"
+#include "Keyboard.h"
+#include "Mouse.h"
 #include "SceneGraphWindow.h"
 
 class TestApp final : public SolarApp
@@ -28,15 +31,45 @@ public:
 	void UseSubsystems() override;
 };
 
+struct TestComponent
+{
+	glm::vec2 angle;
+};
+
 static float _time;
-class TestSystem final : public System<CameraComponent, TransformComponent>
+
+float KBGetAxis(const Key pos, const Key neg)
+{
+	return Keyboard::Current().KeyHeld(pos) * 1.f + Keyboard::Current().KeyHeld(neg) * -1.f;
+}
+
+class TestSystem final : public System<CameraComponent, TransformComponent, TestComponent>
 {
 public:
-	void Execute(const Entity e, CameraComponent& c, TransformComponent& t) override
+	void Execute(const Entity e, CameraComponent& c, TransformComponent& t, TestComponent& tc) override
 	{
-		const auto y = _time * 3.5f / (2 * glm::pi<float>());
-		t.rotation = glm::quat(glm::vec3(glm::radians(15.f), y, 0));
-		t.position = glm::vec3(0, 2.f, -7) * glm::inverse(glm::quat(glm::vec3(0, y, 0)));
+		const auto& mouse = Input::First<Mouse>();
+		
+		if (mouse.ButtonDown(MouseButton::Right)) mouse.SetCursorEnabled(false);
+		else if (mouse.ButtonUp(MouseButton::Right)) mouse.SetCursorEnabled(true);
+		else if (mouse.ButtonHeld(MouseButton::Right))
+		{
+			const auto delta = Input::First<Mouse>().GetDelta();
+			tc.angle += delta / 35.f;
+
+			tc.angle.y = glm::clamp(tc.angle.y, -90.f, 90.f);
+			t.rotation = glm::quat(glm::radians(glm::vec3(tc.angle.y, tc.angle.x, 0)));
+
+			const auto fwd = t.rotation * glm::vec3(0, 0, 1);
+			const auto up = t.rotation * glm::vec3(0, 1, 0);
+			const auto right = t.rotation * glm::vec3(1, 0, 0);
+
+			auto dpos = glm::vec3(0);
+			dpos += fwd * KBGetAxis(Key::W, Key::S);
+			dpos += up * KBGetAxis(Key::E, Key::Q);
+			dpos += right * KBGetAxis(Key::D, Key::A);
+			t.position += dpos * 4.f / 75.f;
+		}
 	}
 };
 
@@ -54,8 +87,8 @@ void TestApp::Init()
 		desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	});
 	// C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test
-	//const std::filesystem::path path = R"(D:\Projects\Solar Engine\src\test)";
-	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
+	const std::filesystem::path path = R"(D:\Projects\Solar Engine\src\test)";
+	//const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
 	m_diffuseIBL = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png").string());
 	m_mesh = Mesh::Load((path / "ferarri" / "millenio.glb").string());
@@ -94,6 +127,8 @@ void TestApp::Init()
 	auto& t = ec.GetComponent<TransformComponent>();
 	t.position = glm::vec3(0, 3.5f, -10);
 	t.rotation = glm::quat(glm::vec3(glm::radians(15.f), 0, 0));
+
+	ec.AddComponent<TestComponent>();
 	
 	EditorWindow::Open<SceneGraphWindow>();
 	EditorWindow::Open<InspectorWindow>();
