@@ -53,8 +53,9 @@ void TestApp::Init()
 	{
 		desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	});
-
-	const std::filesystem::path path = R"(D:\Projects\Solar Engine\src\test)";
+	// C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test
+	//const std::filesystem::path path = R"(D:\Projects\Solar Engine\src\test)";
+	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
 	m_diffuseIBL = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png").string());
 	m_mesh = Mesh::Load((path / "ferarri" / "millenio.glb").string());
