@@ -34,13 +34,6 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 	m_satV = Material::Create(ShaderCompiler::Compile("ShadowProcessSAT.hlsl", "vert", "fragV"));
 
 	m_shadowmap = RenderTarget::Create(2, {TEX_FORMAT_RG32_FLOAT, 1024, 1024}, {TEX_FORMAT_D16_UNORM, 1024, 1024});
-	m_rt = RenderTarget::Create(4, {TEX_FORMAT_RGBA32_FLOAT, 1920, 1080}, {TEX_FORMAT_D16_UNORM, 1920, 1080});
-	
-	m_compositeMat->GetProperties().SetTexture("_GBDiffuseRough",  m_rt->Color(0));
-	m_compositeMat->GetProperties().SetTexture("_GBEmissionMetal", m_rt->Color(1));
-	m_compositeMat->GetProperties().SetTexture("_GBNormal",        m_rt->Color(2));
-	m_compositeMat->GetProperties().SetTexture("_GBPosition",      m_rt->Color(3));
-	m_compositeMat->GetProperties().SetTexture("_GBDepth",         m_rt->Depth());
 	
 	m_compositeMat->GetProperties().SetTexture("_ShadowMap", m_shadowmap->Color(0));
 
@@ -63,6 +56,16 @@ inline void SimplePipeline::RenderLight(const CullingResults& culled, const glm:
 
 inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target)
 {
+	if (m_rt == nullptr || (m_rt->Width() != target->Width() || m_rt->Height() != target->Height()))
+	{
+		m_rt = RenderTarget::Create(4, { TEX_FORMAT_RGBA32_FLOAT, target->Width(), target->Height() }, { TEX_FORMAT_D16_UNORM, target->Width(), target->Height() });
+		m_compositeMat->GetProperties().SetTexture("_GBDiffuseRough", m_rt->Color(0));
+		m_compositeMat->GetProperties().SetTexture("_GBEmissionMetal", m_rt->Color(1));
+		m_compositeMat->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
+		m_compositeMat->GetProperties().SetTexture("_GBPosition", m_rt->Color(3));
+		m_compositeMat->GetProperties().SetTexture("_GBDepth", m_rt->Depth());
+	}
+	
 	CullingResults culled;
 	ctx.GetRawContext()->SetRenderTarget(m_rt.get());
 	ctx.GetRawContext()->Clear(nullptr, 1, 0);

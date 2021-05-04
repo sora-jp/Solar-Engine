@@ -105,9 +105,18 @@ project "Editor"
 	enginepch()
 	vendor { "entt", "spdlog", "glm" }
 	
+project "Input"
+	kind "StaticLib"
+	links { "Core", "ImGui" }
+	includedirs { "vendor/dear-imgui", "vendor/diligent" }
+	defines { "SOLAR_SUBSYSTEM_BUILD" }
+	copytoshared()
+	enginepch()
+	vendor { "entt", "spdlog", "glm", "GLFW" }
+	
 project "Test"
 	kind "ConsoleApp"
-	links { "Core", "Graphics", "Editor" }
+	links { "Core", "Graphics", "Editor", "Input" }
 	--copyshaders()
 	includedirs { "include/*", "vendor/", "vendor/*" }
 	-- prebuildcommands { "{COPY} \"%{sharedBuildLoc}\" \"%{cfg.targetdir}\"" }

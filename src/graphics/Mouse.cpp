@@ -26,21 +26,25 @@ glm::vec2 Mouse::GetPosition() const
 
 glm::vec2 Mouse::GetDelta() const
 {
+	//if (ImGui::GetIO().WantCaptureMouse) return glm::vec2(0.f);
 	return m_delta;
 }
 
 bool Mouse::ButtonDown(MouseButton btn) const
 {
+	//if (ImGui::GetIO().WantCaptureMouse) return false;
 	return m_buttonStates[static_cast<int>(btn)] == 0b01;
 }
 
 bool Mouse::ButtonHeld(MouseButton btn) const
 {
+	//if (ImGui::GetIO().WantCaptureMouse) return false;
 	return m_buttonStates[static_cast<int>(btn)] == 0b11;
 }
 
 bool Mouse::ButtonUp(MouseButton btn) const
 {
+	//if (ImGui::GetIO().WantCaptureMouse) return false;
 	return m_buttonStates[static_cast<int>(btn)] == 0b10;
 }
 

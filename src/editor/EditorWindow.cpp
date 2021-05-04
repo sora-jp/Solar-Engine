@@ -12,7 +12,7 @@ EditorWindow* EditorWindow::Register(Unique<EditorWindow> wnd)
 
 void EditorWindow::InternalDraw()
 {
-	if (ImGui::Begin(Title().c_str(), &m_open, ImGuiWindowFlags_NoCollapse))
+	if (ImGui::Begin(Title().c_str(), &m_open, ImGuiWindowFlags_NoCollapse | GetAdditionalFlags()))
 	{
 		Draw();
 	}

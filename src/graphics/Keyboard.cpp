@@ -23,18 +23,24 @@ void Keyboard::Update()
 
 bool Keyboard::KeyDown(const Key k) const
 {
+	//if (ImGui::GetIO().WantCaptureKeyboard) return false;
+	
 	if (!HasEntry(m_curState, m_lastState, k)) return false;
 	return m_curState.at(k) && !m_lastState.at(k);
 }
 
 bool Keyboard::KeyHeld(const Key k) const
 {
+	//if (ImGui::GetIO().WantCaptureKeyboard) return false;
+	
 	if (!HasEntry(m_curState, m_lastState, k)) return false;
 	return m_curState.at(k);
 }
 
 bool Keyboard::KeyUp(const Key k) const
 {
+	//if (ImGui::GetIO().WantCaptureKeyboard) return false;
+	
 	if (!HasEntry(m_curState, m_lastState, k)) return false;
 	return !m_curState.at(k) && m_lastState.at(k);
 }

@@ -35,6 +35,12 @@ class TextureBase
 protected:
 	TextureBase() = default;
 	Diligent::RefCntAutoPtr<Diligent::ITexture> texture;
+
+public:
+	void* ToImGui()
+	{
+		return GetView(Diligent::TEXTURE_VIEW_SHADER_RESOURCE);
+	}
 };
 
 class Texture2D final : TextureBase
@@ -75,4 +81,6 @@ public:
 	[[nodiscard]] size_t ColorCount() const { return colorTextures.size(); }
 	[[nodiscard]] TextureBase Color(const int idx) { return colorTextures[idx].RawPtr(); }
 	[[nodiscard]] TextureBase Depth() { return depthTexture.RawPtr(); }
+	[[nodiscard]] uint32_t Width() const { return m_colorDesc.width; }
+	[[nodiscard]] uint32_t Height() const { return m_colorDesc.height; }
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include "core/Common.h"
 #include "core/Subsystem.h"
 

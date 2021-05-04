@@ -16,7 +16,8 @@ protected:
 public:
 	EditorWindow() = default;
 	virtual ~EditorWindow() = default;
-	
+
+	virtual ImGuiWindowFlags GetAdditionalFlags() { return 0; }
 	virtual void Draw() = 0;
 
 	template <typename WindowType, typename ... Args, std::enable_if_t<std::is_base_of_v<EditorWindow, WindowType>, bool> = true>

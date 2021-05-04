@@ -2,7 +2,7 @@
 
 #include <diligent/Graphics/GraphicsEngine/interface/Shader.h>
 
-#include "HLSLReflectionTypes.h"
+#include "shadertools/HLSLReflectionTypes.h"
 #include "core/Log.h"
 
 class HLSLReflector

@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <diligent/Graphics/GraphicsEngine/interface/Shader.h>
 
 enum class CBufferBasicType
 {
@@ -15,10 +14,29 @@ enum class CBufferViewType
 	Scalar, Vector, Matrix, Array, Unknown
 };
 
+enum class ShaderType : uint32_t
+{
+	Unknown = 0x0000, ///< Unknown shader type
+	Vertex = 0x0001, ///< Vertex shader
+	Pixel = 0x0002, ///< Pixel (fragment) shader
+	Geometry = 0x0004, ///< Geometry shader
+	Hull = 0x0008, ///< Hull (tessellation control) shader
+	DomainShader = 0x0010, ///< Domain (tessellation evaluation) shader
+	Compute = 0x0020, ///< Compute shader
+	Amplification = 0x0040, ///< Amplification (task) shader
+	Mesh = 0x0080, ///< Mesh shader
+	RayGen = 0x0100, ///< Ray generation shader
+	RayMiss = 0x0200, ///< Ray miss shader
+	RayClosestHit = 0x0400, ///< Ray closest hit shader
+	RayAnyHit = 0x0800, ///< Ray any hit shader
+	RayIntersection = 0x1000, ///< Ray intersection shader
+	Callable = 0x2000, ///< Callable shader
+};
+
 struct CommonVariableData
 {
 	std::string name;
-	Diligent::SHADER_TYPE usages;
+	ShaderType usages;
 };
 
 struct TextureVariable : public CommonVariableData

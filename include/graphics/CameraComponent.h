@@ -1,12 +1,11 @@
 #pragma once
+#include "Cubemap.h"
+#include "editor/EditorGUI.h"
 #include "core/Bounds.h"
+#include "core/Plane.h"
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"
-#include "core/Plane.h"
-#include "editor/EditorGUI.h"
 #include <algorithm>
-
-#include "Cubemap.h"
 
 struct Frustum
 {
@@ -50,10 +49,12 @@ struct CameraComponent
 	float aspect;
 	Shared<Cubemap> skybox;
 	Shared<Cubemap> indirectIBL;
+	Shared<RenderTarget> target;
 
 	[[nodiscard]] glm::mat4 GetCameraMatrix() const
 	{
-		return glm::perspectiveLH_ZO(glm::radians<float>(fov), aspect, nearClip, farClip);
+		const auto actualAspect = target != nullptr ? (static_cast<float>(target->Width()) / target->Height()) : aspect;
+		return glm::perspectiveLH_ZO(glm::radians<float>(fov), actualAspect, nearClip, farClip);
 	}
 
 	void OnInspectorGUI()

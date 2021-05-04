@@ -7,8 +7,10 @@
 #include "glm/vec2.hpp"
 #include "assimp/scene.h"
 
+//TODO: Remove references to Diligent from here
 using namespace Diligent;
 
+struct aiMesh;
 struct Vertex
 {
 	glm::vec3 pos;
