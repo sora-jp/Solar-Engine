@@ -14,6 +14,10 @@
 
 #endif
 
+#ifndef LOG_ENABLED
+#define LOG_ENABLED 1
+#endif
+
 #include "Common.h"
 
 #pragma warning(push, 0)
@@ -52,7 +56,11 @@ public:
 #endif
 };
 
+#if (LOG_ENABLED == 1)
 #define SOLAR_LOG(fn, ...) ::Log::##fn##_loc(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#else
+#define SOLAR_LOG(...) (void)0
+#endif
 
 #define SOLAR_TRACE(str, ...) SOLAR_LOG(Trace, str, __VA_ARGS__)
 #define SOLAR_INFO(str, ...) SOLAR_LOG(Info, str, __VA_ARGS__)

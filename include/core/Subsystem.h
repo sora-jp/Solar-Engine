@@ -17,12 +17,9 @@ public:
 	bool operator<(const Subsystem& b) const;
 };
 
-//typedef std::shared_ptr<Subsystem> SubsystemPtr;
-// , std::enable_if_t<std::is_base_of_v<Subsystem, T>, bool> = true
-template <class T> using SubsystemPtr = Shared<T>;
-typedef Subsystem* (__cdecl *CreateSubsystemFunc)();
-
 #define SUBSYSTEM_ORDER(order) int GetOrder() const override { return order; }
 #define SUBSYSTEM_NAME(name) const char* GetName() const override { return name; }
 
-#define EXPORT_SUBSYSTEM(sub) extern "C" SUBSYSTEM_API sub* __cdecl CreateSubsystem() { return new sub(); }
+//INSTANTIATE_FACTORY_DEF(Subsystem)
+//#define REGISTER_SUBSYSTEM(sys) REGISTER(Subsystem, sys)
+//#define GET_SUBSYSTEMS() GET(Subsystem)

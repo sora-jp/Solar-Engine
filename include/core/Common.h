@@ -1,5 +1,6 @@
 #pragma once
 
+#if 0
 #if SOLAR_ENGINE_BUILD
 	#define SOLAR_API __declspec(dllexport)
 	#define ENTT_API_EXPORT
@@ -11,6 +12,11 @@
 #if SOLAR_SUBSYSTEM_BUILD
 #define SUBSYSTEM_API __declspec(dllexport)
 #else
+#define SUBSYSTEM_API __declspec(dllimport)
+#endif
+
+#else
+#define SOLAR_API
 #define SUBSYSTEM_API
 #endif
 
@@ -19,6 +25,7 @@
 
 template<typename T> using Shared = SOLAR_API std::shared_ptr<T>;
 template<typename T> using Unique = SOLAR_API std::unique_ptr<T>;
+template<typename T> using Weak   = SOLAR_API std::weak_ptr  <T>;
 
 template<typename T, typename ...Args> Shared<T> MakeShared(Args&&... args)
 {
@@ -74,3 +81,26 @@ template<class Coll, class Fn, std::enable_if_t<std::is_convertible_v<std::invok
 	
 	return false;
 }
+
+struct Range {
+	const float min, max;
+
+	Range() = delete;
+	constexpr Range(const float min, const float max) noexcept : min(min), max(max), m_value(0) {}
+	Range(const Range& other) noexcept : min(other.min), max(other.max), m_value(other.m_value) {}
+	Range(Range&& other) noexcept : min(other.min), max(other.max), m_value(std::move(other.m_value)) {}
+	
+	Range& operator =(const float& other) { m_value = other; return *this; }
+	Range& operator =(const Range& other) { m_value = other.m_value; return *this; }
+
+	// ReSharper disable CppNonExplicitConversionOperator
+	operator float& () { return m_value; }
+	operator const float& () const { return m_value; }
+
+	float* operator &() { return &m_value; }
+	const float* operator &() const { return &m_value; }
+	// ReSharper restore CppNonExplicitConversionOperator
+
+private:
+	float m_value;
+};

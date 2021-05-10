@@ -3,6 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Auto-generated IDE directories
+.vs/
+
 # Auto-generated solution files
 *.sln
 *.vcxproj
@@ -25,20 +28,13 @@ imgui.ini
 # Mono auto generated files
 mono_crash.*
 
+# TEMPORARY HACKY HACKY
+vendor/diligent/DiligentCoreRelease.lib
+vendor/diligent/DiligentCoreDebug.lib
+vendor/assimp/assimp-vc142-mtRelease.lib
+
 # Build results
 [Bb]uild/
-[Dd]ebug/
-[Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
-x86/
-[Ww][Ii][Nn]32/
-[Aa][Rr][Mm]/
-[Aa][Rr][Mm]64/
-bld/
-[Bb]in/
-[Oo]bj/
 [Ll]og/
 [Ll]ogs/
 
