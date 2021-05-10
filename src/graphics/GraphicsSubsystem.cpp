@@ -12,7 +12,6 @@
 
 #include "diligent-imgui/ImGuiDiligentRenderer.h"
 #include "imbackends/imgui_impl_glfw.h"
-#include "ImGuiDebugWindow.h"
 #include "ImGuiStyle.h"
 #include "Keyboard.h"
 #include "Mouse.h"
@@ -20,6 +19,8 @@
 
 #include "pipeline/impl/SimplePipeline.h"
 #include "glslang/Public/ShaderLang.h"
+
+#include "ImGuizmo.h"
 
 #define WNDW_WIDTH 1920
 #define WNDW_HEIGHT 1080
@@ -66,6 +67,8 @@ void GraphicsSubsystem::Init()
 	ImPlot::CreateContext();
 
 	auto& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigWindowsMoveFromTitleBarOnly = true;
 	
 	io.FontDefault  = io.Fonts->AddFontFromMemoryTTF(Montserrat_Regular_ttf, 64, 16.0f);
 	s_monoFont      = io.Fonts->AddFontFromMemoryTTF(FiraCode_Regular_ttf, 64, 16.0f);
@@ -114,24 +117,25 @@ void GraphicsSubsystem::PreRun()
 	s_imguiRenderer->NewFrame(w, h, SURFACE_TRANSFORM_IDENTITY);
 	
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 
 	Input::UpdateAll();
 }
 
 void GraphicsSubsystem::PostRun()
 {
-	static auto debugStats = true;
-	static auto lastState = GLFW_RELEASE;
-	
-	const auto state = glfwGetKey(m_window, GLFW_KEY_F11);
-	
-	if (state == GLFW_PRESS && lastState == GLFW_RELEASE) debugStats = !debugStats;
-	lastState = state;
+	//static auto debugStats = true;
+	//static auto lastState = GLFW_RELEASE;
+	//
+	//const auto state = glfwGetKey(m_window, GLFW_KEY_F11);
+	//
+	//if (state == GLFW_PRESS && lastState == GLFW_RELEASE) debugStats = !debugStats;
+	//lastState = state;
 
-	if (debugStats)
-	{
-		DrawDebugWindow(_ctx, s_monoFont, s_monoFontSmall);
-	}
+	//if (debugStats)
+	//{
+	//	DrawDebugWindow(_ctx, s_monoFont, s_monoFontSmall);
+	//}
 
 	//TODO: Render
 	s_imguiRenderer->EndFrame();
@@ -155,10 +159,20 @@ void GraphicsSubsystem::PostRun()
 	Profiler::End();
 
 	Profiler::Begin("VSync", "VSync");
-	_mainWindow->Present(1);
+	_mainWindow->Present(0);
 	Profiler::End();
 	
 	glfwPollEvents();
+}
+
+const PipelineStats& GraphicsSubsystem::GetStats()
+{
+	return *reinterpret_cast<const PipelineStats*>(&_ctx->GetPipelineStats());
+}
+
+const double& GraphicsSubsystem::GetLastDuration()
+{
+	return _ctx->GetLastDuration();
 }
 
 bool GraphicsSubsystem::RequestedShutdown()

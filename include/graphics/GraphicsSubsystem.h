@@ -2,6 +2,7 @@
 
 #include "core/Common.h"
 #include "core/Subsystem.h"
+#include "PipelineStats.h"
 
 struct GLFWwindow;
 class DiligentContext;
@@ -25,5 +26,8 @@ public:
 	
 	static Shared<DiligentContext> GetCurrentContext() { return _ctx; }
 	static Shared<DiligentWindow> GetMainWindow() { return _mainWindow; }
+	static const PipelineStats& GetStats();
+	static const double& GetLastDuration();
+	
 	bool RequestedShutdown() override;
 };

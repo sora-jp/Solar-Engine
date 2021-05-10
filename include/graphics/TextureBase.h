@@ -43,16 +43,20 @@ public:
 	}
 };
 
-class Texture2D final : TextureBase
+class Texture2D final : public TextureBase
 {
 	Texture2D() = default;
 	
 public:
 	static Shared<Texture2D> Create(const TextureDescription& desc);
+	static Shared<Texture2D> Load(const std::string& fileFormat);
 };
 
 class RenderTargetBase
 {
+public:
+	virtual ~RenderTargetBase() = default;
+private:
 	friend class DiligentContext;
 	
 	std::vector<Diligent::ITextureView*> m_colorTargets;
@@ -83,4 +87,39 @@ public:
 	[[nodiscard]] TextureBase Depth() { return depthTexture.RawPtr(); }
 	[[nodiscard]] uint32_t Width() const { return m_colorDesc.width; }
 	[[nodiscard]] uint32_t Height() const { return m_colorDesc.height; }
+};
+
+class CubemapRenderTarget final : public RenderTargetBase
+{
+	Diligent::ITextureView* m_colorTargets[6] {};
+
+	size_t GetColorTargetCount() override { return 6; }
+	Diligent::ITextureView** GetColorTargets() override { return m_colorTargets; }
+	Diligent::ITextureView* GetDepthTarget() override { return nullptr; }
+	
+public:
+	explicit CubemapRenderTarget(Diligent::ITexture* cubemap, const int mip = 0)
+	{
+		for (auto i = 0; i < 6; i++)
+		{
+			Diligent::TextureViewDesc view;
+			view.ViewType = Diligent::TEXTURE_VIEW_RENDER_TARGET;
+			view.TextureDim = Diligent::RESOURCE_DIM_TEX_2D_ARRAY;
+			view.FirstArraySlice = i;
+			view.NumArraySlices = 1;
+			view.MostDetailedMip = mip;
+			view.NumMipLevels = 0;
+
+			cubemap->CreateView(view, &m_colorTargets[i]);
+		}
+	}
+
+	~CubemapRenderTarget() override
+	{
+		for (auto i = 0; i < 6; i++)
+		{
+			m_colorTargets[i]->Release();
+			m_colorTargets[i] = nullptr;
+		}
+	}
 };

@@ -17,9 +17,6 @@ class SOLAR_API Scene final : public std::enable_shared_from_this<Scene>
 	static std::vector<Shared<Scene>> _loadedScenes;
 
 public:
-	//Scene();
-	//~Scene();
-	
 	static Shared<Scene> Create();
 	void Destroy();
 	static const std::vector<Shared<Scene>>& GetLoadedScenes();
@@ -29,6 +26,8 @@ public:
 
 	Entity CreateEntity(const std::string& name, const Entity& parent );
 };
+
+#include "Entity.h"
 
 template <typename... C, typename F>
 void Scene::IterateEntities(F func)

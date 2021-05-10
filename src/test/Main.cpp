@@ -76,7 +76,7 @@ public:
 
 static Shared<Shader> m_shader;
 static Shared<Mesh> m_mesh;
-static Shared<Cubemap> m_diffuseIBL;
+static Shared<Cubemap> m_envMap, m_diffuseIbl;
 
 void TestApp::Init()
 {
@@ -85,14 +85,16 @@ void TestApp::Init()
 
 	m_shader = ShaderCompiler::Compile("DefaultDeferred.hlsl", "vert", "frag", [](GraphicsPipelineDesc& desc)
 	{
-		desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
+		//desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	});
 	// C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test
-	//const std::filesystem::path path = R"(D:\Projects\Solar Engine\src\test)";
-	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
+	const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
+	//const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
-	m_diffuseIBL = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K_DIFFUSE.png").string());
-	m_mesh = Mesh::Load((path / "ferarri" / "millenio.glb").string());
+	m_envMap = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K.jpg").string());
+	m_diffuseIbl = Cubemap::ConvolveDiffuse(m_envMap);
+	
+	m_mesh = Mesh::Load((path / "sponza" / "Sponza.gltf").string());
 	
 	auto scene = Scene::Create();
 
@@ -108,11 +110,29 @@ void TestApp::Init()
 
 		auto diff = glm::vec4(m.diffuse, 1);
 		auto emiss = glm::vec4(m.emissive, 1);
-		auto smxx = glm::vec2(m.roughness, m.metallicity);
+		//auto smxx = glm::vec2(m.roughness, m.metallicity);
+		auto smxx = glm::vec2(0.85f, 0);
+
+		glm::vec3 tp(0);
+		if (m.diffuseTex != nullptr) {
+			tp.x = 1;
+			mat->GetProperties().SetTexture("_MainTex", *m.diffuseTex);
+		}
+		
+		if (m.normalTex != nullptr) {
+			tp.y = 1;
+			mat->GetProperties().SetTexture("_NormalTex", *m.normalTex);
+		}
+
+		if (m.metalRoughTex != nullptr) {
+			tp.z = 1;
+			mat->GetProperties().SetTexture("_MRTex", *m.metalRoughTex);
+		}
 		
 		mat->GetProperties().Set("_Tint", &diff);
 		mat->GetProperties().Set("_Emission", &emiss);
 		mat->GetProperties().Set("_SmoothnessMetal", &smxx);
+		mat->GetProperties().Set("_TexturesPresent", &tp);
 
 		r.materials.push_back(mat);
 	}
@@ -121,9 +141,10 @@ void TestApp::Init()
 	auto& c = ec.AddComponent<CameraComponent>();
 	c.fov = 60;
 	c.nearClip = 0.3f;
-	c.farClip = 1000.0f;
+	c.farClip = 500.0f;
 	c.aspect = 1280.0f / 720;
-	c.skybox = m_diffuseIBL;
+	c.skybox = m_envMap;
+	c.indirectIBL = m_diffuseIbl;
 
 	auto& t = ec.GetComponent<TransformComponent>();
 	t.position = glm::vec3(0, 3.5f, -10);
@@ -133,13 +154,12 @@ void TestApp::Init()
 	
 	EditorWindow::Open<SceneGraphWindow>();
 	EditorWindow::Open<InspectorWindow>();
-	EditorWindow::Open<SceneViewWindow>(c);
+	EditorWindow::Open<SceneViewWindow>(c, t);
 }
 
 void TestApp::Run()
 {
-	static auto demoOpen = true;
-	ImGui::ShowDemoWindow(&demoOpen);
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 	_time += 1.0f / 60;
 
 	EditorWindow::UpdateAll();

@@ -1,4 +1,5 @@
 #pragma once
+#include "TextureBase.h"
 #include "core/Bounds.h"
 #include "core/Common.h"
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"
@@ -15,6 +16,7 @@ struct Vertex
 {
 	glm::vec3 pos;
 	glm::vec3 nrm;
+	glm::vec3 tan;
 	glm::vec2 uv;
 };
 
@@ -24,6 +26,8 @@ struct MeshMaterialData
 	glm::vec3 emissive;
 	float roughness;
 	float metallicity;
+
+	Shared<Texture2D> diffuseTex, normalTex, metalRoughTex;
 };
 
 class Mesh

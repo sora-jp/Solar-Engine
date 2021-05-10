@@ -1,0 +1,289 @@
+[
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/imgui.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui.d -c E:/Solar Engine/vendor/dear-imgui/imgui.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/imgui_demo.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui_demo.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui_demo.d -c E:/Solar Engine/vendor/dear-imgui/imgui_demo.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/imgui_draw.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui_draw.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui_draw.d -c E:/Solar Engine/vendor/dear-imgui/imgui_draw.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/imgui_tables.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui_tables.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui_tables.d -c E:/Solar Engine/vendor/dear-imgui/imgui_tables.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/imgui_widgets.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui_widgets.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui_widgets.d -c E:/Solar Engine/vendor/dear-imgui/imgui_widgets.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/dear-imgui",
+            "file": "E:/Solar Engine/vendor/dear-imgui/misc/cpp/imgui_stdlib.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imgui\" -I\"E:/Solar Engine/src/imgui\" -m64 -O2 -o E:/Solar Engine/build/imgui/obj/Release/imgui_stdlib.o -MF E:/Solar Engine/build/imgui/obj/Release/imgui_stdlib.d -c E:/Solar Engine/vendor/dear-imgui/misc/cpp/imgui_stdlib.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/imguizmo",
+            "file": "E:/Solar Engine/vendor/imguizmo/ImCurveEdit.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imguizmo\" -I\"E:/Solar Engine/src/imguizmo\" -I\"E:/Solar Engine/vendor/dear-imgui\" -m64 -O2 -o E:/Solar Engine/build/imguizmo/obj/Release/ImCurveEdit.o -MF E:/Solar Engine/build/imguizmo/obj/Release/ImCurveEdit.d -c E:/Solar Engine/vendor/imguizmo/ImCurveEdit.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/imguizmo",
+            "file": "E:/Solar Engine/vendor/imguizmo/ImGradient.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imguizmo\" -I\"E:/Solar Engine/src/imguizmo\" -I\"E:/Solar Engine/vendor/dear-imgui\" -m64 -O2 -o E:/Solar Engine/build/imguizmo/obj/Release/ImGradient.o -MF E:/Solar Engine/build/imguizmo/obj/Release/ImGradient.d -c E:/Solar Engine/vendor/imguizmo/ImGradient.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/imguizmo",
+            "file": "E:/Solar Engine/vendor/imguizmo/ImGuizmo.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imguizmo\" -I\"E:/Solar Engine/src/imguizmo\" -I\"E:/Solar Engine/vendor/dear-imgui\" -m64 -O2 -o E:/Solar Engine/build/imguizmo/obj/Release/ImGuizmo.o -MF E:/Solar Engine/build/imguizmo/obj/Release/ImGuizmo.d -c E:/Solar Engine/vendor/imguizmo/ImGuizmo.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine/vendor/imguizmo",
+            "file": "E:/Solar Engine/vendor/imguizmo/ImSequencer.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/imguizmo\" -I\"E:/Solar Engine/src/imguizmo\" -I\"E:/Solar Engine/vendor/dear-imgui\" -m64 -O2 -o E:/Solar Engine/build/imguizmo/obj/Release/ImSequencer.o -MF E:/Solar Engine/build/imguizmo/obj/Release/ImSequencer.d -c E:/Solar Engine/vendor/imguizmo/ImSequencer.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Engine.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Engine.o -MF E:/Solar Engine/build/core/obj/Release/Engine.d -c E:/Solar Engine/src/core/Engine.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Entity.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Entity.o -MF E:/Solar Engine/build/core/obj/Release/Entity.d -c E:/Solar Engine/src/core/Entity.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Input.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Input.o -MF E:/Solar Engine/build/core/obj/Release/Input.d -c E:/Solar Engine/src/core/Input.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Log.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Log.o -MF E:/Solar Engine/build/core/obj/Release/Log.d -c E:/Solar Engine/src/core/Log.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Profiler.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Profiler.o -MF E:/Solar Engine/build/core/obj/Release/Profiler.d -c E:/Solar Engine/src/core/Profiler.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Scene.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Scene.o -MF E:/Solar Engine/build/core/obj/Release/Scene.d -c E:/Solar Engine/src/core/Scene.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/SolarApp.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/SolarApp.o -MF E:/Solar Engine/build/core/obj/Release/SolarApp.d -c E:/Solar Engine/src/core/SolarApp.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/Subsystem.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/Subsystem.o -MF E:/Solar Engine/build/core/obj/Release/Subsystem.d -c E:/Solar Engine/src/core/Subsystem.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/core/pch.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_ENGINE_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/src/core\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/core/obj/Release/pch.o -MF E:/Solar Engine/build/core/obj/Release/pch.d -c E:/Solar Engine/src/core/pch.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/GraphicsSubsystem.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/GraphicsSubsystem.o -MF E:/Solar Engine/build/graphics/obj/Release/GraphicsSubsystem.d -c E:/Solar Engine/src/graphics/GraphicsSubsystem.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/Keyboard.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Keyboard.o -MF E:/Solar Engine/build/graphics/obj/Release/Keyboard.d -c E:/Solar Engine/src/graphics/Keyboard.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/Material.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Material.o -MF E:/Solar Engine/build/graphics/obj/Release/Material.d -c E:/Solar Engine/src/graphics/Material.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/MaterialPropertyBlock.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/MaterialPropertyBlock.o -MF E:/Solar Engine/build/graphics/obj/Release/MaterialPropertyBlock.d -c E:/Solar Engine/src/graphics/MaterialPropertyBlock.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/Mesh.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Mesh.o -MF E:/Solar Engine/build/graphics/obj/Release/Mesh.d -c E:/Solar Engine/src/graphics/Mesh.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/Mouse.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Mouse.o -MF E:/Solar Engine/build/graphics/obj/Release/Mouse.d -c E:/Solar Engine/src/graphics/Mouse.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/RenderSystem.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/RenderSystem.o -MF E:/Solar Engine/build/graphics/obj/Release/RenderSystem.d -c E:/Solar Engine/src/graphics/RenderSystem.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/Shader.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Shader.o -MF E:/Solar Engine/build/graphics/obj/Release/Shader.d -c E:/Solar Engine/src/graphics/Shader.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/diligent/DiligentInit.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/DiligentInit.o -MF E:/Solar Engine/build/graphics/obj/Release/DiligentInit.d -c E:/Solar Engine/src/graphics/diligent/DiligentInit.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/diligent/DiligentWindow.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/DiligentWindow.o -MF E:/Solar Engine/build/graphics/obj/Release/DiligentWindow.d -c E:/Solar Engine/src/graphics/diligent/DiligentWindow.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/diligent-imgui/ImGuiDiligentRenderer.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/ImGuiDiligentRenderer.o -MF E:/Solar Engine/build/graphics/obj/Release/ImGuiDiligentRenderer.d -c E:/Solar Engine/src/graphics/diligent-imgui/ImGuiDiligentRenderer.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/imbackends/imgui_impl_glfw.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/imgui_impl_glfw.o -MF E:/Solar Engine/build/graphics/obj/Release/imgui_impl_glfw.d -c E:/Solar Engine/src/graphics/imbackends/imgui_impl_glfw.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/pch.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/pch.o -MF E:/Solar Engine/build/graphics/obj/Release/pch.d -c E:/Solar Engine/src/graphics/pch.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/pipeline/PipelineContext.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/PipelineContext.o -MF E:/Solar Engine/build/graphics/obj/Release/PipelineContext.d -c E:/Solar Engine/src/graphics/pipeline/PipelineContext.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/shadertools/HLSLReflector.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/HLSLReflector.o -MF E:/Solar Engine/build/graphics/obj/Release/HLSLReflector.d -c E:/Solar Engine/src/graphics/shadertools/HLSLReflector.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/textures/Cubemap.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/Cubemap.o -MF E:/Solar Engine/build/graphics/obj/Release/Cubemap.d -c E:/Solar Engine/src/graphics/textures/Cubemap.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/graphics/textures/TextureBase.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/TextureBase.o -MF E:/Solar Engine/build/graphics/obj/Release/TextureBase.d -c E:/Solar Engine/src/graphics/textures/TextureBase.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/vendor/implot/implot/implot.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/implot.o -MF E:/Solar Engine/build/graphics/obj/Release/implot.d -c E:/Solar Engine/vendor/implot/implot/implot.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/vendor/implot/implot/implot_demo.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/implot_demo.o -MF E:/Solar Engine/build/graphics/obj/Release/implot_demo.d -c E:/Solar Engine/vendor/implot/implot/implot_demo.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/vendor/implot/implot/implot_items.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -DSOLAR_GRAPHICS_BUILD -DENGINE_DLL=1 -DENABLE_HLSL -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/src/graphics\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/freeimage\" -m64 -O2 -o E:/Solar Engine/build/graphics/obj/Release/implot_items.o -MF E:/Solar Engine/build/graphics/obj/Release/implot_items.d -c E:/Solar Engine/vendor/implot/implot/implot_items.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/CommonEntityDataInspector.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/CommonEntityDataInspector.o -MF E:/Solar Engine/build/editor/obj/Release/CommonEntityDataInspector.d -c E:/Solar Engine/src/editor/CommonEntityDataInspector.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/EditorContext.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/EditorContext.o -MF E:/Solar Engine/build/editor/obj/Release/EditorContext.d -c E:/Solar Engine/src/editor/EditorContext.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/EditorGUI.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/EditorGUI.o -MF E:/Solar Engine/build/editor/obj/Release/EditorGUI.d -c E:/Solar Engine/src/editor/EditorGUI.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/EditorWindow.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/EditorWindow.o -MF E:/Solar Engine/build/editor/obj/Release/EditorWindow.d -c E:/Solar Engine/src/editor/EditorWindow.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/InspectorWindow.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/InspectorWindow.o -MF E:/Solar Engine/build/editor/obj/Release/InspectorWindow.d -c E:/Solar Engine/src/editor/InspectorWindow.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/SceneGraphWindow.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/SceneGraphWindow.o -MF E:/Solar Engine/build/editor/obj/Release/SceneGraphWindow.d -c E:/Solar Engine/src/editor/SceneGraphWindow.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/SceneViewWindow.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/SceneViewWindow.o -MF E:/Solar Engine/build/editor/obj/Release/SceneViewWindow.d -c E:/Solar Engine/src/editor/SceneViewWindow.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/editor/pch.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -DSOLAR_SUBSYSTEM_BUILD -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/src/editor\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/glm\" -m64 -O2 -o E:/Solar Engine/build/editor/obj/Release/pch.o -MF E:/Solar Engine/build/editor/obj/Release/pch.d -c E:/Solar Engine/src/editor/pch.cpp"
+          }
+,
+          {
+            "directory": "E:/Solar Engine",
+            "file": "E:/Solar Engine/src/test/Main.cpp",
+            "command": "cc -MMD -MP -DENTT_NO_ETO=1 -DPLATFORM_WIN32=1 -DD3D_SUPPORTED=1 -DD3D2_SUPPORTED=1 -DGL_SUPPORTED=1 -DVULKAN_SUPPORTED=1 -DNDEBUG -I\"E:/Solar Engine/include\" -I\"E:/Solar Engine/include/test\" -I\"E:/Solar Engine/src/test\" -I\"E:/Solar Engine/include/core\" -I\"E:/Solar Engine/include/editor\" -I\"E:/Solar Engine/include/graphics\" -I\"E:/Solar Engine/vendor\" -I\"E:/Solar Engine/vendor/assimp\" -I\"E:/Solar Engine/vendor/compat\" -I\"E:/Solar Engine/vendor/dear-imgui\" -I\"E:/Solar Engine/vendor/diligent\" -I\"E:/Solar Engine/vendor/entt\" -I\"E:/Solar Engine/vendor/freeimage\" -I\"E:/Solar Engine/vendor/GLFW\" -I\"E:/Solar Engine/vendor/glm\" -I\"E:/Solar Engine/vendor/glslang\" -I\"E:/Solar Engine/vendor/iconfontheaders\" -I\"E:/Solar Engine/vendor/imguizmo\" -I\"E:/Solar Engine/vendor/implot\" -I\"E:/Solar Engine/vendor/spdlog\" -I\"E:/Solar Engine/vendor/stb\" -I\"E:/Solar Engine/vendor/tinystl\" -m64 -O2 -o E:/Solar Engine/build/test/obj/Release/Main.o -MF E:/Solar Engine/build/test/obj/Release/Main.d -c E:/Solar Engine/src/test/Main.cpp"
+          }
+]

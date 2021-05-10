@@ -65,7 +65,7 @@ Shared<DiligentWindow> DiligentContext::Init(GLFWwindow* window)
 		case RENDER_DEVICE_TYPE_D3D11:
 		{
 			EngineD3D11CreateInfo d3d11Info;
-			d3d11Info.DebugFlags = D3D11_DEBUG_FLAG_CREATE_DEBUG_DEVICE;
+			//d3d11Info.DebugFlags = D3D11_DEBUG_FLAG_CREATE_DEBUG_DEVICE;
 				
 			auto* d3d11Factory = LoadGraphicsEngineD3D11()();
 			m_factory = d3d11Factory;
@@ -241,11 +241,20 @@ void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh, const int subMesh)
 	m_context->DrawIndexed(m);
 }
 
+void DiligentContext::RenderFullscreenQuad(const Shared<Material>& mat)
+{
+	BindMaterial(mat);
+
+	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };
+	GetContext()->Draw(attribs);
+}
+
 void DiligentContext::EndFrame()
 {
 	m_statsQuery->End(m_context, &m_pipelineStats, sizeof(m_pipelineStats));
 	m_timerQuery->End(m_context, m_duration);
 	
-	m_context->Flush();
-	m_context->FinishFrame();
+	//m_context->Flush();
+	//m_context->WaitForIdle();
+	//m_context->FinishFrame();
 }

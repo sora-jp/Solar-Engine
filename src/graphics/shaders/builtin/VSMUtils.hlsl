@@ -38,7 +38,7 @@ inline float SampleShadows(float3 pos, LightData light, Texture2D shadowMap, Sam
 	float p = length(uv.xy - 0.5) * 2;
 	p = saturate(pow(p, 15));
 
-	return saturate(lerp(p, 1, ChebyshevUpperBound(moments, uv.z, 0.0001, 0.67)));
+	return saturate(lerp(p, 1, ChebyshevUpperBound(moments, uv.z, 0.0001, 0.00)));
 }
 
 #endif

@@ -29,7 +29,7 @@
 	template<typename FormatString, typename... Args> inline static void x##_loc(const spdlog::source_loc& loc, const FormatString& fmt, Args&&... args) \
 	{ \
 		EnsureCreated(); \
-		::Log::##loggerName->log(loc, spdlog::level::##lvl, fmt, std::forward<Args>(args)...); \
+		::Log::loggerName->log(loc, spdlog::level::lvl, fmt, std::forward<Args>(args)...); \
 	};
 
 class SOLAR_API Log final {
@@ -57,7 +57,7 @@ public:
 };
 
 #if (LOG_ENABLED == 1)
-#define SOLAR_LOG(fn, ...) ::Log::##fn##_loc(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
+#define SOLAR_LOG(fn, ...) ::Log::fn##_loc(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, __VA_ARGS__)
 #else
 #define SOLAR_LOG(...) (void)0
 #endif

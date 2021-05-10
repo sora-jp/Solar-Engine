@@ -76,6 +76,7 @@ filter "configurations:Release"
 	optimize "On"
 	
 include "vendor/dear-imgui"
+include "vendor/imguizmo"
 
 project "Core"
 	kind "StaticLib"
@@ -87,9 +88,9 @@ project "Core"
 project "Graphics"
 	kind "StaticLib"
 	defines { "SOLAR_SUBSYSTEM_BUILD", "SOLAR_GRAPHICS_BUILD", "ENGINE_DLL=1", "ENABLE_HLSL" }
-	links { "Core", "ImGui" }
+	links { "Core", "ImGui", "ImGuizmo" }
 	files { "vendor/implot/**.cpp" }
-	includedirs {"vendor/spdlog", "vendor/dear-imgui"}
+	includedirs {"vendor/spdlog", "vendor/dear-imgui", "vendor/imguizmo" }
 	--copyshaders()
 	copytoshared()
 	enginepch()
@@ -98,8 +99,8 @@ project "Graphics"
 	
 project "Editor"
 	kind "StaticLib"
-	links { "Core", "ImGui" }
-	includedirs { "vendor/dear-imgui", "vendor/diligent" }
+	links { "Core", "ImGui", "ImGuizmo" }
+	includedirs { "vendor/dear-imgui", "vendor/diligent", "vendor/imguizmo", "vendor/implot" }
 	defines { "SOLAR_SUBSYSTEM_BUILD" }
 	copytoshared()
 	enginepch()
@@ -116,7 +117,7 @@ project "Input"
 	
 project "Test"
 	kind "ConsoleApp"
-	links { "Core", "Graphics", "Editor", "Input" }
+	links { "Core", "Graphics", "Editor" }
 	--copyshaders()
 	includedirs { "include/*", "vendor/", "vendor/*" }
 	-- prebuildcommands { "{COPY} \"%{sharedBuildLoc}\" \"%{cfg.targetdir}\"" }

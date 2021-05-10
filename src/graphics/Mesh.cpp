@@ -6,6 +6,7 @@
 #include "core/Assert.h"
 #include "GraphicsSubsystem.h"
 #include "diligent/DiligentInit.h"
+#include <filesystem>
 
 using namespace Assimp;
 
@@ -31,6 +32,10 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 		vs[i].nrm.x = m->mNormals[i].x;
 		vs[i].nrm.y = m->mNormals[i].y;
 		vs[i].nrm.z = m->mNormals[i].z;
+
+		vs[i].tan.x = m->mTangents[i].x;
+		vs[i].tan.y = m->mTangents[i].y;
+		vs[i].tan.z = m->mTangents[i].z;
 
 		if (m->HasTextureCoords(0))
 		{
@@ -82,10 +87,25 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 	return std::move(mesh);
 }
 
+Shared<Texture2D> LoadTexture(const std::string& filename, aiMaterial* mat, const char* key, aiTextureType type, unsigned idx)
+{
+	aiString texPath;
+	mat->Get(key, type, idx, texPath);
+
+	if (texPath.length > 0)
+	{
+		//SOLAR_CORE_INFO("Loading texture {}", texPath.C_Str());
+		return Texture2D::Load((std::filesystem::path(filename).parent_path() / texPath.C_Str()).string());
+	}
+
+	return nullptr;
+}
+
 Shared<Mesh> Mesh::Load(const std::string& filename)
 {
 	Importer imp;
-	const auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals);
+	const auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+	
 	SOLAR_CORE_ASSERT_ALWAYS(scene != nullptr);
 	SOLAR_CORE_ASSERT(scene->HasMeshes());
 
@@ -99,6 +119,21 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 
 			SOLAR_CORE_INFO("{}", mat->GetName().C_Str());
 
+			for (auto j = 0u; j < mat->mNumProperties; j++)
+			{
+				auto* prop = mat->mProperties[j];
+				
+				if (prop->mType == aiPTI_Float)
+				{
+					//SOLAR_CORE_INFO("\t{} = {}", prop->mKey.C_Str(), *reinterpret_cast<float*>(prop->mData));
+				}
+				else if (strcmp(prop->mKey.C_Str(), "$tex.file") == 0 && prop->mSemantic != aiTextureType_NONE) 
+				{
+					//if (prop->mSemantic == aiTextureType_DIFFUSE || prop->mSemantic == aiTextureType_NORMALS) continue;
+					SOLAR_CORE_INFO("\tTEX: {} = {} ({})", prop->mKey.C_Str(), reinterpret_cast<aiString*>(prop->mData)->C_Str(), TextureTypeToString(static_cast<aiTextureType>(prop->mSemantic)));
+				}
+			}
+
 			MeshMaterialData data;
 
 			aiColor3D tmp;
@@ -111,6 +146,14 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 			data.emissive.r = tmp.r;
 			data.emissive.g = tmp.g;
 			data.emissive.b = tmp.b;
+
+			data.diffuseTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_DIFFUSE(0));
+			data.normalTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_NORMALS(0));
+			data.metalRoughTex = LoadTexture(filename, mat, "$tex.file", aiTextureType_UNKNOWN, 0);
+			
+			
+			//mat->Get(AI_MATKEY_SHININESS, data.roughness);
+			//data.roughness = 1 - data.roughness;
 			
 			mat->Get("$mat.gltf.pbrMetallicRoughness.roughnessFactor", 0, 0, data.roughness);
 			mat->Get("$mat.gltf.pbrMetallicRoughness.metallicFactor", 0, 0, data.metallicity);
@@ -118,7 +161,16 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 			mesh->m_materials.push_back(data);
 		}
 	}
-	
+
+	//if (scene->HasTextures())
+	//{
+	//	for (auto i = 0u; i < scene->mNumTextures; i++)
+	//	{
+	//		auto* tex = scene->mTextures[i];
+	//		SOLAR_CORE_TRACE("Found texture \"{}\"", tex->mFilename.C_Str());
+	//	}
+	//}
+	//
 	for (auto i = 0u; i < scene->mNumMeshes; i++)
 	{
 		mesh->m_subMeshes.push_back(SubMesh::LoadFrom(scene->mMeshes[i], mesh));

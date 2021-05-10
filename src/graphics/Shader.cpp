@@ -16,7 +16,7 @@ IShader* CompileSingle(ShaderCreateInfo& info, const std::string& entry, const S
 	return shader;
 }
 
-Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc))
+Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, std::string fs, void configure(GraphicsPipelineDesc& desc))
 {
 	GraphicsPipelineStateCreateInfo pipelineInfo;
 
@@ -58,7 +58,8 @@ Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, s
 	LayoutElement layout[] = {
 		LayoutElement {0, 0, 3, VT_FLOAT32, false}, // Vertex position
 		LayoutElement {1, 0, 3, VT_FLOAT32, true}, // Vertex normal
-		LayoutElement {2, 0, 2, VT_FLOAT32, false}  // Texture coordinate
+		LayoutElement {2, 0, 3, VT_FLOAT32, true}, // Vertex tangent
+		LayoutElement {3, 0, 2, VT_FLOAT32, false}  // Texture coordinate
 	};
 
 	pipelineInfo.GraphicsPipeline.InputLayout.LayoutElements = layout;
@@ -79,7 +80,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, s
 		auto varType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
 		if (reflRes.IsBuffer(i)) varType = data->name == "Constants" ? SHADER_RESOURCE_VARIABLE_TYPE_STATIC : SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
 		
-		vars[i] = ShaderResourceVariableDesc {data->usages, data->name.c_str(), varType};
+		vars[i] = ShaderResourceVariableDesc {static_cast<SHADER_TYPE>(data->usages), data->name.c_str(), varType};
 	}
 	
 	pipelineInfo.PSODesc.ResourceLayout.Variables = vars;
@@ -87,16 +88,16 @@ Shared<Shader> ShaderCompiler::Compile(const std::string path, std::string vs, s
 
 	SamplerDesc defaultSampler
 	{
-		FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR,
-		TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP, TEXTURE_ADDRESS_CLAMP
+		FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC,
+		TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, 0, 4
 	};
 
 	auto* samplers = new ImmutableSamplerDesc[reflRes.textures.size()];
 
-	for (auto i = 0; i < reflRes.textures.size(); i++)
+	for (auto i = 0ull; i < reflRes.textures.size(); i++)
 	{
 		auto& tex = reflRes.textures[i];
-		samplers[i] = ImmutableSamplerDesc {tex.usages, tex.name.c_str(), defaultSampler};
+		samplers[i] = ImmutableSamplerDesc {static_cast<SHADER_TYPE>(tex.usages), tex.name.c_str(), defaultSampler};
 	}
 	
 	// clang-format on

@@ -8,10 +8,6 @@
 #define SOLAR_ENABLE_ASSERTS 1
 #endif
 
-#ifndef __VA_OPT__
-#define __VA_OPT__(...) __VA_ARGS__
-#endif
-
 #define SOLAR_CRITICAL_DETAILS() SOLAR_CRITICAL("    At {}", __FUNCTION__ )
 #define SOLAR_CORE_CRITICAL_DETAILS() SOLAR_CORE_CRITICAL("    At {}", __FUNCTION__ )
 

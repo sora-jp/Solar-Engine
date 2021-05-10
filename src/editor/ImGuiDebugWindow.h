@@ -1,10 +1,11 @@
 #pragma once
 #include "imgui.h"
 #include "implot/implot.h"
-#include "diligent/DiligentInit.h"
 #include "core/Profiler.h"
 #include <vector>
 #include <implot/implot_internal.h>
+
+#include "graphics/GraphicsSubsystem.h"
 
 //inline std::string DurationText(double timeMs)
 //{
@@ -109,10 +110,11 @@ static unsigned int s_idx;
 static unsigned int s_length;
 static int _i = 0;
 
-inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, ImFont* smallFont)
+inline void DrawDebugWindow()
 {
-	const auto& stats = ctx->GetPipelineStats();
-	const auto& duration = ctx->GetLastDuration() * 1e6f;
+	auto& io = ImGui::GetIO();
+	const auto& stats = GraphicsSubsystem::GetStats();
+	const auto& duration = GraphicsSubsystem::GetLastDuration() * 1e6;
 
 	static const auto WINDOW_FLAGS =
 		ImGuiWindowFlags_NoDecoration |
@@ -124,23 +126,20 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	const auto pad = 10.0f;
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
+	const auto pad = 2.5f;
+	auto pos = ImGui::GetWindowContentRegionMin();
+	pos.x += pad + ImGui::GetWindowPos().x;
+	pos.y += pad + ImGui::GetWindowPos().y;
 
-	ImVec2 windowPos;
+	ImGui::PushFont(io.Fonts->Fonts[1]);
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(5, 5));
 
-	windowPos.x = (viewport->WorkPos.x + pad);
-	windowPos.y = (viewport->WorkPos.y + pad);
-
-	ImGui::SetNextWindowPos(windowPos, ImGuiCond_Always, ImVec2(0, 0));
-	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::SetNextWindowPos(pos, ImGuiCond_Always);
 	ImGui::SetNextWindowBgAlpha(0.75f);
-
-	ImGui::PushFont(font);
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5, 5));
 	
-	ImGui::Begin("Pipeline statistics", nullptr, WINDOW_FLAGS);
-	ImGui::Text("Verts: %llu, Tris: %llu", stats.InputVertices, stats.InputPrimitives);
+	ImGui::BeginChild("Pipeline statistics", ImVec2(175, 200), false, WINDOW_FLAGS);
+
+	ImGui::Text("Verts: %llu, Tris: %llu", stats.inputVertices, stats.inputPrimitives);
 
 	if (s_gpuMicros < 0) s_gpuMicros = duration;
 	else s_gpuMicros = duration * SmoothFactor + s_gpuMicros * (1.0f - SmoothFactor);
@@ -149,7 +148,7 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 	if (Profiler::HasRootNodes()) {
 		static float t = 0;
 
-		DebugProfilerData data {};
+		DebugProfilerData data{};
 		data.timestamp = t;
 		data.totalFrameTime = Profiler::GetRootNode()->TotalMs;
 
@@ -158,24 +157,24 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 			"Rendering",
 			"VSync"
 		};
-		
+
 		data.PushTime(Profiler::GetTimeForCategory("Engine"));
 		data.PushTime(Profiler::GetTimeForCategory("Rendering"));
 		data.PushTime(Profiler::GetTimeForCategory("VSync"));
 
 		if (s_frameBudgetUsage < 0) s_frameBudgetUsage = (1.0f - data[2] / data.totalFrameTime) * 100;
 		else s_frameBudgetUsage = ((1.0f - data[2] / data.totalFrameTime) * 100) * SmoothFactor + s_frameBudgetUsage * (1.0f - SmoothFactor);
-		
+
 		ImGui::Text("Total time: %.1fms", data.totalFrameTime);
 		ImGui::Text("Frame usage: %.1f%%", s_frameBudgetUsage);
-		
+
 		s_dataQueue.Add(data);
-		
+
 		static const auto FLAGS = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoDecorations;
 
 		ImPlot::SetNextPlotLimitsX(t - 4.f, t, ImGuiCond_Always);
 		ImPlot::FitNextPlotAxes(false);
-		
+
 		ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0.f);
 		ImPlot::PushStyleVar(ImPlotStyleVar_LegendPadding, ImVec2(0, 0));
 		ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
@@ -183,11 +182,11 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 		ImPlot::PushStyleColor(ImPlotCol_LegendBg, 0);
 		ImPlot::PushStyleColor(ImPlotCol_LegendBorder, 0);
 
-		ImGui::PushFont(smallFont);
-		
+		ImGui::PushFont(io.Fonts->Fonts[2]);
+
 		if (ImPlot::BeginPlot("##Scrolling", nullptr, nullptr, ImVec2(ImGui::GetWindowContentRegionWidth(), 100), ImPlotFlags_NoMousePos | ImPlotFlags_NoMenus, FLAGS, FLAGS)) {
 			ImPlot::SetLegendLocation(ImPlotLocation_South, ImPlotOrientation_Horizontal, true);
-			
+
 			const auto offset = s_dataQueue.Offset;
 			const auto size = s_dataQueue.Data.size();
 
@@ -197,19 +196,19 @@ inline void DrawDebugWindow(const Shared<DiligentContext>& ctx, ImFont* font, Im
 				DebugProfilerData::ci = i;
 				ImPlot::PlotShadedG(labels[i], &DebugProfilerData::GetPoint, data1, &DebugProfilerData::GetPoint2, data1, size, offset);
 			}
-			
+
 			ImPlot::EndPlot();
 		}
-		
+
 		ImGui::PopFont();
 
 		ImPlot::PopStyleColor(2);
 		ImPlot::PopStyleVar(3);
-		
+
 		t += 4.f / ImGui::GetWindowContentRegionWidth();//ImGui::GetIO().DeltaTime;
 	}
-	
-	ImGui::End();
+
+	ImGui::EndPopup();
 	ImGui::PopStyleVar();
 	ImGui::PopFont();
 }

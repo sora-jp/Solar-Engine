@@ -33,6 +33,16 @@ enum class ShaderType : uint32_t
 	Callable = 0x2000, ///< Callable shader
 };
 
+inline ShaderType operator |(const ShaderType left, const ShaderType right)
+{
+	return static_cast<ShaderType>(static_cast<uint32_t>(left) | static_cast<uint32_t>(right));
+}
+
+inline ShaderType& operator |=(ShaderType& left, const ShaderType right)
+{
+	return left = left | right;
+}
+
 struct CommonVariableData
 {
 	std::string name;

@@ -55,8 +55,8 @@ void Engine::Run(SolarApp* app)
 		Profiler::End();
 
 		Profiler::Begin("App", "App");
-		app->Run();
 		foreach(_ecssystems, RunEcsSystem);
+		app->Run();
 		Profiler::End();
 
 		Profiler::Begin("PostRun", "Engine");

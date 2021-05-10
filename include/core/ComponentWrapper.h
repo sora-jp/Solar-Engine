@@ -13,7 +13,7 @@
         static bool const value = sizeof(chk<T>(0)) == sizeof(yes);				 \
     }
 
-#define REGISTER_VFN(collection, fn) if constexpr (ComponentWrapper<T>::has_ ## fn ## <T, void(T::*)()>::value) (collection)[#fn] = &T::fn
+#define REGISTER_VFN(collection, fn) if constexpr (ComponentWrapper<T>::has_ ## fn<T, void(T::*)()>::value) (collection)[#fn] = &T::fn
 
 class ComponentWrapperBase
 {

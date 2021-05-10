@@ -43,7 +43,7 @@ Unique<MaterialPropertyBlock> MaterialPropertyBlock::Create(Shared<Shader> shade
 		buf.CPUAccessFlags = CPU_ACCESS_NONE;
 
 		GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateBuffer(buf, nullptr, &mpb->m_globalsBuffer);
-		auto* var = mpb->m_resourceBinding->GetVariableByName(mpb->m_globalsData.usages, mpb->m_globalsData.name.c_str());
+		auto* var = mpb->m_resourceBinding->GetVariableByName(static_cast<SHADER_TYPE>(mpb->m_globalsData.usages), mpb->m_globalsData.name.c_str());
 		if (var != nullptr) var->Set(mpb->m_globalsBuffer);
 	}
 

@@ -1,19 +1,8 @@
 #include "pch.h"
 #include "Scene.h"
-#include "Entity.h"
 #include "TransformComponent.h"
 
 std::vector<Shared<Scene>> Scene::_loadedScenes;
-
-//Scene::Scene()
-//{
-//	SOLAR_CORE_TRACE("Scene::Scene()");
-//}
-//
-//Scene::~Scene()
-//{
-//	SOLAR_CORE_TRACE("Scene::~Scene()");
-//}
 
 Shared<Scene> Scene::Create()
 {
@@ -24,7 +13,7 @@ Shared<Scene> Scene::Create()
 
 void Scene::Destroy()
 {
-	std::remove(_loadedScenes.begin(), _loadedScenes.end(), shared_from_this());
+	_loadedScenes.erase(std::remove(_loadedScenes.begin(), _loadedScenes.end(), shared_from_this()));
 }
 
 const std::vector<Shared<Scene>>& Scene::GetLoadedScenes()

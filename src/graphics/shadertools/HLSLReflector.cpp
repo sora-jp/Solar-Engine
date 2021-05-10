@@ -41,11 +41,11 @@ inline bool AddShader(std::vector<TShader*>& shaders, const char* const* src, co
 	return true;
 }
 
-inline SHADER_TYPE MapToDiligent(EShLanguageMask mask)
+inline ShaderType MapToShaderType(EShLanguageMask mask)
 {
-	auto out = static_cast<SHADER_TYPE>(0);
-	if (mask & EShLangVertexMask) out |= SHADER_TYPE_VERTEX;
-	if (mask & EShLangFragmentMask) out |= SHADER_TYPE_PIXEL;
+	auto out = static_cast<ShaderType>(0);
+	if (mask & EShLangVertexMask) out |= ShaderType::Vertex;
+	if (mask & EShLangFragmentMask) out |= ShaderType::Pixel;
 
 	return out;
 }
@@ -162,7 +162,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 					outResult.buffers[i] = CBufferReflection
 					{
 						block.name,
-						MapToDiligent(block.stages),
+						MapToShaderType(block.stages),
 						block.index,
 						block.size,
 						std::map<std::string, CBufferVariable>()
@@ -182,7 +182,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 					if (uniform.index != -1)
 					{
 						CBufferVariable v = {
-							{uniform.name, MapToDiligent(uniform.stages)},
+							{uniform.name, MapToShaderType(uniform.stages)},
 							uniform.offset, size,
 							GetBasicType(type), GetViewType(type),
 							GetByteSize(type->getBasicType()),
@@ -195,7 +195,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 					else if (uniform.getType()->isTexture())
 					{
 						outResult.textures.push_back({
-							{ uniform.name, MapToDiligent(uniform.stages) }
+							{ uniform.name, MapToShaderType(uniform.stages) }
 						});
 					}
 				}

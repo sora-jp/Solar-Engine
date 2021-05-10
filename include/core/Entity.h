@@ -21,7 +21,7 @@ class SOLAR_API Entity final
 
 public:
 	static const Entity&& null;
-	constexpr Entity() noexcept : m_handle(entt::null), m_scene(nullptr) {}
+	constexpr Entity() noexcept : m_scene(nullptr) {}
 	Entity(entt::entity handle, const Shared<Scene>& scene);
 	
 	template<class T, typename... Args, std::enable_if_t<std::is_constructible_v<T, Args...>, bool> = true>

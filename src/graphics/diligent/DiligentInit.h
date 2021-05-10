@@ -47,6 +47,7 @@ public:
 	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
+	void RenderFullscreenQuad(const Shared<Material>& mat);
 	void EndFrame();
 
 	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);

@@ -37,7 +37,7 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 	
 	m_compositeMat->GetProperties().SetTexture("_ShadowMap", m_shadowmap->Color(0));
 
-	m_compositeMat->GetProperties().Set("_MainLight.color", glm::vec3(.5, .5, .5));
+	m_compositeMat->GetProperties().Set("_MainLight.color", glm::vec3(1));
 	m_compositeMat->GetProperties().Set("_MainLight.direction", glm::normalize(glm::vec3(-1, 1, -1)));
 }
 
@@ -94,5 +94,6 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.GetRawContext()->FlushConstants();
 
 	m_compositeMat->GetProperties().SetTexture("_Skybox", *camera.skybox);
+	m_compositeMat->GetProperties().SetTexture("_IBL", *camera.indirectIBL);
 	ctx.RenderFullscreenQuad(m_compositeMat);
 }

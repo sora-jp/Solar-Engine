@@ -4,7 +4,6 @@
 #include "Engine.h"
 #include "BuildPlatform.h"
 #include "SolarApp.h"
-#include <iostream>
 #include "System.h"
 
 #ifdef SOLAR_PLATFORM_WINDOWS
@@ -14,17 +13,19 @@ extern SolarApp* CreateApp();
 //extern void RegSystems(std::vector<BaseSystem*>&);
 
 // ReSharper disable once CppNonInlineFunctionDefinitionInHeaderFile
-void main(int argc, char** argv)
+int main(int argc, char** argv)
 {
 	const auto app = CreateApp();
 	
 	if (!Engine::Init(app))
 	{
 		SOLAR_CRITICAL("Failed to initialize engine");
+		return 1;
 	}
 	
 	Engine::Run(app);
 	Engine::Shutdown(app);
+	return 0;
 }
 
 #endif

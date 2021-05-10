@@ -13,10 +13,10 @@ Texture2D    _GBDepth;
 Texture2D    _ShadowMap;
 SamplerState _ShadowMap_sampler;
 
-Texture2D    _Skybox;
+TextureCube  _Skybox;
 SamplerState _Skybox_sampler;
 
-Texture2D    _IBL;
+TextureCube  _IBL;
 SamplerState _IBL_sampler;
 
 float3 ACESFilm(float3 x)
@@ -43,7 +43,8 @@ float4 frag(in v2f i) : SV_TARGET
 	GBufferData data = UnpackGBuffer(i.pixelPos.xy, _GBDiffuseRough, _GBEmissionMetal, _GBPosition, _GBNormal);
 	
 	[branch]
-	if (!data.hasData) return _Skybox.SampleLevel(_Skybox_sampler, RadialCoords(viewDir), 0);
+    if (!data.hasData)
+        return float4((_Skybox.SampleLevel(_Skybox_sampler, viewDir, 0).rgb), 1);
 
 	float shadow = SampleShadows(data.position, light, _ShadowMap, _ShadowMap_sampler);
 
@@ -51,22 +52,22 @@ float4 frag(in v2f i) : SV_TARGET
 	float3 diffuseContrib = DiffuseBRDF(data.position, data.normal, light.direction, viewDir, data.roughness);
 
 	float3 refl = reflect(viewDir, data.normal);
-	float3 reflCol = _Skybox.SampleLevel(_Skybox_sampler, RadialCoords(refl), 0).rgb;
+    float3 reflCol = _Skybox.SampleLevel(_Skybox_sampler, refl, data.roughness * 11).rgb;
 
-	float3 cdown = float3(186, 179, 168) / 255;
-	float3 cmid = float3(92, 107, 64) / 255;
-	float3 cup = float3(191, 236, 254) / 255;
+    float3 ambientCol = _IBL.SampleLevel(_IBL_sampler, -data.normal, 0).rgb;
 
-	float3 ambientCol = lerp(cmid, data.normal.y > 0 ? cup : cdown, abs(data.normal.y));
-
-	float surfaceReduction = 1.0 / (data.roughness * data.roughness + 1.0);
+    float surfaceReduction = (1.0 / (data.roughness * data.roughness + 1.0)); //* (pow(1 - data.roughness, 2));
 	float grazingTerm = saturate((1 - data.roughness) + (1 - data.oneMinusReflectivity));
 	float fres = FresnelLerp(data.specular, grazingTerm, dot(data.normal, viewDir));
+	
+    //return float4(fres, surfaceReduction, 0, 1);
+    //return float4(reflCol / (1 + reflCol), 1);
+    //return float4(data.diffuse * ambientCol + reflCol * fres * surfaceReduction, 1);
 
 	float3 final = data.diffuse * (ambientCol + diffuseContrib * shadow * light.color)
 		+ specularContrib * light.color * shadow
 		+ reflCol * fres * surfaceReduction
 		+ data.emission;
 
-	return float4(final, 1);
+    return float4(final /*/ (1 + final)*/, 1);
 }
