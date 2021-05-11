@@ -62,7 +62,7 @@ void frag(in v2f i, in bool ff : SV_IsFrontFace, out psout o)
     float3 tangent = normalize(i.Tangent);
     float3 bitangent = normalize(cross(nrm, tangent));
     
-    float3 ppNrm = lerp(normalize(_NormalTex.Sample(sampler_NormalTex, frac(i.UV)).xyz * 2 - 1), float3(0, 0, 1), 0.5);
+    float3 ppNrm = lerp(normalize(_NormalTex.Sample(sampler_NormalTex, frac(i.UV)).xyz * 2 - 1), float3(0, 0, 1), 1);
     ppNrm.z = abs(ppNrm.z);
     ppNrm = normalize(lerp(nrm, ppNrm.z * nrm + -ppNrm.x * tangent + ppNrm.y * bitangent, _TexturesPresent.y));
     

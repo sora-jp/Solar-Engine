@@ -27,6 +27,7 @@ void PipelineContext::Cull(const Shared<Scene>& scene, const CameraComponent& ca
 	});
 
 	outResult.cameraPos = cameraTransform.position;
+	outResult.vMatrix = glm::transpose(glm::inverse(cameraTransform.GetTransformMatrix()));
 	outResult.vpMatrix = glm::transpose(vpMat);
 	outResult.invVpMatrix = glm::inverseTranspose(vpMat);
 	outResult.rendererCount = i;
@@ -34,6 +35,7 @@ void PipelineContext::Cull(const Shared<Scene>& scene, const CameraComponent& ca
 
 void PipelineContext::SetupCameraProps(const CullingResults& culled) const
 {
+	m_ctx->GetConstants()->view = culled.vMatrix;
 	m_ctx->GetConstants()->viewProj = culled.vpMatrix;
 	m_ctx->GetConstants()->worldSpaceCamPos = culled.cameraPos;
 }

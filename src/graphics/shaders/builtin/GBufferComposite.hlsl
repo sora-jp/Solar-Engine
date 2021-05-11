@@ -3,6 +3,7 @@
 #include "BRDF.hlsl"
 #include "VSMUtils.hlsl"
 #include "DeferredUtils.hlsl"
+#include "GTAO.hlsl"
 
 Texture2D    _GBDiffuseRough;
 Texture2D    _GBEmissionMetal;
@@ -60,6 +61,9 @@ float4 frag(in v2f i) : SV_TARGET
 	float grazingTerm = saturate((1 - data.roughness) + (1 - data.oneMinusReflectivity));
 	float fres = FresnelLerp(data.specular, grazingTerm, dot(data.normal, viewDir));
 	
+    float ao = saturate(GTAO(i.uv, viewDir, data.normal, length(g_WorldSpaceCameraPos - data.position), _GBNormal, _ShadowMap_sampler));
+    return float4(ao.xxx, 1);
+	
     //return float4(fres, surfaceReduction, 0, 1);
     //return float4(reflCol / (1 + reflCol), 1);
     //return float4(data.diffuse * ambientCol + reflCol * fres * surfaceReduction, 1);
@@ -69,5 +73,5 @@ float4 frag(in v2f i) : SV_TARGET
 		+ reflCol * fres * surfaceReduction
 		+ data.emission;
 
-    return float4(final /*/ (1 + final)*/, 1);
+    return float4(final * ao /*/ (1 + final)*/, 1);
 }

@@ -23,6 +23,7 @@ struct DrawOperation
 struct CullingResults
 {
 	int rendererCount;
+	glm::mat4 vMatrix;
 	glm::mat4 vpMatrix;
 	glm::mat4 invVpMatrix;
 	glm::vec3 cameraPos;
