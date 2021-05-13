@@ -32,7 +32,7 @@ TextureDesc ToDiligentDesc(const RenderTargetDescription& desc)
 		|| desc.format == TEX_FORMAT_D32_FLOAT 
 		|| desc.format == TEX_FORMAT_D24_UNORM_S8_UINT 
 		|| desc.format == TEX_FORMAT_D32_FLOAT_S8X24_UINT) d.BindFlags |= BIND_DEPTH_STENCIL;
-	else d.BindFlags |= BIND_RENDER_TARGET;
+	else d.BindFlags |= BIND_RENDER_TARGET | BIND_UNORDERED_ACCESS;
 	
 	d.SampleCount = desc.numSamples;
 
@@ -81,7 +81,7 @@ Shared<Texture2D> Texture2D::Load(const std::string& fileFormat)
 	const auto pixType = FreeImage_GetImageType(bitmap);
 
 	auto fmt = TEX_FORMAT_UNKNOWN;
-	SOLAR_CORE_TRACE("Loading image (color type: {}, pixel type: {})", colorType, pixType);
+	//SOLAR_CORE_TRACE("Loading image (color type: {}, pixel type: {})", colorType, pixType);
 
 	if (colorType == FIC_RGB)
 	{

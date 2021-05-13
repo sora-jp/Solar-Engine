@@ -46,6 +46,7 @@ inline ShaderType MapToShaderType(EShLanguageMask mask)
 	auto out = static_cast<ShaderType>(0);
 	if (mask & EShLangVertexMask) out |= ShaderType::Vertex;
 	if (mask & EShLangFragmentMask) out |= ShaderType::Pixel;
+	if (mask & EShLangComputeMask) out |= ShaderType::Compute;
 
 	return out;
 }
@@ -129,7 +130,7 @@ inline CBufferViewType GetViewType(const TType* type)
 	return CBufferViewType::Unknown;
 }
 
-bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps, IShaderSourceInputStreamFactory* sourceResolver, ReflectionResult& outResult)
+bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps, std::string cs, IShaderSourceInputStreamFactory* sourceResolver, ReflectionResult& outResult)
 {
 	auto includer = DiligentIncluder(sourceResolver);
 	auto* src = includer.includeLocal(filename.c_str(), nullptr, 0);
@@ -141,6 +142,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 	auto success = true;
 	if (!vs.empty()) success &= AddShader(shaders, &src->headerData, vs, EShLangVertex, includer);
 	if (!ps.empty()) success &= AddShader(shaders, &src->headerData, ps, EShLangFragment, includer);
+	if (!cs.empty()) success &= AddShader(shaders, &src->headerData, cs, EShLangCompute, includer);
 
 	if (success)
 	{
@@ -151,7 +153,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 		{
 			if (prog.buildReflection(EShReflectionAllBlockVariables | EShReflectionDefault | EShReflectionSeparateBuffers | EShReflectionAllIOVariables))
 			{
-				//prog.dumpReflection();
+				prog.dumpReflection();
 				
 				const auto numUBOs = prog.getNumUniformBlocks();
 				outResult.buffers.resize(numUBOs);
@@ -192,7 +194,7 @@ bool HLSLReflector::Reflect(std::string filename, std::string vs, std::string ps
 						outResult.buffers[uniform.index].variables[uniform.name] = v;
 						outResult.buffers[uniform.index].rawVars.push_back(v);
 					}
-					else if (uniform.getType()->isTexture())
+					else if (uniform.getType()->isTexture() || uniform.getType()->isImage())
 					{
 						outResult.textures.push_back({
 							{ uniform.name, MapToShaderType(uniform.stages) }

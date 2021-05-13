@@ -3,13 +3,13 @@
 #include "BRDF.hlsl"
 #include "VSMUtils.hlsl"
 #include "DeferredUtils.hlsl"
-#include "GTAO.hlsl"
 
 Texture2D    _GBDiffuseRough;
 Texture2D    _GBEmissionMetal;
 Texture2D    _GBPosition;
 Texture2D    _GBNormal;
 Texture2D    _GBDepth;
+Texture2D<float2> _GBAmbientOcclusion;
 
 Texture2D    _ShadowMap;
 SamplerState _ShadowMap_sampler;
@@ -19,6 +19,13 @@ SamplerState _Skybox_sampler;
 
 TextureCube  _IBL;
 SamplerState _IBL_sampler;
+
+SamplerState GTAOSampler
+{
+	Filter = LINEAR;
+    AddressU = CLAMP;
+	AddressV = CLAMP;
+};
 
 float3 ACESFilm(float3 x)
 {
@@ -61,17 +68,17 @@ float4 frag(in v2f i) : SV_TARGET
 	float grazingTerm = saturate((1 - data.roughness) + (1 - data.oneMinusReflectivity));
 	float fres = FresnelLerp(data.specular, grazingTerm, dot(data.normal, viewDir));
 	
-    float ao = saturate(GTAO(i.uv, viewDir, data.normal, length(g_WorldSpaceCameraPos - data.position), _GBNormal, _ShadowMap_sampler));
+    float ao = _GBAmbientOcclusion.Load(int3(i.pixelPos.xy, 0)).r;
     return float4(ao.xxx, 1);
 	
     //return float4(fres, surfaceReduction, 0, 1);
-    //return float4(reflCol / (1 + reflCol), 1);
+    //return float4(reflCol * fres * surfaceReduction, 1);
     //return float4(data.diffuse * ambientCol + reflCol * fres * surfaceReduction, 1);
-
-	float3 final = data.diffuse * (ambientCol + diffuseContrib * shadow * light.color)
+	
+    float3 final = data.diffuse * (ambientCol + diffuseContrib * shadow * light.color)
 		+ specularContrib * light.color * shadow
 		+ reflCol * fres * surfaceReduction
 		+ data.emission;
-
+	
     return float4(final * ao /*/ (1 + final)*/, 1);
 }

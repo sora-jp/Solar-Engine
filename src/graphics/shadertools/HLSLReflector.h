@@ -8,5 +8,5 @@
 class HLSLReflector
 {
 public:
-	static bool Reflect(std::string filename, std::string vs, std::string ps, Diligent::IShaderSourceInputStreamFactory* sourceResolver, ReflectionResult& outResult);
+	static bool Reflect(std::string filename, std::string vs, std::string ps, std::string cs, Diligent::IShaderSourceInputStreamFactory* sourceResolver, ReflectionResult& outResult);
 };

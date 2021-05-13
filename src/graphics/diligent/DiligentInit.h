@@ -48,6 +48,7 @@ public:
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
 	void RenderFullscreenQuad(const Shared<Material>& mat);
+	void DispatchCompute(glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb);
 	void EndFrame();
 
 	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);

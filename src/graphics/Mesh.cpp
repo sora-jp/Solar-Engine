@@ -117,22 +117,22 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 		{
 			auto* mat = scene->mMaterials[i];
 
-			SOLAR_CORE_INFO("{}", mat->GetName().C_Str());
+			//SOLAR_CORE_INFO("{}", mat->GetName().C_Str());
 
-			for (auto j = 0u; j < mat->mNumProperties; j++)
-			{
-				auto* prop = mat->mProperties[j];
-				
-				if (prop->mType == aiPTI_Float)
-				{
-					//SOLAR_CORE_INFO("\t{} = {}", prop->mKey.C_Str(), *reinterpret_cast<float*>(prop->mData));
-				}
-				else if (strcmp(prop->mKey.C_Str(), "$tex.file") == 0 && prop->mSemantic != aiTextureType_NONE) 
-				{
-					//if (prop->mSemantic == aiTextureType_DIFFUSE || prop->mSemantic == aiTextureType_NORMALS) continue;
-					SOLAR_CORE_INFO("\tTEX: {} = {} ({})", prop->mKey.C_Str(), reinterpret_cast<aiString*>(prop->mData)->C_Str(), TextureTypeToString(static_cast<aiTextureType>(prop->mSemantic)));
-				}
-			}
+			//for (auto j = 0u; j < mat->mNumProperties; j++)
+			//{
+			//	auto* prop = mat->mProperties[j];
+			//	
+			//	if (prop->mType == aiPTI_Float)
+			//	{
+			//		//SOLAR_CORE_INFO("\t{} = {}", prop->mKey.C_Str(), *reinterpret_cast<float*>(prop->mData));
+			//	}
+			//	else if (strcmp(prop->mKey.C_Str(), "$tex.file") == 0 && prop->mSemantic != aiTextureType_NONE) 
+			//	{
+			//		//if (prop->mSemantic == aiTextureType_DIFFUSE || prop->mSemantic == aiTextureType_NORMALS) continue;
+			//		SOLAR_CORE_INFO("\tTEX: {} = {} ({})", prop->mKey.C_Str(), reinterpret_cast<aiString*>(prop->mData)->C_Str(), TextureTypeToString(static_cast<aiTextureType>(prop->mSemantic)));
+			//	}
+			//}
 
 			MeshMaterialData data;
 

@@ -51,20 +51,35 @@ Unique<MaterialPropertyBlock> MaterialPropertyBlock::Create(Shared<Shader> shade
 	return std::move(mpb);
 }
 
-bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val)
+bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val, bool write)
 {
-	auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_PIXEL, name.c_str());
-	if (var)
+	const auto& d = m_resourceBinding->GetPipelineState()->GetDesc();
+
+	if (d.IsAnyGraphicsPipeline()) 
 	{
-		var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
-		return true;
+		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_PIXEL, name.c_str());
+		if (var)
+		{
+			var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
+			return true;
+		}
+
+		var = m_resourceBinding->GetVariableByName(SHADER_TYPE_VERTEX, name.c_str());
+		if (var)
+		{
+			var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
+			return true;
+		}
 	}
 
-	var = m_resourceBinding->GetVariableByName(SHADER_TYPE_VERTEX, name.c_str());
-	if (var)
-	{
-		var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
-		return true;
+	if (d.IsComputePipeline()) 
+	{	
+		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_COMPUTE, name.c_str());
+		if (var)
+		{
+			var->Set(val.GetView(write ? TEXTURE_VIEW_UNORDERED_ACCESS : TEXTURE_VIEW_SHADER_RESOURCE));
+			return true;
+		}
 	}
 	
 	return false;

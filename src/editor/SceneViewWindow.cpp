@@ -8,6 +8,7 @@
 #include "ImGuizmo.h"
 #include "ImGuiDebugWindow.h"
 
+using namespace Diligent;
 void SceneViewWindow::Draw()
 {
 	const auto sz = ImGui::GetWindowSize();

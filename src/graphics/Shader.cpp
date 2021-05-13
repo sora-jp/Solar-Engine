@@ -68,7 +68,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 	pipelineInfo.PSODesc.ResourceLayout.DefaultVariableType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
 
 	ReflectionResult reflRes;
-	if (!HLSLReflector::Reflect(path, vs, fs, pShaderSourceFactory, reflRes)) return nullptr; // TODO: Return error shader instead
+	if (!HLSLReflector::Reflect(path, vs, fs, "", pShaderSourceFactory, reflRes)) return nullptr; // TODO: Return error shader instead
 
 	const auto varCount = reflRes.buffers.size() + reflRes.textures.size();
 	auto* vars = new ShaderResourceVariableDesc[varCount];
@@ -106,6 +106,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 
 	auto shader = MakeShared<Shader>();
 
+	shader->m_type = SolarShaderType::Graphics;
 	shader->m_reflectionInfo = reflRes;
 	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &shader->m_pipelineState);
 	
@@ -118,5 +119,84 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 	delete[] vars;
 	delete[] samplers;
 	
+	return shader;
+}
+
+Shared<Shader> ShaderCompiler::CompileCompute(const std::string& path, std::string compute, void configure(ComputePipelineStateCreateInfo& desc))
+{
+	ComputePipelineStateCreateInfo info;
+	info.PSODesc.PipelineType = PIPELINE_TYPE_COMPUTE;
+
+	if (configure) configure(info);
+
+	auto p0 = std::filesystem::current_path();
+	auto p1 = std::filesystem::current_path() / "shaders";
+	auto p2 = std::filesystem::current_path() / "shaders" / "builtin";
+
+	auto res = p0.string().append(";").append(p1.string().append(";").append(p2.string()));
+
+	RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
+	GraphicsSubsystem::GetCurrentContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
+
+	ShaderCreateInfo shaderInfo;
+	shaderInfo.FilePath = path.c_str();
+	shaderInfo.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
+	shaderInfo.UseCombinedTextureSamplers = true;
+	shaderInfo.pShaderSourceStreamFactory = pShaderSourceFactory;
+
+	info.pCS = CompileSingle(shaderInfo, compute, SHADER_TYPE_COMPUTE);
+
+	ReflectionResult reflRes;
+	if (!HLSLReflector::Reflect(path, "", "", compute, pShaderSourceFactory, reflRes)) return nullptr; // TODO: Return error shader instead
+
+	const auto varCount = reflRes.buffers.size() + reflRes.textures.size();
+	auto* vars = new ShaderResourceVariableDesc[varCount];
+
+	for (auto i = 0; i < varCount; i++)
+	{
+		auto* data = reflRes.GetData(i);
+
+		auto varType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
+		if (reflRes.IsBuffer(i)) varType = data->name == "Constants" ? SHADER_RESOURCE_VARIABLE_TYPE_STATIC : SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
+
+		vars[i] = ShaderResourceVariableDesc{ static_cast<SHADER_TYPE>(data->usages), data->name.c_str(), varType };
+	}
+
+	info.PSODesc.ResourceLayout.Variables = vars;
+	info.PSODesc.ResourceLayout.NumVariables = varCount;
+
+	SamplerDesc defaultSampler
+	{
+		FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC,
+		TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, 0, 4
+	};
+
+	auto* samplers = new ImmutableSamplerDesc[reflRes.textures.size()];
+
+	for (auto i = 0ull; i < reflRes.textures.size(); i++)
+	{
+		auto& tex = reflRes.textures[i];
+		samplers[i] = ImmutableSamplerDesc{ static_cast<SHADER_TYPE>(tex.usages), tex.name.c_str(), defaultSampler };
+	}
+
+	// clang-format on
+	info.PSODesc.ResourceLayout.ImmutableSamplers = samplers;
+	info.PSODesc.ResourceLayout.NumImmutableSamplers = reflRes.textures.size();
+
+	auto shader = MakeShared<Shader>();
+
+	shader->m_type = SolarShaderType::Compute;
+	shader->m_reflectionInfo = reflRes;
+	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateComputePipelineState(info, &shader->m_pipelineState);
+
+	auto* consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants");
+	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+
+	consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_PIXEL, "Constants");
+	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+
+	delete[] vars;
+	delete[] samplers;
+
 	return shader;
 }

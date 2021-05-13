@@ -249,6 +249,19 @@ void DiligentContext::RenderFullscreenQuad(const Shared<Material>& mat)
 	GetContext()->Draw(attribs);
 }
 
+void DiligentContext::DispatchCompute(const glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb)
+{
+	m_context->SetPipelineState(computeShader->m_pipelineState);
+	m_context->CommitShaderResources(mpb.m_resourceBinding.RawPtr(), TRANSITION_MODE);
+
+	DispatchComputeAttribs attribs;
+	attribs.ThreadGroupCountX = groups.x;
+	attribs.ThreadGroupCountY = groups.y;
+	attribs.ThreadGroupCountZ = groups.z;
+	
+	m_context->DispatchCompute(attribs);
+}
+
 void DiligentContext::EndFrame()
 {
 	m_statsQuery->End(m_context, &m_pipelineStats, sizeof(m_pipelineStats));
