@@ -15,7 +15,7 @@ void PipelineContext::Cull(const Shared<Scene>& scene, const CameraComponent& ca
 	scene->IterateEntities<const TransformComponent, const RendererComponent>([&](Entity, const TransformComponent& t, const RendererComponent& r)
 	{
 		const auto mat = t.GetTransformMatrix();
-		const auto bounds = r.mesh->bounds.Transform(mat);
+		//const auto bounds = r.mesh->bounds.Transform(mat);
 
 		//if (frustum.TestAABB(bounds))
 		{
@@ -76,15 +76,12 @@ void PipelineContext::BlitFullscreenQuad(TextureBase src, TextureBase dest, cons
 	m_ctx->GetContext()->SetRenderTargets(1, &destView, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 	mat->GetProperties().SetTexture("_MainTex", src);
 
-	m_ctx->BindMaterial(mat);
-
-	const DrawAttribs attribs {3, DRAW_FLAG_VERIFY_ALL };
-	
-	m_ctx->GetContext()->Draw(attribs);
+	RenderFullscreenQuad(mat);
 }
 
 void PipelineContext::RenderFullscreenQuad(const Shared<Material>& mat) const
 {
+	m_ctx->UnbindVertexBuffers();
 	m_ctx->BindMaterial(mat);
 
 	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };

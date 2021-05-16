@@ -30,7 +30,9 @@ public:
 		
 		SOLAR_CORE_ASSERT(sizeof(T) == var.byteSize);
 
-		WriteGlobal(var, val);
+		*reinterpret_cast<T*>(m_backing + var.byteOffset) = *val;
+		Flush();
+		//WriteGlobal(var, val);
 		
 		return true;
 	}
@@ -43,7 +45,9 @@ public:
 
 		SOLAR_CORE_ASSERT(sizeof(T) == var.byteSize);
 
-		WriteGlobal(var, &val);
+		*reinterpret_cast<T*>(m_backing + var.byteOffset) = val;
+		Flush();
+		//WriteGlobal(var, &val);
 
 		return true;
 	}
@@ -51,7 +55,7 @@ public:
 	template<typename T>
 	T* Property(const std::string& name)
 	{
-		//if (!m_hasGlobals || !m_globalsData.variables.count(name)) return T();
+		if (!m_hasGlobals || !m_globalsData.variables.count(name)) return nullptr;
 		auto& var = m_globalsData.variables[name];
 
 		//SOLAR_CORE_ASSERT(sizeof(T) == var.byteSize);

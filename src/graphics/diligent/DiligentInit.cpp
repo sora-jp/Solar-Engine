@@ -246,7 +246,7 @@ void DiligentContext::RenderFullscreenQuad(const Shared<Material>& mat)
 	BindMaterial(mat);
 
 	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };
-	GetContext()->Draw(attribs);
+	m_context->Draw(attribs);
 }
 
 void DiligentContext::DispatchCompute(const glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb)
@@ -262,12 +262,18 @@ void DiligentContext::DispatchCompute(const glm::ivec3 groups, const Shared<Shad
 	m_context->DispatchCompute(attribs);
 }
 
+void DiligentContext::UnbindVertexBuffers()
+{
+	m_context->SetVertexBuffers(0, 0, nullptr, nullptr, TRANSITION_MODE, SET_VERTEX_BUFFERS_FLAG_RESET);
+	m_context->SetIndexBuffer(nullptr, 0, TRANSITION_MODE);
+}
+
 void DiligentContext::EndFrame()
 {
 	m_statsQuery->End(m_context, &m_pipelineStats, sizeof(m_pipelineStats));
 	m_timerQuery->End(m_context, m_duration);
 	
-	//m_context->Flush();
+	m_context->Flush();
 	//m_context->WaitForIdle();
-	//m_context->FinishFrame();
+	m_context->FinishFrame();
 }

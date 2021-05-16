@@ -39,13 +39,13 @@ float3    _TexturesPresent;
 End
 
 Texture2D<float4> _MainTex;
-SamplerState sampler_MainTex;
+SamplerState _MainTex_sampler;
 
 Texture2D<float4> _NormalTex;
-SamplerState sampler_NormalTex;
+SamplerState _NormalTex_sampler;
 
 Texture2D<float4> _MRTex;
-SamplerState sampler_MRTex;
+SamplerState _MRTex_sampler;
 
 void vert(in appdata v, out v2f o)
 {
@@ -62,16 +62,19 @@ void frag(in v2f i, in bool ff : SV_IsFrontFace, out psout o)
     float3 tangent = normalize(i.Tangent);
     float3 bitangent = normalize(cross(nrm, tangent));
     
-    float3 ppNrm = lerp(normalize(_NormalTex.Sample(sampler_NormalTex, frac(i.UV)).xyz * 2 - 1), float3(0, 0, 1), .5);
-    ppNrm.z = abs(ppNrm.z);
+    float3 ppNrm = lerp(normalize(_NormalTex.Sample(_NormalTex_sampler, i.UV).xyz * 2 - 1), float3(0, 0, 1), .5);
+    //ppNrm.z = abs(ppNrm.z);
     ppNrm = normalize(lerp(nrm, ppNrm.z * nrm + -ppNrm.x * tangent + ppNrm.y * bitangent, _TexturesPresent.y));
     
-    float2 sm = lerp(_SmoothnessMetal, _MRTex.Sample(sampler_MRTex, frac(i.UV)).gb, _TexturesPresent.z);
+    float2 sm = lerp(_SmoothnessMetal, _MRTex.Sample(_MRTex_sampler, i.UV).gb, _TexturesPresent.z);
+    //float2 sm = float2(0.1, 1);
     
-    float4 tc = _MainTex.Sample(sampler_MainTex, frac(i.UV));
-    clip(tc - _TexturesPresent.x * 0.001);
+    float4 tc = _MainTex.Sample(_MainTex_sampler, i.UV);
+    //clip(tc - _TexturesPresent.x * 0.001);
     
-    o.ColorRough = float4(_Tint.rgb * lerp(1, tc.rgb, _TexturesPresent.x), sm.r); //lerp(0.015, 1, saturate(dot(PSIn.Nrm, normalize(float3(1, 1, -1)))));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
+    float3 col = _Tint.rgb * lerp(1, tc.rgb, _TexturesPresent.x);
+    
+    o.ColorRough = float4(col, sm.r); //lerp(0.015, 1, saturate(dot(PSIn.Nrm, normalize(float3(1, 1, -1)))));//_MainTex.Sample(_MainTex_sampler, PSIn.UV);
     o.EmissMetal = float4(_Emission.rgb, sm.g);
     
     o.Normal = float4(normalize(ppNrm), 1);

@@ -24,7 +24,7 @@ public:
 	void PostRun() override;
 	void PreRun() override;
 	
-	static Shared<DiligentContext> GetCurrentContext() { return _ctx; }
+	static Shared<DiligentContext> GetContext() { return _ctx; }
 	static Shared<DiligentWindow> GetMainWindow() { return _mainWindow; }
 	static const PipelineStats& GetStats();
 	static const double& GetLastDuration();

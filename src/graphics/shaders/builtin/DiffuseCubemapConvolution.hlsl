@@ -1,7 +1,7 @@
 #include "CubemapUtils.hlsl"
 
 TextureCube<float4> _MainTex;
-SamplerState sampler_MainTex;
+SamplerState _MainTex_sampler;
 
 #define PI 3.14159
 float4 convolve(float3 normal)
@@ -22,7 +22,7 @@ float4 convolve(float3 normal)
             float3 tangentSample = float3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
             float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-            irradiance += _MainTex.Sample(sampler_MainTex, sampleVec).rgb * cos(theta) * sin(theta);
+            irradiance += _MainTex.Sample(_MainTex_sampler, sampleVec).rgb * cos(theta) * sin(theta);
             nrSamples++;
         }
     }

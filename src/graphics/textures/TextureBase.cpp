@@ -43,7 +43,7 @@ Shared<Texture2D> Texture2D::Create(const TextureDescription& desc)
 {
 	auto tex = Shared<Texture2D>(new Texture2D());
 	
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(ToDiligentDesc(desc), nullptr, &tex->texture);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(ToDiligentDesc(desc), nullptr, &tex->texture);
 	
 	return tex;
 }
@@ -129,9 +129,9 @@ Shared<Texture2D> Texture2D::Load(const std::string& fileFormat)
 	subResource.Stride = FreeImage_GetPitch(bitmap);
 	subResource.pData = FreeImage_GetBits(bitmap);
 	
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateTexture(result->texture, 0, 0, Box(0, desc.Width, 0, desc.Height), subResource, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->GenerateMips(result->texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
+	GraphicsSubsystem::GetContext()->GetContext()->UpdateTexture(result->texture, 0, 0, Box(0, desc.Width, 0, desc.Height), subResource, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	GraphicsSubsystem::GetContext()->GetContext()->GenerateMips(result->texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
 
 	return result;
 }
@@ -157,10 +157,10 @@ Shared<RenderTarget> RenderTarget::Create(const int colorTargetCount, const Rend
 		rt->colorTextures.resize(colorTargetCount);
 		const auto c = ToDiligentDesc(color);
 
-		for (auto i = 0; i < colorTargetCount; i++) GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(c, nullptr, &rt->colorTextures[i]);
+		for (auto i = 0; i < colorTargetCount; i++) GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(c, nullptr, &rt->colorTextures[i]);
 	}
 	
-	if (depth.Valid()) GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(ToDiligentDesc(depth), nullptr, &rt->depthTexture);
+	if (depth.Valid()) GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(ToDiligentDesc(depth), nullptr, &rt->depthTexture);
 
 	rt->Init(color.Valid() && colorTargetCount > 0, depth.Valid());
 	return rt;

@@ -85,7 +85,7 @@ void compute(int3 threadOffset : SV_GroupThreadID, int3 globalId : SV_DispatchTh
         depthSamples[local.x][local.y] = _AODepthCur.Load(int3(((groupTexel + OFFSET_FILTER + local)) + OFFSET_TEXEL, _DepthMip)).y;
     }
     
-    AllMemoryBarrierWithGroupSync();
+    GroupMemoryBarrierWithGroupSync();
     
     // Spatial filter
     
@@ -94,22 +94,21 @@ void compute(int3 threadOffset : SV_GroupThreadID, int3 globalId : SV_DispatchTh
     float weightsSpacial = 0.0;
     float aoLocal = 0.0;
     
+    [unroll]
     for (int y = 0; y < 4; y++)
     {
+        [unroll]
         for (int x = 0; x < 4; x++)
         {
             // Weight each sample by its distance from the refrence depth - but also scale the weight by 1/10 of the reference depth so that the further from the camera the samples are, the higher the tolerance for depth differences is
-            float sample = aoSamples[threadOffset.x + x][threadOffset.y + y].x;
-            if (!isnan(sample))
-            {
-                float localWeight = max(0.0, 5.0 - abs(depthSamples[threadOffset.x + x][threadOffset.y + y] - depth) / (depth * 0.1));
-                weightsSpacial += localWeight;
-                aoLocal += aoSamples[threadOffset.x + x][threadOffset.y + y].x * localWeight;
-            }
+            
+            float localWeight = max(0.0, 5.0 - abs(depthSamples[threadOffset.x + x][threadOffset.y + y] - depth) / (depth * 0.1));
+            weightsSpacial += localWeight;
+            aoLocal += aoSamples[threadOffset.x + x][threadOffset.y + y].x * localWeight;
         }
     }
     
-    if (weightsSpacial > 0) aoLocal /= weightsSpacial;
+    aoLocal /= weightsSpacial;
     
     //// Temporal filter
     //uint3 sz;

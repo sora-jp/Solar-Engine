@@ -1,8 +1,8 @@
 #include "FullScreenQuad.hlsl"
 
 Texture2D<float4> _MainTex;
-SamplerState sampler_MainTex;
+SamplerState _MainTex_sampler;
 
 float4 frag(v2f i) : SV_Target {
-    return _MainTex.Sample(sampler_MainTex, i.uv);
+    return _MainTex.Sample(_MainTex_sampler, i.uv);
 }

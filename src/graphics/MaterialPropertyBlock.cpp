@@ -42,7 +42,7 @@ Unique<MaterialPropertyBlock> MaterialPropertyBlock::Create(Shared<Shader> shade
 		buf.BindFlags = BIND_UNIFORM_BUFFER;
 		buf.CPUAccessFlags = CPU_ACCESS_NONE;
 
-		GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateBuffer(buf, nullptr, &mpb->m_globalsBuffer);
+		GraphicsSubsystem::GetContext()->GetDevice()->CreateBuffer(buf, nullptr, &mpb->m_globalsBuffer);
 		auto* var = mpb->m_resourceBinding->GetVariableByName(static_cast<SHADER_TYPE>(mpb->m_globalsData.usages), mpb->m_globalsData.name.c_str());
 		if (var != nullptr) var->Set(mpb->m_globalsBuffer);
 	}
@@ -87,11 +87,11 @@ bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val,
 
 void MaterialPropertyBlock::Flush()
 {
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->UpdateBuffer(m_globalsBuffer, 0, m_globalsBuffer->GetDesc().uiSizeInBytes, m_backing, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	GraphicsSubsystem::GetContext()->GetContext()->UpdateBuffer(m_globalsBuffer, 0, m_globalsBuffer->GetDesc().uiSizeInBytes, m_backing, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 }
 
 void MaterialPropertyBlock::WriteGlobal(const CBufferVariable& var, void* val)
 {
-	memcpy(m_backing + var.byteOffset, val, var.byteSize);
+	//memcpy(m_backing + var.byteOffset, val, var.byteSize);
 	Flush();
 }

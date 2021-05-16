@@ -67,7 +67,7 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 	vsData.DataSize = vsDesc.uiSizeInBytes;
 	vsData.pData = vs;
 
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateBuffer(vsDesc, &vsData, &mesh->m_vertBuf);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateBuffer(vsDesc, &vsData, &mesh->m_vertBuf);
 
 	BufferDesc isDesc;
 	isDesc.Name = "IS Buf";
@@ -79,7 +79,7 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 	isData.DataSize = isDesc.uiSizeInBytes;
 	isData.pData = is;
 
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateBuffer(isDesc, &isData, &mesh->m_idxBuf);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateBuffer(isDesc, &isData, &mesh->m_idxBuf);
 
 	delete[] vs;
 	delete[] is;
@@ -104,7 +104,7 @@ Shared<Texture2D> LoadTexture(const std::string& filename, aiMaterial* mat, cons
 Shared<Mesh> Mesh::Load(const std::string& filename)
 {
 	Importer imp;
-	const auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_FindInvalidData | aiProcess_PreTransformVertices | aiProcess_OptimizeMeshes | aiProcess_FixInfacingNormals | aiProcess_GenNormals | aiProcess_CalcTangentSpace);
+	const auto* scene = imp.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_OptimizeGraph | aiProcess_FindDegenerates | aiProcess_ImproveCacheLocality | aiProcess_JoinIdenticalVertices | aiProcess_OptimizeMeshes | aiProcess_SortByPType | aiProcess_PreTransformVertices | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
 	
 	SOLAR_CORE_ASSERT_ALWAYS(scene != nullptr);
 	SOLAR_CORE_ASSERT(scene->HasMeshes());
@@ -173,7 +173,8 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 	//
 	for (auto i = 0u; i < scene->mNumMeshes; i++)
 	{
-		mesh->m_subMeshes.push_back(SubMesh::LoadFrom(scene->mMeshes[i], mesh));
+		if (scene->mMeshes[i]->mPrimitiveTypes & aiPrimitiveType_TRIANGLE)
+			mesh->m_subMeshes.push_back(SubMesh::LoadFrom(scene->mMeshes[i], mesh));
 	}
 	
 	return mesh;

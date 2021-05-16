@@ -10,9 +10,11 @@ IShader* CompileSingle(ShaderCreateInfo& info, const std::string& entry, const S
 {
 	info.Desc.ShaderType = type;
 	info.EntryPoint = entry.c_str();
+	info.UseCombinedTextureSamplers = true;
+	info.CombinedSamplerSuffix = "_sampler";
 
 	IShader* shader;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateShader(info, &shader);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateShader(info, &shader);
 	return shader;
 }
 
@@ -39,7 +41,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 	auto res = p0.string().append(";").append(p1.string().append(";").append(p2.string()));
 	
 	RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
-	GraphicsSubsystem::GetCurrentContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
+	GraphicsSubsystem::GetContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
 	
 	ShaderCreateInfo shaderInfo;
 	shaderInfo.FilePath = path.c_str();
@@ -61,7 +63,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 		LayoutElement {2, 0, 3, VT_FLOAT32, true}, // Vertex tangent
 		LayoutElement {3, 0, 2, VT_FLOAT32, false}  // Texture coordinate
 	};
-
+	
 	pipelineInfo.GraphicsPipeline.InputLayout.LayoutElements = layout;
 	pipelineInfo.GraphicsPipeline.InputLayout.NumElements = _countof(layout);
 
@@ -77,7 +79,7 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 	{
 		auto* data = reflRes.GetData(i);
 
-		auto varType = SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC;
+		auto varType = SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
 		if (reflRes.IsBuffer(i)) varType = data->name == "Constants" ? SHADER_RESOURCE_VARIABLE_TYPE_STATIC : SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE;
 		
 		vars[i] = ShaderResourceVariableDesc {static_cast<SHADER_TYPE>(data->usages), data->name.c_str(), varType};
@@ -88,16 +90,18 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 
 	SamplerDesc defaultSampler
 	{
-		FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC, FILTER_TYPE_ANISOTROPIC,
-		TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, 0, 4
+		FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR, FILTER_TYPE_LINEAR,
+		TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, TEXTURE_ADDRESS_WRAP, 0, 0
 	};
 
 	auto* samplers = new ImmutableSamplerDesc[reflRes.textures.size()];
 
 	for (auto i = 0ull; i < reflRes.textures.size(); i++)
 	{
-		auto& tex = reflRes.textures[i];
-		samplers[i] = ImmutableSamplerDesc {static_cast<SHADER_TYPE>(tex.usages), tex.name.c_str(), defaultSampler};
+		const auto& tex = reflRes.textures[i];
+		samplers[i].ShaderStages = static_cast<SHADER_TYPE>(tex.usages); //= ImmutableSamplerDesc {static_cast<SHADER_TYPE>(tex.usages), tex.name.c_str(), defaultSampler};
+		samplers[i].SamplerOrTextureName = tex.name.c_str();
+		samplers[i].Desc = defaultSampler;
 	}
 	
 	// clang-format on
@@ -108,13 +112,13 @@ Shared<Shader> ShaderCompiler::Compile(const std::string& path, std::string vs, 
 
 	shader->m_type = SolarShaderType::Graphics;
 	shader->m_reflectionInfo = reflRes;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &shader->m_pipelineState);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateGraphicsPipelineState(pipelineInfo, &shader->m_pipelineState);
 	
 	auto* consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants");
-	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+	if (consts) consts->Set(GraphicsSubsystem::GetContext()->GetConstantBuffer());
 
 	consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_PIXEL, "Constants");
-	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+	if (consts) consts->Set(GraphicsSubsystem::GetContext()->GetConstantBuffer());
 
 	delete[] vars;
 	delete[] samplers;
@@ -136,7 +140,7 @@ Shared<Shader> ShaderCompiler::CompileCompute(const std::string& path, std::stri
 	auto res = p0.string().append(";").append(p1.string().append(";").append(p2.string()));
 
 	RefCntAutoPtr<IShaderSourceInputStreamFactory> pShaderSourceFactory;
-	GraphicsSubsystem::GetCurrentContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
+	GraphicsSubsystem::GetContext()->GetFactory<IEngineFactory>()->CreateDefaultShaderSourceStreamFactory(res.c_str(), &pShaderSourceFactory);
 
 	ShaderCreateInfo shaderInfo;
 	shaderInfo.FilePath = path.c_str();
@@ -187,13 +191,13 @@ Shared<Shader> ShaderCompiler::CompileCompute(const std::string& path, std::stri
 
 	shader->m_type = SolarShaderType::Compute;
 	shader->m_reflectionInfo = reflRes;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateComputePipelineState(info, &shader->m_pipelineState);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateComputePipelineState(info, &shader->m_pipelineState);
 
 	auto* consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_VERTEX, "Constants");
-	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+	if (consts) consts->Set(GraphicsSubsystem::GetContext()->GetConstantBuffer());
 
 	consts = shader->m_pipelineState->GetStaticVariableByName(SHADER_TYPE_PIXEL, "Constants");
-	if (consts) consts->Set(GraphicsSubsystem::GetCurrentContext()->GetConstantBuffer());
+	if (consts) consts->Set(GraphicsSubsystem::GetContext()->GetConstantBuffer());
 
 	delete[] vars;
 	delete[] samplers;

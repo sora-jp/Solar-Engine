@@ -19,6 +19,8 @@ using namespace Diligent;
 class DiligentWindow;
 struct GLFWwindow;
 
+//TODO: Expose a better low-level API
+
 class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
@@ -49,7 +51,20 @@ public:
 	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
 	void RenderFullscreenQuad(const Shared<Material>& mat);
 	void DispatchCompute(glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb);
+	void UnbindVertexBuffers();
 	void EndFrame();
+
+
+	/*
+	BeginFrame
+	EndFrame
+
+	SetRenderTarget
+	Clear
+
+	BindMaterial
+	SubmitMesh
+	*/
 
 	void CreateSwapChain(const SwapChainDesc& desc, void* windowHandle, ISwapChain** outSwapChain);
 	ITexture* CreateTexture(uint32_t width, uint32_t height, TEXTURE_FORMAT format, Diligent::BIND_FLAGS bindFlags, uint32_t mipLevels = 1, uint32_t msaa = 1);

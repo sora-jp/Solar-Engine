@@ -2,7 +2,7 @@
 @setlocal enabledelayedexpansion
 @set testl=%cmdcmdline:"=%
 @set testr=!testl:%~nx0=!
-set cmdcloc=cloc src include --skip-uniqueness --exclude-dir=fonts
+set cmdcloc=cloc src include --skip-uniqueness --exclude-dir=fonts,sponza
 
 if /I not "%testl%" == "%testr%" (
 	%cmdcloc% --by-file

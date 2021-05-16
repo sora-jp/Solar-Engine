@@ -110,21 +110,21 @@ Shared<Cubemap> Cubemap::Load(const std::string& file)
 	data.pSubResources = &subResource;
 
 	ITexture* tempTexture;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, &data, &tempTexture);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(desc, &data, &tempTexture);
 
 	desc.Type = RESOURCE_DIM_TEX_CUBE;
-	desc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
+	//desc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
 	desc.BindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET;
 	desc.Format = TEX_FORMAT_RGBA32_FLOAT;
 	desc.Width  = 1024;
 	desc.Height = 1024;
 	desc.ArraySize = 6;
-	desc.MipLevels = 11;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
-	GraphicsSubsystem::GetCurrentContext()->GetContext()->GenerateMips(result->texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+	desc.MipLevels = 8;
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
+	//GraphicsSubsystem::GetCurrentContext()->GetContext()->GenerateMips(result->texture->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
 
 	ITexture* tmpCubemap;
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &tmpCubemap);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(desc, nullptr, &tmpCubemap);
 
 	static const Shared<Material> convertMat = Material::Create(ShaderCompiler::Compile("RectangularToCubemap.hlsl", "vert", "frag"));
 	static const Shared<Material> convolveMat = Material::Create(ShaderCompiler::Compile("SpecCubemapConvolution.hlsl", "vert", "frag"));
@@ -132,27 +132,27 @@ Shared<Cubemap> Cubemap::Load(const std::string& file)
 	{
 		auto rt = CubemapRenderTarget(tmpCubemap);
 
-		GraphicsSubsystem::GetCurrentContext()->SetRenderTarget(&rt);
+		GraphicsSubsystem::GetContext()->SetRenderTarget(&rt);
 		convertMat->GetProperties().SetTexture("_MainTex", RawTexture(tempTexture));
 
-		GraphicsSubsystem::GetCurrentContext()->RenderFullscreenQuad(convertMat);
+		GraphicsSubsystem::GetContext()->RenderFullscreenQuad(convertMat);
 	}
 
 
-	for (auto i = 0; i < 11; i++)
+	for (auto i = 0; i < 8; i++)
 	{
 		SOLAR_CORE_INFO("Generating mip {}", i);
 		
-		const auto rough = static_cast<float>(i) / 10;
+		const auto rough = static_cast<float>(i) / 7;
 		auto rtmip = CubemapRenderTarget(result->texture, i);
 		
 		convolveMat->GetProperties().SetTexture("_MainTex", RawTexture(tmpCubemap));
 		convolveMat->GetProperties().Set("_Roughness", rough);
 
-		GraphicsSubsystem::GetCurrentContext()->SetRenderTarget(&rtmip);
-		GraphicsSubsystem::GetCurrentContext()->RenderFullscreenQuad(convolveMat);
+		GraphicsSubsystem::GetContext()->SetRenderTarget(&rtmip);
+		GraphicsSubsystem::GetContext()->RenderFullscreenQuad(convolveMat);
 
-		GraphicsSubsystem::GetCurrentContext()->GetContext()->WaitForIdle();
+		GraphicsSubsystem::GetContext()->GetContext()->WaitForIdle();
 	}
 
 	tempTexture->Release();
@@ -170,7 +170,7 @@ Shared<Cubemap> Cubemap::ConvolveDiffuse(const Shared<Cubemap>& other)
 	TextureDesc desc;
 	desc.Usage = USAGE_DEFAULT;
 	desc.Type = RESOURCE_DIM_TEX_CUBE;
-	desc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
+	//desc.MiscFlags = MISC_TEXTURE_FLAG_GENERATE_MIPS;
 	desc.BindFlags = BIND_SHADER_RESOURCE | BIND_RENDER_TARGET;
 	desc.Format = TEX_FORMAT_RGBA32_FLOAT;
 	desc.Width = 128;
@@ -179,16 +179,16 @@ Shared<Cubemap> Cubemap::ConvolveDiffuse(const Shared<Cubemap>& other)
 	desc.MipLevels = 1;
 	desc.SampleCount = 1;
 	
-	GraphicsSubsystem::GetCurrentContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(desc, nullptr, &result->texture);
 
 	auto rt = CubemapRenderTarget(result->texture);
 
 	static const Shared<Material> convolveMat = Material::Create(ShaderCompiler::Compile("DiffuseCubemapConvolution.hlsl", "vert", "frag"));
 
-	GraphicsSubsystem::GetCurrentContext()->SetRenderTarget(&rt);
+	GraphicsSubsystem::GetContext()->SetRenderTarget(&rt);
 	convolveMat->GetProperties().SetTexture("_MainTex", *other);
 
-	GraphicsSubsystem::GetCurrentContext()->RenderFullscreenQuad(convolveMat);
+	GraphicsSubsystem::GetContext()->RenderFullscreenQuad(convolveMat);
 	
 	return result;
 }

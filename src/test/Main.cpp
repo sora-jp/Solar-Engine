@@ -14,6 +14,7 @@
 #include <filesystem>
 
 #include "GraphicsSubsystem.h"
+#include "Shader.h"
 #include "Input.h"
 #include "InspectorWindow.h"
 #include "Keyboard.h"

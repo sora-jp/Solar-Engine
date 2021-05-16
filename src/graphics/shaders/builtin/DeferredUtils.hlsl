@@ -25,7 +25,7 @@ GBufferData UnpackGBuffer(int2 pixel, Texture2D _DiffuseRoughness, Texture2D _Em
 	output.position = pos;
 	output.normal = normalize(rawNormal.xyz);
 
-	output.roughness = diffuseRough.a; //* diffuseRough.a;
+    output.roughness = diffuseRough.a; //* diffuseRough.a;
 	output.emission = emissMetal.rgb;
 	output.diffuse = DiffuseAndSpecularFromMetallic(diffuseRough.rgb, emissMetal.a, output.specular, output.oneMinusReflectivity);
 	output.hasData = rawNormal.a > 0.1;
