@@ -52,15 +52,31 @@ RESOURCE_DIMENSION MapType(const TextureType type)
 
 BIND_FLAGS GetBindFlags(const _TextureDescription& desc)
 {
-	if (desc.isRenderTarget && IsDSVFormat(desc.format)) return BIND_SHADER_RESOURCE | BIND_DEPTH_STENCIL;
-	if (desc.isRenderTarget) return BIND_SHADER_RESOURCE | BIND_RENDER_TARGET;
+	auto flags = BIND_SHADER_RESOURCE;
+	
+	if (desc.isRenderTarget && IsDSVFormat(desc.format)) flags |= BIND_DEPTH_STENCIL;
+	else if (desc.isRenderTarget) flags |= BIND_RENDER_TARGET;
 
-	return BIND_SHADER_RESOURCE;
+	return flags;
+}
+
+TextureView::TextureView(void* handle, const bool shouldRelease) : m_shouldRelease(shouldRelease), m_texViewHandle(handle)
+{
+	const auto vt = static_cast<Diligent::ITextureView*>(handle)->GetDesc().ViewType;
+	m_isRenderTarget = vt == TEXTURE_VIEW_RENDER_TARGET || vt == TEXTURE_VIEW_DEPTH_STENCIL;
 }
 
 TextureView::~TextureView()
 {
 	if (m_shouldRelease) static_cast<Diligent::ITextureView*>(m_texViewHandle)->Release();
+}
+
+const TextureView& Texture::GetView(bool renderTarget)
+{
+	auto vt = TEXTURE_VIEW_SHADER_RESOURCE;
+	if (renderTarget) vt = IsDSVFormat(m_description.format) ? TEXTURE_VIEW_DEPTH_STENCIL : TEXTURE_VIEW_RENDER_TARGET;
+	
+	return TextureView(static_cast<Diligent::ITexture*>(m_texHandle)->GetDefaultView(vt), false);
 }
 
 Shared<Texture> Texture::Create(const _TextureDescription& desc)
@@ -72,8 +88,8 @@ Shared<Texture> Texture::Create(const _TextureDescription& desc)
 	tex.Depth = desc.depth;
 	tex.BindFlags = GetBindFlags(desc);
 	tex.Format = MapFormat(desc.format);
-	tex.Usage = USAGE_DEFAULT;
-	tex.CPUAccessFlags = CPU_ACCESS_NONE;
+	tex.Usage = desc.cpuReadWriteEnabled ? USAGE_UNIFIED : USAGE_DEFAULT;
+	tex.CPUAccessFlags = desc.cpuReadWriteEnabled ? CPU_ACCESS_READ | CPU_ACCESS_WRITE : CPU_ACCESS_NONE;
 	tex.MipLevels = desc.mipLevels;
 	tex.SampleCount = 1;
 	

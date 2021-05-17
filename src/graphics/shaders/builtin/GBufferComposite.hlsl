@@ -9,7 +9,9 @@ Texture2D    _GBEmissionMetal;
 Texture2D    _GBPosition;
 Texture2D    _GBNormal;
 Texture2D    _GBDepth;
+
 Texture2D<float2> _GBAmbientOcclusion;
+SamplerState _GBAmbientOcclusion_sampler;
 
 Texture2D    _ShadowMap;
 SamplerState _ShadowMap_sampler;
@@ -67,7 +69,7 @@ float4 frag(in v2f i) : SV_TARGET
 	
     //return float4((dot(data.normal, viewDir)).xxx, 1);
 	
-    float ao = _GBAmbientOcclusion.Load(int3(i.pixelPos.xy, 0)).r;
+    float ao = _GBAmbientOcclusion.Sample(_GBAmbientOcclusion_sampler, i.uv).r;
     //return float4(ao.xxx, 1);
     //return float4(data.roughness, 1-data.oneMinusReflectivity, 0, 1);
 	

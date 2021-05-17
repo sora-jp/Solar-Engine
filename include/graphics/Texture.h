@@ -26,26 +26,43 @@ struct _TextureDescription
 	bool cpuReadWriteEnabled;
 };
 
-class TextureView
+class TextureView;
+class TextureResource
+{
+	friend class DiligentContext;
+	
+protected:
+	virtual const TextureView& GetView(bool renderTarget) = 0;
+	virtual ~TextureResource() = default;
+};
+
+class TextureView : public TextureResource
 {
 	friend class Texture;
-	
+
+	bool m_isRenderTarget;
 	bool m_shouldRelease;
 	void* m_texViewHandle;
 
-	TextureView(void* handle, const bool shouldRelease) : m_shouldRelease(shouldRelease), m_texViewHandle(handle) {}
+	TextureView(void* handle, const bool shouldRelease);
+
+protected:
+	const TextureView& GetView(bool renderTarget) override { return *this; }
 
 public:
 	~TextureView();
 };
 
-class Texture
+class Texture : public TextureResource
 {
 	_TextureDescription m_description;
 	void* m_texHandle;
 
 	Texture(const _TextureDescription& desc, void* handle) noexcept : m_description(desc), m_texHandle(handle) {}
 	Texture(const Texture& other) noexcept = default;
+
+protected:
+	const TextureView& GetView(bool renderTarget) override;
 
 public:
 	static Shared<Texture> Create(const _TextureDescription& desc);
