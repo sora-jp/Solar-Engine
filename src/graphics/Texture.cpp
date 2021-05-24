@@ -50,7 +50,7 @@ RESOURCE_DIMENSION MapType(const TextureType type)
 	SOLAR_CORE_DIE("Invalid texture type");
 }
 
-BIND_FLAGS GetBindFlags(const _TextureDescription& desc)
+BIND_FLAGS GetBindFlags(const FullTextureDescription& desc)
 {
 	auto flags = BIND_SHADER_RESOURCE;
 	
@@ -60,27 +60,22 @@ BIND_FLAGS GetBindFlags(const _TextureDescription& desc)
 	return flags;
 }
 
-TextureView::TextureView(void* handle, const bool shouldRelease) : m_shouldRelease(shouldRelease), m_texViewHandle(handle)
+TextureView::TextureView(void* handle)
 {
-	const auto vt = static_cast<Diligent::ITextureView*>(handle)->GetDesc().ViewType;
-	m_isRenderTarget = vt == TEXTURE_VIEW_RENDER_TARGET || vt == TEXTURE_VIEW_DEPTH_STENCIL;
+	m_texViewHandle = handle;
+	static_cast<Diligent::ITextureView*>(m_texViewHandle)->AddRef();
 }
 
-TextureView::~TextureView()
+void TextureView::Release()
 {
-	if (m_shouldRelease) static_cast<Diligent::ITextureView*>(m_texViewHandle)->Release();
+	if (m_texViewHandle != nullptr) static_cast<Diligent::ITextureView*>(m_texViewHandle)->Release();
+	m_texViewHandle = nullptr;
 }
 
-const TextureView& Texture::GetView(bool renderTarget)
+void Texture::Create(const FullTextureDescription& desc)
 {
-	auto vt = TEXTURE_VIEW_SHADER_RESOURCE;
-	if (renderTarget) vt = IsDSVFormat(m_description.format) ? TEXTURE_VIEW_DEPTH_STENCIL : TEXTURE_VIEW_RENDER_TARGET;
+	description = desc;
 	
-	return TextureView(static_cast<Diligent::ITexture*>(m_texHandle)->GetDefaultView(vt), false);
-}
-
-Shared<Texture> Texture::Create(const _TextureDescription& desc)
-{
 	TextureDesc tex;
 	tex.Type = MapType(desc.type);
 	tex.Width = desc.width;
@@ -92,14 +87,50 @@ Shared<Texture> Texture::Create(const _TextureDescription& desc)
 	tex.CPUAccessFlags = desc.cpuReadWriteEnabled ? CPU_ACCESS_READ | CPU_ACCESS_WRITE : CPU_ACCESS_NONE;
 	tex.MipLevels = desc.mipLevels;
 	tex.SampleCount = 1;
-	
-	ITexture* handle;
-	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(tex, nullptr, &handle);
-	
-	return Shared<Texture>(new Texture(desc, handle));
+
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(tex, nullptr, reinterpret_cast<ITexture**>(&texHandle));
+
+	srv = TextureView(static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
 }
 
 Texture::~Texture()
 {
-	static_cast<Diligent::ITexture*>(m_texHandle)->Release();
+	static_cast<Diligent::ITexture*>(texHandle)->Release();
+}
+
+static FullTextureDescription Convert(const RenderTextureDesc d, const bool isDepth) { return { TextureType::Tex2D, isDepth ? d.depthBufferFormat : d.colorBufferFormat, d.width, d.height, 1, 1, false, true }; }
+RenderTextureAttachment::RenderTextureAttachment(const RenderTextureDesc& desc, const bool isDepth)
+{
+	Create(desc, isDepth);
+}
+
+void RenderTextureAttachment::Create(const RenderTextureDesc& desc, bool isDepth)
+{
+	Texture::Create(Convert(desc, isDepth));
+	m_rtv = TextureView(static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_DEPTH_STENCIL : TEXTURE_VIEW_RENDER_TARGET));
+}
+
+RenderTexture::RenderTexture(const RenderTextureDesc& desc, const size_t numColor, const bool depth) noexcept
+{
+	m_description = desc;
+
+	m_attachments = std::vector(numColor + 1, RenderTextureAttachment());
+	m_cachedRtvs = std::vector(numColor + 1, TextureView());
+	
+	for (size_t i = 0; i < numColor; i++)
+	{
+		m_attachments[i + 1].Create(desc, false);
+		m_cachedRtvs[i + 1] = m_attachments[i].GetRenderTargetView();
+	}
+
+	if (depth)
+	{
+		m_attachments[0].Create(desc, true);
+		m_cachedRtvs[0] = m_attachments[0].GetRenderTargetView();
+	}
+}
+
+Shared<RenderTexture> RenderTexture::Create(const RenderTextureDesc& desc, const size_t numColor, const bool depth)
+{
+	return Shared<RenderTexture>(new RenderTexture(desc, numColor, depth));
 }
