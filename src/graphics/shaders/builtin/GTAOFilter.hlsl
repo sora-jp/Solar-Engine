@@ -20,6 +20,7 @@ See line 123
 
 Texture2D<float2> _AODepthCur;
 Texture2D<float2> _AODepthHist;
+Texture2D<float4> _GBPosition;
 
 #define _DepthMip 0
 
@@ -27,7 +28,6 @@ PerMaterial
     //int _DepthMip;
 
     float4x4 _CameraVPDelta;
-    float4x4 _CameraRays;
 End
  
 // A trick to avoid integer division
@@ -110,40 +110,44 @@ void compute(int3 threadOffset : SV_GroupThreadID, int3 globalId : SV_DispatchTh
     
     aoLocal /= weightsSpacial;
     
-    //// Temporal filter
-    //uint3 sz;
-    //_AODepthHist.GetDimensions(_DepthMip, sz.x, sz.y, sz.z);
+    // Temporal filter
+    uint3 sz;
+    _AODepthHist.GetDimensions(0, sz.x, sz.y, sz.z);
     
-    //// Get history tc and depth
+    // Get history tc and depth
     //float2 textureCoords = (texel + 0.5) / sz.xy;
-    //depth = _AODepthCur.Load(int3(texel, _DepthMip)).y;
+    depth = _AODepthCur.Load(int3(texel, _DepthMip)).y;
     
-    //// Reconstruct position from depth
-    //// Note that the position is relative to the camera position (not an absolute world space position)
+    // Reconstruct position from depth
+    // Note that the position is relative to the camera position (not an absolute world space position)
     //float4 pos = float4(lerp(lerp(_CameraRays[1].xyz, _CameraRays[3].xyz, textureCoords.x), lerp(_CameraRays[0].xyz, _CameraRays[2].xyz, textureCoords.x), textureCoords.y) * depth, 1.0);
     
-    //// Get the linear depth of the projected position in the last frame
-    ////float depthProjected = abs(dot(pos, cameraPlanePrevious));
-    //// Project the position using last frame's projection
-    //// Note that the matrix should not contain camera translation (becuase of the lack of absolute world space position)
-    //// Instead the matrix must contain the relative camera translation since the last frame
+    // Get the linear depth of the projected position in the last frame
+    //float depthProjected = abs(dot(pos, cameraPlanePrevious));
+    // Project the position using last frame's projection
+    // Note that the matrix should not contain camera translation (becuase of the lack of absolute world space position)
+    // Instead the matrix must contain the relative camera translation since the last frame
     //pos = mul(pos, _CameraVPDelta);
     //pos /= pos.w;
     //float2 tcProjected = pos.xy * 0.5 + 0.5;
     //tcProjected.y = 1 - tcProjected.y;
+    float4 tcp = float4(_GBPosition.Load(int3(texel, 0)).xyz, 1);
+    tcp = mul(tcp, _CameraVPDelta);
+    tcp.xyz /= tcp.w;
+    tcp.xy = tcp.xy * float2(0.5, -0.5) + 0.5;
  
-    //float depthProjected = depth;
+    float depthProjected = depth;
     
-    //float ao = 0.0;
-    //float temporalWeight = CheckRange(tcProjected);
-    //// Reject history samples that are too far from current sample - same as in spacial filter
+    float ao = 0.0;
+    float temporalWeight = CheckRange(tcp.xy);
+    // Reject history samples that are too far from current sample - same as in spacial filter
     
-    //float2 lastAODepth = _AODepthHist.Load(int3(tcProjected * sz.xy, _DepthMip));
-    //temporalWeight *= max(0.0, 1.0 - abs(lastAODepth.y - depthProjected) / (depthProjected * 0.1));
-    //ao = lastAODepth.x;
-    //ao = lerp(aoLocal, ao, temporalWeight);
+    float2 lastAODepth = _AODepthHist.Load(int3(tcp.xy * sz.xy, _DepthMip));
+    temporalWeight *= max(0.0, 1.0 - abs(lastAODepth.y - depth) / (depth * 0.1));
+    ao = lastAODepth.x;
+    ao = lerp(aoLocal, ao, temporalWeight);
     
-    //ao = lerp(aoLocal, ao, 0.9);
+    ao = lerp(aoLocal, ao, 0.8);
     
-    _AOOut[texel] = float2(aoLocal, depth);
+    _AOOut[texel] = float2(ao, depth);
 }

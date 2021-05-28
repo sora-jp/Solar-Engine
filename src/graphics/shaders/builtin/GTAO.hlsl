@@ -3,11 +3,11 @@
 
 #define PI_HALF 1.5707963267948966192313216916398
 #define SSAO_LIMIT 150
-#define SSAO_SAMPLES 3
+#define SSAO_SAMPLES 4
 #define SSAO_RADIUS 2.5
 #define SSAO_FALLOFF 1.5
 #define SSAO_THICKNESSMIX 0
-#define SSAO_MAX_STRIDE 32
+#define SSAO_MAX_STRIDE 25
 
 Texture2D<float4> _GBPosition;
 Texture2D<float4> _GBNormal;

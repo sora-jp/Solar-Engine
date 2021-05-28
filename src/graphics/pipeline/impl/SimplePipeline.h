@@ -85,6 +85,7 @@ PerMaterial
 End
  */
 
+static glm::mat4x4 lastVP;
 inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target)
 {
 	if (m_rt == nullptr || (m_rt->Width() != target->Width() || m_rt->Height() != target->Height()))
@@ -99,7 +100,7 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 		m_gtao->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
 		m_gtao->GetProperties().SetTexture("_GBPosition", m_rt->Color(3));
 
-		const auto gtDesc = RenderTargetDescription{ TEX_FORMAT_RG32_FLOAT, target->Width() >> 1, target->Height() >> 1 };
+		const auto gtDesc = RenderTargetDescription{ TEX_FORMAT_RG32_FLOAT, target->Width(), target->Height() };
 		m_gtaoCur  = RenderTarget::Create(1, gtDesc, nullptr);
 		m_gtaoLast = RenderTarget::Create(1, gtDesc, nullptr);
 		m_gtaoTemp = RenderTarget::Create(1, gtDesc, nullptr);
@@ -115,7 +116,7 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.Draw(culled, { nullptr });
 	
 	m_gtao->GetProperties().Set("_Aspect", 1.f / camera.aspect);
-	m_gtao->GetProperties().Set("_InvRTSize", 1.f / glm::vec2(target->Width() >> 1, target->Height() >> 1));
+	m_gtao->GetProperties().Set("_InvRTSize", 1.f / glm::vec2(target->Width(), target->Height()));
 	m_gtao->GetProperties().Set("_AngleOffset", dpi(rand));
 	m_gtao->GetProperties().Set("_SpatialOffset", d01(rand) * 0.5f - 0.25f);
 
@@ -123,11 +124,17 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.GetRawContext()->Clear(nullptr, 1, 0);
 	ctx.RenderFullscreenQuad(m_gtao);
 
-	m_gtaoFProps->SetTexture("_AODepthCur", m_gtaoTemp->Color(0));
-	m_gtaoFProps->SetTexture("_AOOut", m_gtaoCur->Color(0), true);
 
-	const glm::ivec3 groups((target->Width() >> 4) + 1, (target->Height() >> 4) + 1, 1);
+	m_gtaoFProps->SetTexture("_AODepthCur", m_gtaoTemp->Color(0));
+	m_gtaoFProps->SetTexture("_AODepthHist", m_gtaoLast->Color(0));
+	m_gtaoFProps->SetTexture("_GBPosition", m_rt->Color(3));
+	m_gtaoFProps->SetTexture("_AOOut", m_gtaoCur->Color(0), true);
+	m_gtaoFProps->Set("_CameraVPDelta", lastVP);
+
+	const glm::ivec3 groups((target->Width() >> 3) + 1, (target->Height() >> 3) + 1, 1);
 	ctx.GetRawContext()->DispatchCompute(groups, m_gtaoFilter, *m_gtaoFProps);
+	
+	ctx.BlitFullscreenQuad(m_gtaoCur->Color(0), m_gtaoLast->Color(0), m_blit);
 	
 	static const auto SIZE = 15.f;
 	const auto shadowmatrix = 
@@ -152,4 +159,6 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	m_compositeMat->GetProperties().SetTexture("_IBL", *camera.indirectIBL);
 	
 	ctx.RenderFullscreenQuad(m_compositeMat);
+
+	lastVP = culled.vpMatrix;
 }
