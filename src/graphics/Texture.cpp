@@ -23,6 +23,11 @@ Texture::~Texture()
 	static_cast<Diligent::ITexture*>(texHandle)->Release();
 }
 
+TextureCube::TextureCube(const std::string& data) : Texture(TextureType::TexCube, data)
+{
+	
+}
+
 static FullTextureDescription Convert(const RenderTextureDesc d, const bool isDepth) { return { isDepth ? d.depthBufferFormat : d.colorBufferFormat, d.width, d.height, 1, 1, false, true }; }
 RenderTextureAttachment::RenderTextureAttachment(const RenderTextureDesc& desc, const bool isDepth) : Texture(TextureType::Tex2D, Convert(desc, isDepth))
 {

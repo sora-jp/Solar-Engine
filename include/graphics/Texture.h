@@ -65,7 +65,7 @@ public:
 class TextureCube : public Texture
 {
 	explicit TextureCube(const FullTextureDescription& desc) : Texture(TextureType::TexCube, desc) {}
-	explicit TextureCube(const std::string& data) : Texture(TextureType::TexCube, data) {}
+	explicit TextureCube(const std::string& data);
 
 public:
 	static Shared<TextureCube> Create(const FullTextureDescription& desc) { return Shared<TextureCube>(new TextureCube(desc)); }
@@ -93,10 +93,17 @@ protected:
 	void* GetRenderTargetView() const { return m_rtv; }
 };
 
-class RenderTexture
+class RenderTarget_ 
 {
 	friend class DiligentContext;
-	
+
+protected:
+	virtual void* const* GetColorRtvs() const = 0;
+	virtual void* GetDepthRtv() const = 0;
+};
+
+class RenderTexture : public RenderTarget_
+{
 	RenderTextureDesc m_description;
 	
 	std::vector<RenderTextureAttachment*> m_attachments;
@@ -105,8 +112,8 @@ class RenderTexture
 	explicit RenderTexture(const RenderTextureDesc& desc, size_t numColor, bool depth) noexcept;
 
 protected:
-	void* const* GetColorRtvs() const { return &m_cachedRtvs[1]; }
-	void* GetDepthRtv() const { return m_cachedRtvs[0]; }
+	void* const* GetColorRtvs() const override { return &m_cachedRtvs[1]; }
+	void* GetDepthRtv() const override { return m_cachedRtvs[0]; }
 	
 public:
 	static Shared<RenderTexture> Create(const RenderTextureDesc& desc, size_t numColor = 1, bool depth = true);

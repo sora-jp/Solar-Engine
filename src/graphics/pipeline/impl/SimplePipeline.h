@@ -118,12 +118,11 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	m_gtao->GetProperties().Set("_Aspect", 1.f / camera.aspect);
 	m_gtao->GetProperties().Set("_InvRTSize", 1.f / glm::vec2(target->Width(), target->Height()));
 	m_gtao->GetProperties().Set("_AngleOffset", dpi(rand));
-	m_gtao->GetProperties().Set("_SpatialOffset", d01(rand) * 0.5f - 0.25f);
+	m_gtao->GetProperties().Set("_SpatialOffset", d01(rand) - 0.5f);
 
 	ctx.GetRawContext()->SetRenderTarget(m_gtaoTemp.get());
 	ctx.GetRawContext()->Clear(nullptr, 1, 0);
 	ctx.RenderFullscreenQuad(m_gtao);
-
 
 	m_gtaoFProps->SetTexture("_AODepthCur", m_gtaoTemp->Color(0));
 	m_gtaoFProps->SetTexture("_AODepthHist", m_gtaoLast->Color(0));

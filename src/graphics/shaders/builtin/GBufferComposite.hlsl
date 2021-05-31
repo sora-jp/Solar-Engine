@@ -70,7 +70,7 @@ float4 frag(in v2f i) : SV_TARGET
     //return float4((dot(data.normal, viewDir)).xxx, 1);
 	
     float ao = _GBAmbientOcclusion.Sample(_GBAmbientOcclusion_sampler, i.uv).r;
-    //return float4(ao.xxx, 1);
+    return float4(ao.xxx, 1);
     //return float4(data.roughness, 1-data.oneMinusReflectivity, 0, 1);
 	
     //return float4(fres, surfaceReduction, 0, 1);
