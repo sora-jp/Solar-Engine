@@ -77,7 +77,7 @@ public:
 
 static Shared<Shader> m_shader;
 static Shared<Mesh> m_mesh;
-static Shared<Cubemap> m_envMap, m_diffuseIbl;
+static Shared<TextureCube> m_envMap, m_diffuseIbl;
 
 void TestApp::Init()
 {
@@ -92,8 +92,8 @@ void TestApp::Init()
 	const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
 	//const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
-	m_envMap = Cubemap::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K.jpg").string());
-	m_diffuseIbl = Cubemap::ConvolveDiffuse(m_envMap);
+	m_envMap = TextureCube::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K.jpg").string());
+	m_diffuseIbl = TextureCube::ConvolveDiffuse(m_envMap);
 	
 	m_mesh = Mesh::Load((path / "sponza" / "Sponza.gltf").string());
 	

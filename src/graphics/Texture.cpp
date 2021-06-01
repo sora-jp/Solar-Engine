@@ -3,7 +3,6 @@
 #include "TextureUtils.h"
 #include "CubemapUtils.h"
 
-
 Texture::Texture(TextureType type, const FullTextureDescription& desc) noexcept
 {
 	description = desc;
@@ -26,7 +25,7 @@ Texture::~Texture()
 
 TextureCube::TextureCube(const std::string& data)
 {
-	const auto tmpTexture = Texture2D_::Load(data);
+	const auto tmpTexture = Texture2D::Load(data);
 
 	description = tmpTexture->Description();
 	description.width = 1024;

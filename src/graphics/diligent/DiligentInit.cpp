@@ -14,6 +14,7 @@
 #define TO_TEXVIEW(x) (static_cast<Diligent::ITextureView*>(x))
 #define TO_TEXVIEW_ARR(x) (reinterpret_cast<Diligent::ITextureView**>(x))
 
+
 void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
 	SOLAR_CORE_ASSERT(obj != nullptr);
@@ -191,22 +192,20 @@ ITexture* DiligentContext::CreateTexture(uint32_t width, uint32_t height, TEXTUR
 	return out;
 }
 
-void DiligentContext::ResolveMSAA(RenderTargetBase* source, RenderTargetBase* dest)
+void DiligentContext::ResolveMSAA(RenderTexture* source, RenderTexture* dest)
 {
 	ResolveTextureSubresourceAttribs a;
 	a.SrcTextureTransitionMode = a.DstTextureTransitionMode = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
 	SOLAR_CORE_ASSERT(source->GetColorTargetCount() != dest->GetColorTargetCount());
-
-	auto* src = source->GetColorTargets();
-	auto* dst = dest->GetColorTargets();
-	for (auto i = 0; i < source->GetColorTargetCount(); i++)
+	
+	for (auto i = 0; i < source->GetColorRtvCount(); i++)
 	{
-		m_context->ResolveTextureSubresource(src[i]->GetTexture(), dst[i]->GetTexture(), a);
+		m_context->ResolveTextureSubresource(TO_TEX(source->Color(i)->texHandle), TO_TEX(dest->Color(i)->texHande), a);
 	}
 }
 
-void DiligentContext::SetRenderTarget(RenderTarget_* texture, const bool autoTransition)
+void DiligentContext::SetRenderTarget(RenderTarget* texture, const bool autoTransition)
 {
 	m_activeTexture = texture;
 	//if (autoTransition) TransitionState(texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
@@ -244,7 +243,7 @@ void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh, const int subMesh)
 	m_context->DrawIndexed(m);
 }
 
-void DiligentContext::Blit(RenderTarget_* dest, const Shared<Material>& mat, int subpass)
+void DiligentContext::Blit(RenderTarget* dest, const Shared<Material>& mat, int subpass)
 {
 	SetRenderTarget(dest);
 	BindMaterial(mat, subpass);
@@ -253,7 +252,7 @@ void DiligentContext::Blit(RenderTarget_* dest, const Shared<Material>& mat, int
 	m_context->Draw(attribs);
 }
 
-void DiligentContext::Blit(Texture* src, RenderTarget_* dest, const Shared<Material>& mat, int subpass)
+void DiligentContext::Blit(Texture* src, RenderTarget* dest, const Shared<Material>& mat, int subpass)
 {
 	mat->GetProperties().SetTexture("_MainTex", src);
 	Blit(dest, mat, subpass);

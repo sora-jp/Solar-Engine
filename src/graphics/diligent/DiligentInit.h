@@ -26,7 +26,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
 	ShaderConstants m_constants;
-	RenderTarget_* m_activeTexture;
+	RenderTarget* m_activeTexture;
 	QueryDataPipelineStatistics m_pipelineStats;
 	double m_duration = 0;
 	
@@ -47,15 +47,15 @@ public:
 	void BeginFrame();
 	void EndFrame();
 	
-	void SetRenderTarget(RenderTarget_* texture, bool autoTransition = false);
+	void SetRenderTarget(RenderTarget* texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
 	
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
 	
-	void Blit(RenderTarget_* dest, const Shared<Material>& mat, int subpass = 0);
-	void Blit(Texture* src, RenderTarget_* dest, const Shared<Material>& mat, int subpass = 0);
+	void Blit(RenderTarget* dest, const Shared<Material>& mat, int subpass = 0);
+	void Blit(Texture* src, RenderTarget* dest, const Shared<Material>& mat, int subpass = 0);
 	
 	void DispatchCompute(glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb);
 	void UnbindVertexBuffers();

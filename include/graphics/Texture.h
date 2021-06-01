@@ -54,14 +54,14 @@ public:
 	[[nodiscard]] uint32_t Height() const { return description.height; }
 };
 
-class Texture2D_ : public Texture
+class Texture2D : public Texture
 {
-	explicit Texture2D_(const FullTextureDescription& desc) : Texture(TextureType::Tex2D, desc) {}
-	explicit Texture2D_(const std::string& data) : Texture(TextureType::Tex2D, data) {}
+	explicit Texture2D(const FullTextureDescription& desc) : Texture(TextureType::Tex2D, desc) {}
+	explicit Texture2D(const std::string& data) : Texture(TextureType::Tex2D, data) {}
 	
 public:
-	static Shared<Texture2D_> Create(const FullTextureDescription& desc) { return Shared<Texture2D_>(new Texture2D_(desc)); }
-	static Shared<Texture2D_> Load(const std::string& file) { return Shared<Texture2D_>(new Texture2D_(file)); }
+	static Shared<Texture2D> Create(const FullTextureDescription& desc) { return Shared<Texture2D>(new Texture2D(desc)); }
+	static Shared<Texture2D> Load(const std::string& file) { return Shared<Texture2D>(new Texture2D(file)); }
 };
 
 class TextureCube : public Texture
@@ -81,7 +81,7 @@ struct RenderTextureDesc
 	TextureFormat depthBufferFormat = TextureFormat::D24_S8;
 };
 
-class RenderTarget_
+class RenderTarget
 {
 	friend class DiligentContext;
 
@@ -94,7 +94,7 @@ protected:
 	void* depthRtv;
 };
 
-class RenderTextureAttachment : public Texture, public RenderTarget_
+class RenderTextureAttachment : public Texture, public RenderTarget
 {
 	friend class DiligentContext;
 	friend class RenderTexture;
@@ -103,7 +103,7 @@ protected:
 	RenderTextureAttachment(const RenderTextureDesc& desc, bool isDepth);
 };
 
-class RenderTexture : public RenderTarget_
+class RenderTexture : public RenderTarget
 {
 	RenderTextureDesc m_description;
 	

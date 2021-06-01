@@ -3,7 +3,7 @@
 #include "Material.h"
 #include "Shader.h"
 
-class CubemapRT final : RenderTarget_
+class CubemapRT final : public RenderTarget
 {
 public:
 	CubemapRT(Diligent::ITexture* handle, const size_t mip = 0)
@@ -35,18 +35,18 @@ public:
 	}
 };
 
-inline void* EquirectToCubemap(const FullTextureDescription desc, Shared<Texture2D_> src)
+inline void* EquirectToCubemap(const FullTextureDescription desc, Shared<Texture2D> src)
 {
 	auto* target = static_cast<Diligent::ITexture*>(Create(TextureType::TexCube, desc, nullptr));
 
 	static const auto convolveMat = Material::Create(ShaderCompiler::Compile("SpecCubemapConvolution.hlsl", "vert", "frag"));
 
-	convolveMat->GetProperties().SetTexture("_MainTex", src);
+	convolveMat->GetProperties().SetTexture("_MainTex", src.get());
 	for (auto i = 0u; i < desc.mipLevels; i++)
 	{
 		SOLAR_CORE_INFO("Generating mip {}", i);
 
-		const auto rough = static_cast<float>(i) / (desc.mipLevels - 1);
+		const auto rough = static_cast<float>(i) / static_cast<float>(desc.mipLevels - 1u);
 		convolveMat->GetProperties().Set("_Roughness", rough);
 
 		auto rtmip = CubemapRT(target, i);
