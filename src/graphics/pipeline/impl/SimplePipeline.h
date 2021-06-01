@@ -14,19 +14,19 @@ class SimplePipeline final : public RenderPipeline
 	std::uniform_real<float> d01;
 	
 	Shared<Material> m_shadowmapMat, m_compositeMat;
-	Shared<RenderTarget> m_rt, m_shadowmap;
+	Shared<RenderTexture> m_rt, m_shadowmap;
 	Shared<Material> m_satConv, m_satH, m_satV;
 	Shared<Material> m_gtao, m_blit;
 
-	Shared<RenderTarget> m_gtaoLast, m_gtaoCur, m_gtaoTemp;
+	Shared<RenderTexture> m_gtaoLast, m_gtaoCur, m_gtaoTemp;
 
 	Shared<Shader> m_gtaoFilter;
 	Unique<MaterialPropertyBlock> m_gtaoFProps;
 	
 public:
 	void Init(const PipelineContext& ctx) override;
-	void RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTarget>& target, const PipelineContext& ctx) const;
-	void RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target) override;
+	void RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTexture>& target, const PipelineContext& ctx) const;
+	void RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, const Shared<RenderTexture>& target) override;
 };
 
 inline void SimplePipeline::Init(const PipelineContext& ctx)
@@ -63,17 +63,17 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 	m_compositeMat->GetProperties().Set("_MainLight.direction", glm::normalize(glm::vec3(-1, 1, -1)));
 }
 
-inline void SimplePipeline::RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTarget>& target, const PipelineContext& ctx) const
+inline void SimplePipeline::RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTexture>& target, const PipelineContext& ctx) const
 {
-	ctx.GetRawContext()->SetRenderTarget(target.get());
-	ctx.GetRawContext()->Clear(nullptr, 1, 0);
+	ctx.Context()->SetRenderTarget(target.get());
+	ctx.Context()->Clear(nullptr, 1, 0);
 	
 	ctx.SetupCameraProps(viewToLight);
 	ctx.Draw(culled, { m_shadowmapMat });
 
-	ctx.BlitFullscreenQuad(target->Depth(),  target->Color(0), m_satConv);
-	ctx.BlitFullscreenQuad(target->Color(0), target->Color(1), m_satV);
-	ctx.BlitFullscreenQuad(target->Color(1), target->Color(0), m_satH);
+	ctx.Context()->Blit(target->Depth(),  target->Color(0), m_satConv);
+	ctx.Context()->Blit(target->Color(0), target->Color(1), m_satV);
+	ctx.Context()->Blit(target->Color(1), target->Color(0), m_satH);
 }
 
 /*
@@ -86,7 +86,7 @@ End
  */
 
 static glm::mat4x4 lastVP;
-inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target)
+inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, const Shared<RenderTexture>& target)
 {
 	if (m_rt == nullptr || (m_rt->Width() != target->Width() || m_rt->Height() != target->Height()))
 	{
@@ -107,8 +107,8 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	}
 	
 	CullingResults culled;
-	ctx.GetRawContext()->SetRenderTarget(m_rt.get());
-	ctx.GetRawContext()->Clear(nullptr, 1, 0);
+	ctx.Context()->SetRenderTarget(m_rt.get());
+	ctx.Context()->Clear(nullptr, 1, 0);
 	
 	ctx.Cull(scene, camera, cameraTransform, culled);
 	ctx.SetupCameraProps(culled);
@@ -120,9 +120,9 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	m_gtao->GetProperties().Set("_AngleOffset", dpi(rand));
 	m_gtao->GetProperties().Set("_SpatialOffset", d01(rand) - 0.5f);
 
-	ctx.GetRawContext()->SetRenderTarget(m_gtaoTemp.get());
-	ctx.GetRawContext()->Clear(nullptr, 1, 0);
-	ctx.RenderFullscreenQuad(m_gtao);
+	ctx.Context()->SetRenderTarget(m_gtaoTemp.get());
+	ctx.Context()->Clear(nullptr, 1, 0);
+	ctx.Context()->Blit(m_gtaoTemp.get(), m_gtao);
 
 	m_gtaoFProps->SetTexture("_AODepthCur", m_gtaoTemp->Color(0));
 	m_gtaoFProps->SetTexture("_AODepthHist", m_gtaoLast->Color(0));
@@ -131,9 +131,9 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	m_gtaoFProps->Set("_CameraVPDelta", lastVP);
 
 	const glm::ivec3 groups((target->Width() >> 3) + 1, (target->Height() >> 3) + 1, 1);
-	ctx.GetRawContext()->DispatchCompute(groups, m_gtaoFilter, *m_gtaoFProps);
+	ctx.Context()->DispatchCompute(groups, m_gtaoFilter, *m_gtaoFProps);
 	
-	ctx.BlitFullscreenQuad(m_gtaoCur->Color(0), m_gtaoLast->Color(0), m_blit);
+	ctx.Context()->Blit(m_gtaoCur->Color(0), m_gtaoLast->Color(0), m_blit);
 	
 	static const auto SIZE = 15.f;
 	const auto shadowmatrix = 
@@ -143,21 +143,21 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	
 	RenderLight(culled, shadowmatrix, m_shadowmap, ctx);
 	
-	ctx.GetRawContext()->SetRenderTarget(target);
-	ctx.GetRawContext()->Clear(nullptr, 1, 0);
+	ctx.Context()->SetRenderTarget(target.get());
+	ctx.Context()->Clear(nullptr, 1, 0);
 	
 	m_compositeMat->GetProperties().Set("_MainLight.worldToLightSpace", glm::transpose(shadowmatrix));
 
-	ctx.GetRawContext()->GetConstants()->viewProj = culled.invVpMatrix;
-	ctx.GetRawContext()->GetConstants()->model = glm::transpose(shadowmatrix);
-	ctx.GetRawContext()->GetConstants()->worldSpaceCamPos = cameraTransform.position;
-	ctx.GetRawContext()->FlushConstants();
+	ctx.Context()->GetConstants()->viewProj = culled.invVpMatrix;
+	ctx.Context()->GetConstants()->model = glm::transpose(shadowmatrix);
+	ctx.Context()->GetConstants()->worldSpaceCamPos = cameraTransform.position;
+	ctx.Context()->FlushConstants();
 
 	m_compositeMat->GetProperties().SetTexture("_GBAmbientOcclusion", m_gtaoCur->Color(0));
-	m_compositeMat->GetProperties().SetTexture("_Skybox", *camera.skybox);
-	m_compositeMat->GetProperties().SetTexture("_IBL", *camera.indirectIBL);
+	m_compositeMat->GetProperties().SetTexture("_Skybox", camera.skybox.get());
+	m_compositeMat->GetProperties().SetTexture("_IBL", camera.indirectIBL.get());
 	
-	ctx.RenderFullscreenQuad(m_compositeMat);
+	ctx.Context()->Blit(target.get(), m_compositeMat);
 
 	lastVP = culled.vpMatrix;
 }

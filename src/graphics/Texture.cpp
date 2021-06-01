@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Texture.h"
 #include "TextureUtils.h"
+#include "CubemapUtils.h"
 
 
 Texture::Texture(TextureType type, const FullTextureDescription& desc) noexcept
@@ -23,15 +24,33 @@ Texture::~Texture()
 	static_cast<Diligent::ITexture*>(texHandle)->Release();
 }
 
-TextureCube::TextureCube(const std::string& data) : Texture(TextureType::TexCube, data)
+TextureCube::TextureCube(const std::string& data)
 {
+	const auto tmpTexture = Texture2D_::Load(data);
+
+	description = tmpTexture->Description();
+	description.width = 1024;
+	description.height = 1024;
+	description.depth = 6;
+	description.mipLevels = 8;
+	description.generateMips = true;
 	
+	texHandle = EquirectToCubemap(description, tmpTexture);
+	srv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
 }
 
 static FullTextureDescription Convert(const RenderTextureDesc d, const bool isDepth) { return { isDepth ? d.depthBufferFormat : d.colorBufferFormat, d.width, d.height, 1, 1, false, true }; }
 RenderTextureAttachment::RenderTextureAttachment(const RenderTextureDesc& desc, const bool isDepth) : Texture(TextureType::Tex2D, Convert(desc, isDepth))
 {
-	m_rtv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_DEPTH_STENCIL : TEXTURE_VIEW_RENDER_TARGET);
+	if (isDepth)
+	{
+		depthRtv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_DEPTH_STENCIL);
+	}
+	else
+	{
+		colorRtvs.reserve(1);
+		colorRtvs[0] = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_RENDER_TARGET);
+	}
 }
 
 RenderTexture::RenderTexture(const RenderTextureDesc& desc, const size_t numColor, const bool depth) noexcept
@@ -39,23 +58,23 @@ RenderTexture::RenderTexture(const RenderTextureDesc& desc, const size_t numColo
 	m_description = desc;
 
 	m_attachments.reserve(numColor + 1);
-	m_cachedRtvs.reserve(numColor + 1);
+	colorRtvs.reserve(numColor + 1);
 	
 	for (size_t i = 0; i < numColor; i++)
 	{
 		m_attachments[i + 1] = new RenderTextureAttachment(desc, false);
-		m_cachedRtvs[i + 1] = m_attachments[i + 1]->GetRenderTargetView();
+		colorRtvs[i] = m_attachments[i + 1]->colorRtvs[0];
 	}
 
 	if (depth)
 	{
 		m_attachments[0] = new RenderTextureAttachment(desc, true);
-		m_cachedRtvs[0] = m_attachments[0]->GetRenderTargetView();
+		depthRtv = m_attachments[0]->depthRtv;
 	}
 	else
 	{
 		m_attachments[0] = nullptr;
-		m_cachedRtvs[0] = nullptr;
+		depthRtv = nullptr;
 	}
 }
 

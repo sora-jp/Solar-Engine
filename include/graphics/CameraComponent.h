@@ -1,5 +1,6 @@
 #pragma once
-#include "Cubemap.h"
+//#include "Cubemap.h"
+#include "Texture.h"
 #include "editor/EditorGUI.h"
 #include "core/Bounds.h"
 #include "core/Plane.h"
@@ -47,8 +48,8 @@ struct CameraComponent
 	Range fov { 0, 90 };
 	float nearClip, farClip;
 	float aspect;
-	Shared<Cubemap> skybox;
-	Shared<Cubemap> indirectIBL;
+	Shared<TextureCube> skybox;
+	Shared<TextureCube> indirectIBL;
 	Shared<RenderTarget> target;
 
 	[[nodiscard]] glm::mat4 GetCameraMatrix() const

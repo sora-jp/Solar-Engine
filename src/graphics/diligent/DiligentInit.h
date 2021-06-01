@@ -13,6 +13,7 @@
 #include "diligent/Graphics/GraphicsTools/interface/ScopedQueryHelper.hpp"
 #include "diligent/Graphics/GraphicsTools/interface/DurationQueryHelper.hpp"
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"
+#include "Texture.h"
 
 using namespace Diligent;
 
@@ -25,7 +26,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	static const RESOURCE_STATE_TRANSITION_MODE TRANSITION_MODE = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
 
 	ShaderConstants m_constants;
-	RenderTargetBase* m_activeTexture;
+	RenderTarget_* m_activeTexture;
 	QueryDataPipelineStatistics m_pipelineStats;
 	double m_duration = 0;
 	
@@ -44,15 +45,20 @@ public:
 	Shared<DiligentWindow> Init(GLFWwindow* window);
 
 	void BeginFrame();
-	void SetRenderTarget(RenderTargetBase* texture, bool autoTransition = false);
+	void EndFrame();
+	
+	void SetRenderTarget(RenderTarget_* texture, bool autoTransition = false);
 	void Clear(float* rgba, float depth, uint8_t stencil, bool autoTransition = false);
 	void FlushConstants() { *MapHelper<ShaderConstants>(m_context, m_constantsBuf, MAP_WRITE, MAP_FLAG_DISCARD) = m_constants; }
+	
 	void BindMaterial(const Shared<Material>& material, int subpass = 0);
 	void SubmitMesh(const Shared<Mesh>& mesh, int subMesh);
-	void RenderFullscreenQuad(const Shared<Material>& mat);
+	
+	void Blit(RenderTarget_* dest, const Shared<Material>& mat, int subpass = 0);
+	void Blit(Texture* src, RenderTarget_* dest, const Shared<Material>& mat, int subpass = 0);
+	
 	void DispatchCompute(glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb);
 	void UnbindVertexBuffers();
-	void EndFrame();
 
 
 	/*

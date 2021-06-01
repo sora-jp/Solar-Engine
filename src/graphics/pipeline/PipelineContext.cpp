@@ -68,22 +68,3 @@ void PipelineContext::Draw(const CullingResults& culled, const DrawSettings& set
 		}
 	}
 }
-
-void PipelineContext::BlitFullscreenQuad(TextureBase src, TextureBase dest, const Shared<Material>& mat) const
-{
-	auto* destView = dest.GetView(TEXTURE_VIEW_RENDER_TARGET);
-	
-	m_ctx->GetContext()->SetRenderTargets(1, &destView, nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-	mat->GetProperties().SetTexture("_MainTex", src);
-
-	RenderFullscreenQuad(mat);
-}
-
-void PipelineContext::RenderFullscreenQuad(const Shared<Material>& mat) const
-{
-	m_ctx->UnbindVertexBuffers();
-	m_ctx->BindMaterial(mat);
-
-	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };
-	m_ctx->GetContext()->Draw(attribs);
-}

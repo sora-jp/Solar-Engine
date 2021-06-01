@@ -11,6 +11,9 @@
 #include "core/Log.h"
 #include "diligent/DiligentWindow.h"
 
+#define TO_TEXVIEW(x) (static_cast<Diligent::ITextureView*>(x))
+#define TO_TEXVIEW_ARR(x) (reinterpret_cast<Diligent::ITextureView**>(x))
+
 void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
 	SOLAR_CORE_ASSERT(obj != nullptr);
@@ -203,23 +206,23 @@ void DiligentContext::ResolveMSAA(RenderTargetBase* source, RenderTargetBase* de
 	}
 }
 
-void DiligentContext::SetRenderTarget(RenderTargetBase* texture, const bool autoTransition)
+void DiligentContext::SetRenderTarget(RenderTarget_* texture, const bool autoTransition)
 {
 	m_activeTexture = texture;
 	//if (autoTransition) TransitionState(texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture->GetColorTargetCount(), m_activeTexture->GetColorTargets(), m_activeTexture->GetDepthTarget(), TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture->GetColorRtvCount(), TO_TEXVIEW_ARR(m_activeTexture->GetColorRtvs()), TO_TEXVIEW(m_activeTexture->GetDepthRtv()), TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
 {
 	//if (autoTransition) TransitionState(m_activeTexture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 	
-	if (m_activeTexture->GetDepthTarget())
-		m_context->ClearDepthStencil(m_activeTexture->GetDepthTarget(), CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
+	if (m_activeTexture->depthRtv)
+		m_context->ClearDepthStencil(TO_TEXVIEW(m_activeTexture->depthRtv), CLEAR_DEPTH_FLAG | CLEAR_STENCIL_FLAG, depth, stencil, TRANSITION_MODE);
 
-	for (auto i = 0; i < m_activeTexture->GetColorTargetCount(); i++)
-		m_context->ClearRenderTarget(m_activeTexture->GetColorTargets()[i], rgba, TRANSITION_MODE);
+	for (auto i = 0; i < m_activeTexture->colorRtvs.size(); i++)
+		m_context->ClearRenderTarget(TO_TEXVIEW(m_activeTexture->colorRtvs[i]), rgba, TRANSITION_MODE);
 }
 
 void DiligentContext::BindMaterial(const Shared<Material>& material, const int subpass)
@@ -241,12 +244,19 @@ void DiligentContext::SubmitMesh(const Shared<Mesh>& mesh, const int subMesh)
 	m_context->DrawIndexed(m);
 }
 
-void DiligentContext::RenderFullscreenQuad(const Shared<Material>& mat)
+void DiligentContext::Blit(RenderTarget_* dest, const Shared<Material>& mat, int subpass)
 {
-	BindMaterial(mat);
+	SetRenderTarget(dest);
+	BindMaterial(mat, subpass);
 
 	const DrawAttribs attribs{ 3, DRAW_FLAG_VERIFY_ALL };
 	m_context->Draw(attribs);
+}
+
+void DiligentContext::Blit(Texture* src, RenderTarget_* dest, const Shared<Material>& mat, int subpass)
+{
+	mat->GetProperties().SetTexture("_MainTex", src);
+	Blit(dest, mat, subpass);
 }
 
 void DiligentContext::DispatchCompute(const glm::ivec3 groups, const Shared<Shader>& computeShader, MaterialPropertyBlock& mpb)

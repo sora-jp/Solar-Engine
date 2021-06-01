@@ -42,8 +42,6 @@ public:
 	void SetupCameraProps(const CullingResults& culled) const;
 	void SetupCameraProps(const glm::mat4& vpMatrix) const;
 	void Draw(const CullingResults& culled, const DrawSettings& settings) const;
-	void BlitFullscreenQuad(TextureBase src, TextureBase dest, const Shared<Material>& mat) const;
-	void RenderFullscreenQuad(const Shared<Material>& mat) const;
 
-	Shared<DiligentContext> GetRawContext() const { return m_ctx; }
+	Shared<DiligentContext> Context() const { return m_ctx; }
 };

@@ -1,7 +1,7 @@
 #include "Common.hlsl"
 #include "CubemapUtils.hlsl"
 
-TextureCube<float4> _MainTex;
+Texture2D<float4> _MainTex;
 SamplerState _MainTex_sampler;
 
 float3 ImportanceSampleGGX(float2 Xi, float3 N, float roughness)
@@ -49,7 +49,7 @@ float4 convolve(float3 N)
         float NdotL = max(dot(N, L), 0.0);
         if (NdotL > 0.0)
         {
-            prefilteredColor += _MainTex.SampleLevel(_MainTex_sampler, L, 0).rgb * NdotL;
+            prefilteredColor += _MainTex.SampleLevel(_MainTex_sampler, RadialCoords(L), 0).rgb * NdotL;
             totalWeight += NdotL;
         }
     }

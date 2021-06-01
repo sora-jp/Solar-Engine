@@ -6,6 +6,7 @@
 #include "diligent/Graphics/GraphicsAccessories/interface/GraphicsAccessories.hpp"
 #include "diligent/Graphics/GraphicsEngineD3D11/interface/ShaderResourceBindingD3D11.h"
 #include "diligent/Graphics/GraphicsEngineD3DBase/interface/ShaderResourceVariableD3D.h"
+#include "Texture.h"
 
 MaterialPropertyBlock::~MaterialPropertyBlock()
 {
@@ -51,23 +52,24 @@ Unique<MaterialPropertyBlock> MaterialPropertyBlock::Create(Shared<Shader> shade
 	return std::move(mpb);
 }
 
-bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val, bool write)
+bool MaterialPropertyBlock::SetTexture(const std::string& name, Texture* val, bool write)
 {
 	const auto& d = m_resourceBinding->GetPipelineState()->GetDesc();
 
+	auto* srv = static_cast<Diligent::ITextureView*>(val->srv);
 	if (d.IsAnyGraphicsPipeline()) 
 	{
 		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_PIXEL, name.c_str());
 		if (var)
 		{
-			var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
+			var->Set(srv);
 			return true;
 		}
 
 		var = m_resourceBinding->GetVariableByName(SHADER_TYPE_VERTEX, name.c_str());
 		if (var)
 		{
-			var->Set(val.GetView(TEXTURE_VIEW_SHADER_RESOURCE));
+			var->Set(srv);
 			return true;
 		}
 	}
@@ -77,7 +79,7 @@ bool MaterialPropertyBlock::SetTexture(const std::string& name, TextureBase val,
 		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_COMPUTE, name.c_str());
 		if (var)
 		{
-			var->Set(val.GetView(write ? TEXTURE_VIEW_UNORDERED_ACCESS : TEXTURE_VIEW_SHADER_RESOURCE));
+			var->Set(srv);
 			return true;
 		}
 	}

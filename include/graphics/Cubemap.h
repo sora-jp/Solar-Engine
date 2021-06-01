@@ -6,6 +6,6 @@
 class Cubemap : public TextureBase
 {
 public:
-	static Shared<Cubemap> Load(const std::string& file);
-	static Shared<Cubemap> ConvolveDiffuse(const Shared<Cubemap>& other);
+	//static Shared<Cubemap> Load(const std::string& file);
+	//static Shared<Cubemap> ConvolveDiffuse(const Shared<Cubemap>& other);
 };

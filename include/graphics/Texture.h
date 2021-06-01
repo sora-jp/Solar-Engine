@@ -28,6 +28,7 @@ struct FullTextureDescription
 class Texture
 {
 	friend class DiligentContext;
+	friend class MaterialPropertyBlock;
 
 protected:
 	FullTextureDescription description;
@@ -47,7 +48,8 @@ public:
 	Texture& operator=(const Texture& other) noexcept = delete;
 	
 	~Texture();
-	
+
+	[[nodiscard]] const FullTextureDescription& Description() const { return description; }
 	[[nodiscard]] uint32_t Width() const { return description.width; }
 	[[nodiscard]] uint32_t Height() const { return description.height; }
 };
@@ -79,27 +81,26 @@ struct RenderTextureDesc
 	TextureFormat depthBufferFormat = TextureFormat::D24_S8;
 };
 
-class RenderTextureAttachment : public Texture
+class RenderTarget_
+{
+	friend class DiligentContext;
+
+	void** GetColorRtvs() { return colorRtvs.data(); };
+	void* GetDepthRtv() { return depthRtv; };
+	size_t GetColorRtvCount() const { return colorRtvs.size(); }
+
+protected:
+	std::vector<void*> colorRtvs;
+	void* depthRtv;
+};
+
+class RenderTextureAttachment : public Texture, public RenderTarget_
 {
 	friend class DiligentContext;
 	friend class RenderTexture;
-	
-	void* m_rtv;
 
 protected:
-	RenderTextureAttachment() : m_rtv(nullptr) {}
 	RenderTextureAttachment(const RenderTextureDesc& desc, bool isDepth);
-	
-	void* GetRenderTargetView() const { return m_rtv; }
-};
-
-class RenderTarget_ 
-{
-	friend class DiligentContext;
-
-protected:
-	virtual void* const* GetColorRtvs() const = 0;
-	virtual void* GetDepthRtv() const = 0;
 };
 
 class RenderTexture : public RenderTarget_
@@ -107,14 +108,9 @@ class RenderTexture : public RenderTarget_
 	RenderTextureDesc m_description;
 	
 	std::vector<RenderTextureAttachment*> m_attachments;
-	std::vector<void*> m_cachedRtvs;
 
 	explicit RenderTexture(const RenderTextureDesc& desc, size_t numColor, bool depth) noexcept;
 
-protected:
-	void* const* GetColorRtvs() const override { return &m_cachedRtvs[1]; }
-	void* GetDepthRtv() const override { return m_cachedRtvs[0]; }
-	
 public:
 	static Shared<RenderTexture> Create(const RenderTextureDesc& desc, size_t numColor = 1, bool depth = true);
 
@@ -127,6 +123,6 @@ public:
 	[[nodiscard]] uint32_t Width() const { return m_description.width; }
 	[[nodiscard]] uint32_t Height() const { return m_description.height; }
 
-	const RenderTextureAttachment* Color(const size_t idx) const { return m_attachments[idx + 1]; }
-	const RenderTextureAttachment* Depth() const { return m_attachments[0]; }
+	RenderTextureAttachment* Color(const size_t idx) const { return m_attachments[idx + 1]; }
+	RenderTextureAttachment* Depth() const { return m_attachments[0]; }
 };

@@ -4,6 +4,7 @@
 #include "core/Common.h"
 #include "core/Assert.h"
 #include "core/Log.h"
+#include "Texture.h"
 
 class MaterialPropertyBlock
 {
@@ -20,9 +21,9 @@ public:
 	
 	static Unique<MaterialPropertyBlock> Create(Shared<Shader> shader);
 
-	bool SetTexture(const std::string& name, TextureBase val, bool write = false);
+	bool SetTexture(const std::string& name, Texture* val, bool write = false);
 
-	template <typename T, std::enable_if_t<!std::is_base_of_v<Diligent::IDeviceObject, T> && std::is_pod_v<T> && !std::is_pointer_v<T>, bool> = true>
+	template <typename T, std::enable_if_t<!std::is_base_of_v<Diligent::IDeviceObject, T> && !std::is_pointer_v<T>, bool> = true>
 	bool Set(const std::string& name, T* val)
 	{
 		if (!m_hasGlobals || !m_globalsData.variables.count(name)) return false;
@@ -37,7 +38,7 @@ public:
 		return true;
 	}
 
-	template <typename T, std::enable_if_t<!std::is_base_of_v<Diligent::IDeviceObject, std::remove_all_extents_t<T>> && std::is_pod_v<std::remove_all_extents_t<T>> && !std::is_pointer_v<T>, bool> = true>
+	template <typename T, std::enable_if_t<!std::is_base_of_v<Diligent::IDeviceObject, std::remove_all_extents_t<T>> && !std::is_pointer_v<T>, bool> = true>
 	bool Set(const std::string& name, T val)
 	{
 		if (!m_hasGlobals || !m_globalsData.variables.count(name)) return false;
