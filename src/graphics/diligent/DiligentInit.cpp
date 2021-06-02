@@ -13,7 +13,7 @@
 
 #define TO_TEXVIEW(x) (static_cast<Diligent::ITextureView*>(x))
 #define TO_TEXVIEW_ARR(x) (reinterpret_cast<Diligent::ITextureView**>(x))
-
+#define TO_TEX(x) (static_cast<Diligent::ITexture*>(x))
 
 void SetupTransitionDesc(StateTransitionDesc& transition, IDeviceObject* obj, const RESOURCE_STATE newState)
 {
@@ -41,19 +41,19 @@ void DiligentContext::TransitionState(IDeviceObject* obj, const RESOURCE_STATE n
 	m_context->TransitionResourceStates(1, &transition);
 }
 
-void DiligentContext::TransitionState(RenderTargetBase* tex, const RESOURCE_STATE newColorState, const RESOURCE_STATE newDepthState)
+void DiligentContext::TransitionState(RenderTarget* tex, const RESOURCE_STATE newColorState, const RESOURCE_STATE newDepthState)
 {
-	SOLAR_CORE_ASSERT(tex->IsValid());
+	//SOLAR_CORE_ASSERT(tex->IsValid());
 
 	std::vector<StateTransitionDesc> transitions;
 
 	//AppendTransitionDesc(transitions, tex->m_depthTarget, newDepthState);
-	if (tex->m_depthTarget) AppendTransitionDesc(transitions, tex->m_depthTarget->GetTexture(), newDepthState);
+	if (tex->depthRtv) AppendTransitionDesc(transitions, TO_TEXVIEW(tex->depthRtv)->GetTexture(), newDepthState);
 
-	for (auto i = 0; i < tex->GetColorTargetCount(); i++)
+	for (auto i = 0; i < tex->colorRtvs.size(); i++)
 	{
 		//AppendTransitionDesc(transitions, tex->m_colorTargets[i], newColorState);
-		if (tex->GetColorTargets()[i]) AppendTransitionDesc(transitions, tex->GetColorTargets()[i]->GetTexture(), newColorState);
+		if (tex->colorRtvs[i]) AppendTransitionDesc(transitions, TO_TEXVIEW(tex->colorRtvs[i])->GetTexture(), newColorState);
 	}
 
 	m_context->TransitionResourceStates(transitions.size(), transitions.data());
@@ -192,7 +192,7 @@ ITexture* DiligentContext::CreateTexture(uint32_t width, uint32_t height, TEXTUR
 	return out;
 }
 
-void DiligentContext::ResolveMSAA(RenderTexture* source, RenderTexture* dest)
+void DiligentContext::ResolveMSAA(RenderTarget* source, RenderTarget* dest)
 {
 	ResolveTextureSubresourceAttribs a;
 	a.SrcTextureTransitionMode = a.DstTextureTransitionMode = RESOURCE_STATE_TRANSITION_MODE_TRANSITION;
@@ -201,7 +201,7 @@ void DiligentContext::ResolveMSAA(RenderTexture* source, RenderTexture* dest)
 	
 	for (auto i = 0; i < source->GetColorRtvCount(); i++)
 	{
-		m_context->ResolveTextureSubresource(TO_TEX(source->Color(i)->texHandle), TO_TEX(dest->Color(i)->texHande), a);
+		m_context->ResolveTextureSubresource(TO_TEXVIEW(source->colorRtvs[i])->GetTexture(), TO_TEXVIEW(dest->colorRtvs[i])->GetTexture(), a);
 	}
 }
 
@@ -210,7 +210,7 @@ void DiligentContext::SetRenderTarget(RenderTarget* texture, const bool autoTran
 	m_activeTexture = texture;
 	//if (autoTransition) TransitionState(texture, RESOURCE_STATE_RENDER_TARGET, RESOURCE_STATE_DEPTH_WRITE);
 
-	m_context->SetRenderTargets(m_activeTexture->GetColorRtvCount(), TO_TEXVIEW_ARR(m_activeTexture->GetColorRtvs()), TO_TEXVIEW(m_activeTexture->GetDepthRtv()), TRANSITION_MODE);
+	m_context->SetRenderTargets(m_activeTexture->colorRtvs.size(), TO_TEXVIEW_ARR(m_activeTexture->colorRtvs.data()), TO_TEXVIEW(m_activeTexture->depthRtv), TRANSITION_MODE);
 }
 
 void DiligentContext::Clear(float* rgba, const float depth, const uint8_t stencil, const bool autoTransition)
@@ -283,6 +283,6 @@ void DiligentContext::EndFrame()
 	m_timerQuery->End(m_context, m_duration);
 	
 	m_context->Flush();
-	//m_context->WaitForIdle();
+	m_context->WaitForIdle();
 	m_context->FinishFrame();
 }

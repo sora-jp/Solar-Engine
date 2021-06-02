@@ -57,16 +57,16 @@ inline BIND_FLAGS GetBindFlags(const FullTextureDescription& desc)
 	auto flags = BIND_SHADER_RESOURCE;
 
 	if (desc.isRenderTarget && IsDSVFormat(desc.format)) flags |= BIND_DEPTH_STENCIL;
-	else if (desc.isRenderTarget) flags |= BIND_RENDER_TARGET;
+	else if (desc.isRenderTarget) flags |= BIND_RENDER_TARGET | BIND_UNORDERED_ACCESS;
 
 	if (desc.mipLevels != 1 && desc.generateMips) flags |= BIND_RENDER_TARGET;
 
 	return flags;
 }
 
-inline void* Create(const TextureType type, const FullTextureDescription& desc, const TextureData* data)
+inline void* Create(const TextureType type, const FullTextureDescription& desc, const TextureSubResData* data)
 {
-	void* out = nullptr;
+	ITexture* out = nullptr;
 
 	TextureDesc tex;
 	tex.Type = MapType(type);
@@ -81,7 +81,18 @@ inline void* Create(const TextureType type, const FullTextureDescription& desc, 
 	tex.MiscFlags = desc.mipLevels != 1 && desc.generateMips ? MISC_TEXTURE_FLAG_GENERATE_MIPS : MISC_TEXTURE_FLAG_NONE;
 	tex.SampleCount = 1;
 
-	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(tex, data, reinterpret_cast<ITexture**>(&out));
+	GraphicsSubsystem::GetContext()->GetDevice()->CreateTexture(tex, nullptr, &out);
+
+	if (data)
+	{
+		GraphicsSubsystem::GetContext()->GetContext()->UpdateTexture(out, 0, 0, { 0, desc.width, 0, desc.height }, *data, RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+	}
+
+	if (desc.generateMips)
+	{
+		GraphicsSubsystem::GetContext()->GetContext()->GenerateMips(out->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE));
+	}
+	
 	return out;
 }
 
@@ -108,7 +119,7 @@ inline void* Load(const std::string& path, FullTextureDescription& desc)
 	auto* bitmap = LoadFreeImgBitmap(path.c_str(), 0);
 	if (bitmap == nullptr)
 	{
-		SOLAR_CORE_ERROR("Loading cubemap {} failed", path.c_str());
+		SOLAR_CORE_ERROR("Loading texture {} failed", path.c_str());
 		return nullptr;
 	}
 
@@ -137,19 +148,23 @@ inline void* Load(const std::string& path, FullTextureDescription& desc)
 	{
 		if (pixType == FIT_RGBAF) fmt = TextureFormat::RGBA32;
 		else if (pixType == FIT_RGBA16) fmt = TextureFormat::RGBA16;
+		else if (pixType == FIT_BITMAP)
+		{
+			fmt = TextureFormat::RGBA32;
+			bitmap = FreeImage_ConvertToRGBAF(bitmap);
+		}
 	}
-	else
+	
+	if (fmt == TextureFormat::Unknown)
 	{
 		SOLAR_CORE_ERROR("Unkown color type: {}", colorType);
+		return nullptr;
 	}
 
 	TextureSubResData subResource;
 	subResource.Stride = FreeImage_GetPitch(bitmap);
 	subResource.pData = FreeImage_GetBits(bitmap);
-
-	TextureData data;
-	data.NumSubresources = 1;
-	data.pSubResources = &subResource;
+	subResource.pSrcBuffer = nullptr;
 
 	desc.format = fmt;
 
@@ -159,7 +174,7 @@ inline void* Load(const std::string& path, FullTextureDescription& desc)
 	desc.generateMips = true;
 	desc.mipLevels = 0;
 
-	const auto res = Create(TextureType::Tex2D, desc, &data);
+	const auto res = Create(TextureType::Tex2D, desc, &subResource);
 
 	FreeImage_Unload(bitmap);
 	return res;

@@ -39,7 +39,7 @@ class DiligentContext : public std::enable_shared_from_this<DiligentContext> {
 	RENDER_DEVICE_TYPE            m_deviceType = static_cast<RENDER_DEVICE_TYPE>(-1);
 
 	void TransitionState(IDeviceObject* obj, RESOURCE_STATE newState);
-	void TransitionState(RenderTargetBase* tex, RESOURCE_STATE newColorState, RESOURCE_STATE newDepthState);
+	void TransitionState(RenderTarget* tex, RESOURCE_STATE newColorState, RESOURCE_STATE newDepthState);
 
 public:
 	Shared<DiligentWindow> Init(GLFWwindow* window);
@@ -86,5 +86,5 @@ public:
 	[[nodiscard]] IDeviceContext* GetContext() { return m_context; }
 	[[nodiscard]] ShaderConstants* GetConstants() { return &m_constants; }
 	[[nodiscard]] RefCntAutoPtr<IBuffer> GetConstantBuffer() const { return m_constantsBuf; }
-	void ResolveMSAA(RenderTargetBase* source, RenderTargetBase* dest);
+	void ResolveMSAA(RenderTarget* source, RenderTarget* dest);
 };

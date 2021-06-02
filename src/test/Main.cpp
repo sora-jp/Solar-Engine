@@ -89,8 +89,8 @@ void TestApp::Init()
 		//desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	});
 	// C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test
-	const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
-	//const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
+	//const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
+	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
 	m_envMap = TextureCube::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K.jpg").string());
 	m_diffuseIbl = TextureCube::ConvolveDiffuse(m_envMap);
@@ -109,25 +109,25 @@ void TestApp::Init()
 	{
 		auto mat = Material::Create(m_shader);
 
-		auto diff = glm::vec4(m.diffuse, 1);
-		auto emiss = glm::vec4(m.emissive, 1);
+		auto diff = glm::vec4(1); //glm::vec4(m.diffuse, 1);
+		auto emiss = glm::vec4(0, 0, 0, 1);//glm::vec4(m.emissive, 1);
 		//auto smxx = glm::vec2(m.roughness, m.metallicity);
 		auto smxx = glm::vec2(0.85f, 0);
 
 		glm::vec3 tp(0);
 		if (m.diffuseTex != nullptr) {
 			tp.x = 1;
-			mat->GetProperties().SetTexture("_MainTex", *m.diffuseTex);
+			mat->GetProperties().SetTexture("_MainTex", m.diffuseTex.get());
 		}
 		
 		if (m.normalTex != nullptr) {
 			tp.y = 1;
-			mat->GetProperties().SetTexture("_NormalTex", *m.normalTex);
+			mat->GetProperties().SetTexture("_NormalTex", m.normalTex.get());
 		}
 
 		if (m.metalRoughTex != nullptr) {
 			tp.z = 1;
-			mat->GetProperties().SetTexture("_MRTex", *m.metalRoughTex);
+			mat->GetProperties().SetTexture("_MRTex", m.metalRoughTex.get());
 		}
 		
 		mat->GetProperties().Set("_Tint", &diff);

@@ -1,5 +1,5 @@
 #pragma once
-#include "TextureBase.h"
+#include "Texture.h"
 #include "core/Bounds.h"
 #include "core/Common.h"
 #include "diligent/Common/interface/RefCntAutoPtr.hpp"

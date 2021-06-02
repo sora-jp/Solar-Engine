@@ -1,4 +1,4 @@
-//#include "pch.h"
+#include "pch.h"
 //#include "TextureBase.h"
 //
 //#include <freeimage/FreeImage.h>

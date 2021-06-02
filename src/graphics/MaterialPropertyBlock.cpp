@@ -79,6 +79,8 @@ bool MaterialPropertyBlock::SetTexture(const std::string& name, Texture* val, bo
 		auto* var = m_resourceBinding->GetVariableByName(SHADER_TYPE_COMPUTE, name.c_str());
 		if (var)
 		{
+			if (write) srv = static_cast<Diligent::ITexture*>(val->texHandle)->GetDefaultView(TEXTURE_VIEW_UNORDERED_ACCESS);
+			
 			var->Set(srv);
 			return true;
 		}

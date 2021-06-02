@@ -15,7 +15,7 @@ void SceneViewWindow::Draw()
 	const glm::uvec2 szi(sz.x, sz.y);
 
 	if (m_rt == nullptr || (m_rt->Width() != szi.x || m_rt->Height() != szi.y))
-		m_rt = RenderTarget::Create(1, { TEX_FORMAT_RGBA8_UNORM, szi.x, szi.y }, { TEX_FORMAT_D24_UNORM_S8_UINT, szi.x, szi.y });
+		m_rt = RenderTexture::Create({ szi.x, szi.y, TextureFormat::RGBA8, TextureFormat::D24_S8 });
 
 	m_camera.target = m_rt;
 
@@ -28,7 +28,7 @@ void SceneViewWindow::Draw()
 	
 	ImGui::PushClipRect(pos, max, false);
 	ImGui::SetCursorPos(ImVec2(0, 0));
-	ImGui::GetWindowDrawList()->AddImage(m_camera.target->Color(0).ToImGui(), pos, max);
+	ImGui::GetWindowDrawList()->AddImage(m_camera.target->Color(0)->RawResourceHandle(), pos, max);
 
 	ImGuizmo::SetDrawlist();
 	ImGuizmo::SetRect(pos.x, pos.y, sz.x, sz.y);

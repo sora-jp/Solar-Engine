@@ -52,6 +52,8 @@ public:
 	[[nodiscard]] const FullTextureDescription& Description() const { return description; }
 	[[nodiscard]] uint32_t Width() const { return description.width; }
 	[[nodiscard]] uint32_t Height() const { return description.height; }
+	[[nodiscard]] void* RawTextureHandle() const { return texHandle; }
+	[[nodiscard]] void* RawResourceHandle() const { return srv; }
 };
 
 class Texture2D : public Texture
@@ -72,6 +74,7 @@ class TextureCube : public Texture
 public:
 	static Shared<TextureCube> Create(const FullTextureDescription& desc) { return Shared<TextureCube>(new TextureCube(desc)); }
 	static Shared<TextureCube> Load(const std::string& file) { return Shared<TextureCube>(new TextureCube(file)); }
+	static Shared<TextureCube> ConvolveDiffuse(const Shared<TextureCube>& other);
 };
 
 struct RenderTextureDesc
@@ -92,6 +95,10 @@ class RenderTarget
 protected:
 	std::vector<void*> colorRtvs;
 	void* depthRtv;
+
+public:
+	[[nodiscard]] uint32_t Width() const;
+	[[nodiscard]] uint32_t Height() const;
 };
 
 class RenderTextureAttachment : public Texture, public RenderTarget

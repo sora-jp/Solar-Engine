@@ -50,7 +50,7 @@ struct CameraComponent
 	float aspect;
 	Shared<TextureCube> skybox;
 	Shared<TextureCube> indirectIBL;
-	Shared<RenderTarget> target;
+	Shared<RenderTexture> target;
 
 	[[nodiscard]] glm::mat4 GetCameraMatrix() const
 	{

@@ -26,7 +26,7 @@ class SimplePipeline final : public RenderPipeline
 public:
 	void Init(const PipelineContext& ctx) override;
 	void RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTexture>& target, const PipelineContext& ctx) const;
-	void RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, const Shared<RenderTexture>& target) override;
+	void RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target) override;
 };
 
 inline void SimplePipeline::Init(const PipelineContext& ctx)
@@ -55,7 +55,7 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 	m_satH = Material::Create(ShaderCompiler::Compile("ShadowProcessSAT.hlsl", "vert", "fragH"));
 	m_satV = Material::Create(ShaderCompiler::Compile("ShadowProcessSAT.hlsl", "vert", "fragV"));
 
-	m_shadowmap = RenderTarget::Create(2, {TEX_FORMAT_RG32_FLOAT, 1024, 1024}, {TEX_FORMAT_D32_FLOAT, 1024, 1024});
+	m_shadowmap = RenderTexture::Create({1024, 1024, TextureFormat::RG32, TextureFormat::D32}, 2);
 	
 	m_compositeMat->GetProperties().SetTexture("_ShadowMap", m_shadowmap->Color(0));
 
@@ -86,11 +86,11 @@ End
  */
 
 static glm::mat4x4 lastVP;
-inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, const Shared<RenderTexture>& target)
+inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const CameraComponent& camera, const TransformComponent& cameraTransform, const PipelineContext& ctx, RenderTarget* target)
 {
 	if (m_rt == nullptr || (m_rt->Width() != target->Width() || m_rt->Height() != target->Height()))
 	{
-		m_rt = RenderTarget::Create(4, { TEX_FORMAT_RGBA32_FLOAT, target->Width(), target->Height() }, { TEX_FORMAT_D32_FLOAT, target->Width(), target->Height() });
+		m_rt = RenderTexture::Create({target->Width(), target->Height(), TextureFormat::RGBA32, TextureFormat::D32}, 4);
 		m_compositeMat->GetProperties().SetTexture("_GBDiffuseRough", m_rt->Color(0));
 		m_compositeMat->GetProperties().SetTexture("_GBEmissionMetal", m_rt->Color(1));
 		m_compositeMat->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
@@ -100,10 +100,10 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 		m_gtao->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
 		m_gtao->GetProperties().SetTexture("_GBPosition", m_rt->Color(3));
 
-		const auto gtDesc = RenderTargetDescription{ TEX_FORMAT_RG32_FLOAT, target->Width(), target->Height() };
-		m_gtaoCur  = RenderTarget::Create(1, gtDesc, nullptr);
-		m_gtaoLast = RenderTarget::Create(1, gtDesc, nullptr);
-		m_gtaoTemp = RenderTarget::Create(1, gtDesc, nullptr);
+		const auto gtDesc = RenderTextureDesc { target->Width(), target->Height(), TextureFormat::RG32 };
+		m_gtaoCur  = RenderTexture::Create(gtDesc, 1, false);
+		m_gtaoLast = RenderTexture::Create(gtDesc, 1, false);
+		m_gtaoTemp = RenderTexture::Create(gtDesc, 1, false);
 	}
 	
 	CullingResults culled;
@@ -143,7 +143,7 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	
 	RenderLight(culled, shadowmatrix, m_shadowmap, ctx);
 	
-	ctx.Context()->SetRenderTarget(target.get());
+	ctx.Context()->SetRenderTarget(target);
 	ctx.Context()->Clear(nullptr, 1, 0);
 	
 	m_compositeMat->GetProperties().Set("_MainLight.worldToLightSpace", glm::transpose(shadowmatrix));
@@ -157,7 +157,7 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	m_compositeMat->GetProperties().SetTexture("_Skybox", camera.skybox.get());
 	m_compositeMat->GetProperties().SetTexture("_IBL", camera.indirectIBL.get());
 	
-	ctx.Context()->Blit(target.get(), m_compositeMat);
+	ctx.Context()->Blit(target, m_compositeMat);
 
 	lastVP = culled.vpMatrix;
 }

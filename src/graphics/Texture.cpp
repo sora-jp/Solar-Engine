@@ -32,23 +32,38 @@ TextureCube::TextureCube(const std::string& data)
 	description.height = 1024;
 	description.depth = 6;
 	description.mipLevels = 8;
-	description.generateMips = true;
+	description.isRenderTarget = true;
+	description.generateMips = false;
 	
 	texHandle = EquirectToCubemap(description, tmpTexture);
 	srv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
 }
 
-static FullTextureDescription Convert(const RenderTextureDesc d, const bool isDepth) { return { isDepth ? d.depthBufferFormat : d.colorBufferFormat, d.width, d.height, 1, 1, false, true }; }
+static FullTextureDescription Convert(const RenderTextureDesc d, const bool isDepth) { return { isDepth ? d.depthBufferFormat : d.colorBufferFormat, d.width, d.height, 1, 1, false, false, true }; }
+
+uint32_t RenderTarget::Width() const
+{
+	return static_cast<Diligent::ITextureView*>(colorRtvs[0])->GetTexture()->GetDesc().Width;
+}
+
+uint32_t RenderTarget::Height() const
+{
+	return static_cast<Diligent::ITextureView*>(colorRtvs[0])->GetTexture()->GetDesc().Height;
+}
+
 RenderTextureAttachment::RenderTextureAttachment(const RenderTextureDesc& desc, const bool isDepth) : Texture(TextureType::Tex2D, Convert(desc, isDepth))
 {
+	depthRtv = nullptr;
+	colorRtvs.clear();
+	
 	if (isDepth)
 	{
-		depthRtv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_DEPTH_STENCIL);
+		depthRtv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_DEPTH_STENCIL);
 	}
 	else
 	{
-		colorRtvs.reserve(1);
-		colorRtvs[0] = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(isDepth ? TEXTURE_VIEW_RENDER_TARGET);
+		colorRtvs.resize(1);
+		colorRtvs[0] = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_RENDER_TARGET);
 	}
 }
 
@@ -56,8 +71,8 @@ RenderTexture::RenderTexture(const RenderTextureDesc& desc, const size_t numColo
 {
 	m_description = desc;
 
-	m_attachments.reserve(numColor + 1);
-	colorRtvs.reserve(numColor + 1);
+	m_attachments.resize(numColor + 1);
+	colorRtvs.resize(numColor);
 	
 	for (size_t i = 0; i < numColor; i++)
 	{
@@ -85,4 +100,21 @@ Shared<RenderTexture> RenderTexture::Create(const RenderTextureDesc& desc, const
 RenderTexture::~RenderTexture()
 {
 	for (size_t i = 0; i < m_attachments.size(); i++) delete m_attachments[i];
+}
+
+Shared<TextureCube> TextureCube::ConvolveDiffuse(const Shared<TextureCube>& other)
+{
+	auto d = other->description;
+	d.width = 128;
+	d.height = 128;
+	d.mipLevels = 1;
+	d.generateMips = false;
+	
+	auto result = TextureCube::Create(d);
+	auto rt = CubemapRT(static_cast<Diligent::ITexture*>(result->texHandle));
+
+	static const auto convolveMat = Material::Create(ShaderCompiler::Compile("DiffuseCubemapConvolution.hlsl", "vert", "frag"));
+
+	GraphicsSubsystem::GetContext()->Blit(other.get(), &rt, convolveMat);
+	return result;
 }

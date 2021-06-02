@@ -92,11 +92,11 @@ Shared<Texture2D> LoadTexture(const std::string& filename, aiMaterial* mat, cons
 	aiString texPath;
 	mat->Get(key, type, idx, texPath);
 
-	if (texPath.length > 0)
-	{
-		//SOLAR_CORE_INFO("Loading texture {}", texPath.C_Str());
-		return Texture2D::Load((std::filesystem::path(filename).parent_path() / texPath.C_Str()).string());
-	}
+	//if (texPath.length > 0)
+	//{
+	//	SOLAR_CORE_INFO("Loading texture {}", texPath.C_Str());
+	//	return Texture2D::Load((std::filesystem::path(filename).parent_path() / texPath.C_Str()).string());
+	//}
 
 	return nullptr;
 }

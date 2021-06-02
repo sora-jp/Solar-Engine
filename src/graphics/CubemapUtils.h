@@ -10,10 +10,10 @@ public:
 	{
 		depthRtv = nullptr;
 		
-		colorRtvs.reserve(6);
+		colorRtvs.resize(6);
 		TextureViewDesc desc;
 		desc.ViewType = TEXTURE_VIEW_RENDER_TARGET;
-		desc.TextureDim = RESOURCE_DIM_TEX_2D;
+		desc.TextureDim = RESOURCE_DIM_TEX_2D_ARRAY;
 		desc.MostDetailedMip = mip;
 		desc.NumMipLevels = 1;
 		desc.NumArraySlices = 1;
@@ -41,7 +41,6 @@ inline void* EquirectToCubemap(const FullTextureDescription desc, Shared<Texture
 
 	static const auto convolveMat = Material::Create(ShaderCompiler::Compile("SpecCubemapConvolution.hlsl", "vert", "frag"));
 
-	convolveMat->GetProperties().SetTexture("_MainTex", src.get());
 	for (auto i = 0u; i < desc.mipLevels; i++)
 	{
 		SOLAR_CORE_INFO("Generating mip {}", i);
@@ -50,7 +49,7 @@ inline void* EquirectToCubemap(const FullTextureDescription desc, Shared<Texture
 		convolveMat->GetProperties().Set("_Roughness", rough);
 
 		auto rtmip = CubemapRT(target, i);
-		GraphicsSubsystem::GetContext()->Blit(&rtmip, convolveMat);
+		GraphicsSubsystem::GetContext()->Blit(src.get(), &rtmip, convolveMat);
 	}
 
 	return target;

@@ -2,21 +2,25 @@
 #include "DiligentWindow.h"
 #include <GLFW/glfw3native.h>
 
-class WindowRenderTarget final : RenderTargetBase
+class WindowRenderTarget final : public RenderTarget
 {
 	RefCntWeakPtr<ISwapChain> m_swapchain;
-	ITextureView* m_curBackbuffer;	
-
-	[[nodiscard]] size_t GetColorTargetCount() override { return 1; }
-	[[nodiscard]] Diligent::ITextureView** GetColorTargets() override
-	{
-		m_curBackbuffer = m_swapchain.IsValid() ? m_swapchain.Lock()->GetCurrentBackBufferRTV() : nullptr;
-		return &m_curBackbuffer;
-	}
-	[[nodiscard]] Diligent::ITextureView* GetDepthTarget() override { return m_swapchain.IsValid() ? m_swapchain.Lock()->GetDepthBufferDSV() : nullptr; }
-
+	
 public:
-	WindowRenderTarget(ISwapChain* swapChain) : m_swapchain(swapChain), m_curBackbuffer(swapChain->GetCurrentBackBufferRTV()) {}
+	WindowRenderTarget(ISwapChain* swapChain) : m_swapchain(swapChain)
+	{
+		colorRtvs.resize(1);
+		colorRtvs[0] = nullptr;
+		depthRtv = nullptr;
+	}
+
+	void Update()
+	{
+		if (!m_swapchain.IsValid()) return;
+		auto swp = m_swapchain.Lock();
+		colorRtvs[0] = swp->GetCurrentBackBufferRTV();
+		depthRtv = swp->GetDepthBufferDSV();
+	}
 };
 
 void DiligentResizeWindowCallback(GLFWwindow* window, int width, int height)
@@ -47,7 +51,7 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 	}
 	else m_swapchain = swapChain;
 
-	m_renderTarget = Unique<RenderTarget>(reinterpret_cast<RenderTarget*>(new WindowRenderTarget(m_swapchain)));
+	m_renderTarget = new WindowRenderTarget(m_swapchain);
 	
 	glfwSetWindowUserPointer(m_window, this);
 	glfwSetFramebufferSizeCallback(m_window, DiligentResizeWindowCallback);
@@ -64,6 +68,7 @@ void DiligentWindow::Resize(const int width, const int height)
 	if (desc.Width != width || desc.Height != height) 
 	{
 		m_swapchain->Resize(width, height);
+		//reinterpret_cast<WindowRenderTarget*>(m_renderTarget)->Update();
 	}
 }
 
@@ -74,5 +79,6 @@ void DiligentWindow::GetSize(int& width, int& height) const
 
 RenderTarget* DiligentWindow::GetRenderTarget() const
 {
-	return m_renderTarget.get();
+	reinterpret_cast<WindowRenderTarget*>(m_renderTarget)->Update();
+	return m_renderTarget;
 }
