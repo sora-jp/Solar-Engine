@@ -87,16 +87,16 @@ Unique<SubMesh> SubMesh::LoadFrom(const aiMesh* m, const Shared<Mesh> parentMesh
 	return std::move(mesh);
 }
 
-Shared<Texture2D> LoadTexture(const std::string& filename, aiMaterial* mat, const char* key, aiTextureType type, unsigned idx)
+Shared<Texture2D> LoadTexture(const std::string& filename, aiMaterial* mat, const char* key, aiTextureType type, unsigned idx, uint32_t downscale = 0)
 {
 	aiString texPath;
 	mat->Get(key, type, idx, texPath);
 
-	//if (texPath.length > 0)
-	//{
-	//	SOLAR_CORE_INFO("Loading texture {}", texPath.C_Str());
-	//	return Texture2D::Load((std::filesystem::path(filename).parent_path() / texPath.C_Str()).string());
-	//}
+	if (texPath.length > 0)
+	{
+		SOLAR_CORE_INFO("Loading texture {}", texPath.C_Str());
+		return Texture2D::Load((std::filesystem::path(filename).parent_path() / texPath.C_Str()).string(), downscale);
+	}
 
 	return nullptr;
 }
@@ -147,9 +147,9 @@ Shared<Mesh> Mesh::Load(const std::string& filename)
 			data.emissive.g = tmp.g;
 			data.emissive.b = tmp.b;
 
-			data.diffuseTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_DIFFUSE(0));
-			data.normalTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_NORMALS(0));
-			data.metalRoughTex = LoadTexture(filename, mat, "$tex.file", aiTextureType_UNKNOWN, 0);
+			data.diffuseTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_DIFFUSE(0), 0);
+			data.normalTex = LoadTexture(filename, mat, AI_MATKEY_TEXTURE_NORMALS(0), 1);
+			data.metalRoughTex = LoadTexture(filename, mat, "$tex.file", aiTextureType_UNKNOWN, 0, 1);
 			
 			
 			//mat->Get(AI_MATKEY_SHININESS, data.roughness);

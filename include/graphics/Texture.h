@@ -37,7 +37,7 @@ protected:
 
 	Texture() noexcept : srv(nullptr), texHandle(nullptr) {}
 	explicit Texture(TextureType type, const FullTextureDescription& desc) noexcept;
-	explicit Texture(TextureType type, const std::string& path) noexcept;
+	explicit Texture(TextureType type, const std::string& path, uint32_t downsample = 0) noexcept;
 	
 	void* GetResourceView() const { return srv; }
 
@@ -59,11 +59,11 @@ public:
 class Texture2D : public Texture
 {
 	explicit Texture2D(const FullTextureDescription& desc) : Texture(TextureType::Tex2D, desc) {}
-	explicit Texture2D(const std::string& data) : Texture(TextureType::Tex2D, data) {}
+	explicit Texture2D(const std::string& data, uint32_t downsampleFac) : Texture(TextureType::Tex2D, data, downsampleFac) {}
 	
 public:
 	static Shared<Texture2D> Create(const FullTextureDescription& desc) { return Shared<Texture2D>(new Texture2D(desc)); }
-	static Shared<Texture2D> Load(const std::string& file) { return Shared<Texture2D>(new Texture2D(file)); }
+	static Shared<Texture2D> Load(const std::string& file, uint32_t downsample = 0) { return Shared<Texture2D>(new Texture2D(file, downsample)); }
 };
 
 class TextureCube : public Texture

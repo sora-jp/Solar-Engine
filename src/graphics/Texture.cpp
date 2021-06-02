@@ -11,10 +11,10 @@ Texture::Texture(TextureType type, const FullTextureDescription& desc) noexcept
 	srv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
 }
 
-Texture::Texture(TextureType type, const std::string& path) noexcept
+Texture::Texture(TextureType type, const std::string& path, uint32_t downsample) noexcept
 {
 	description = FullTextureDescription();
-	texHandle = Load(path, description);
+	texHandle = Load(path, description, downsample);
 	srv = static_cast<Diligent::ITexture*>(texHandle)->GetDefaultView(TEXTURE_VIEW_SHADER_RESOURCE);
 }
 

@@ -114,7 +114,7 @@ inline FIBITMAP* LoadFreeImgBitmap(const char* path, const int flags) {
 	return nullptr;
 }
 
-inline void* Load(const std::string& path, FullTextureDescription& desc)
+inline void* Load(const std::string& path, FullTextureDescription& desc, uint32_t downsampleFactor = 0)
 {
 	auto* bitmap = LoadFreeImgBitmap(path.c_str(), 0);
 	if (bitmap == nullptr)
@@ -159,6 +159,11 @@ inline void* Load(const std::string& path, FullTextureDescription& desc)
 	{
 		SOLAR_CORE_ERROR("Unkown color type: {}", colorType);
 		return nullptr;
+	}
+
+	if (downsampleFactor > 0)
+	{
+		bitmap = FreeImage_Rescale(bitmap, FreeImage_GetWidth(bitmap) >> downsampleFactor, FreeImage_GetHeight(bitmap) >> downsampleFactor, FILTER_BICUBIC);
 	}
 
 	TextureSubResData subResource;

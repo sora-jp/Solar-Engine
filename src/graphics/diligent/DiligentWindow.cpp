@@ -51,7 +51,7 @@ DiligentWindow::DiligentWindow(const Shared<DiligentContext>& ctx, ISwapChain* s
 	}
 	else m_swapchain = swapChain;
 
-	m_renderTarget = new WindowRenderTarget(m_swapchain);
+	m_renderTarget = MakeUnique<WindowRenderTarget>(m_swapchain);
 	
 	glfwSetWindowUserPointer(m_window, this);
 	glfwSetFramebufferSizeCallback(m_window, DiligentResizeWindowCallback);
@@ -79,6 +79,6 @@ void DiligentWindow::GetSize(int& width, int& height) const
 
 RenderTarget* DiligentWindow::GetRenderTarget() const
 {
-	reinterpret_cast<WindowRenderTarget*>(m_renderTarget)->Update();
-	return m_renderTarget;
+	reinterpret_cast<WindowRenderTarget*>(m_renderTarget.get())->Update();
+	return m_renderTarget.get();
 }

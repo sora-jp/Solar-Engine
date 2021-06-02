@@ -17,7 +17,7 @@ class DiligentWindow
 	GLFWwindow* m_window;
 	RefCntAutoPtr<ISwapChain> m_swapchain;
 	Shared<DiligentContext> m_ctx;
-	RenderTarget* m_renderTarget;
+	Unique<RenderTarget> m_renderTarget;
 
 public:
 	DiligentWindow(const Shared<DiligentContext>& ctx, bool isMainWindow, GLFWwindow* window);
