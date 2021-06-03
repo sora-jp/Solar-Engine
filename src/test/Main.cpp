@@ -10,7 +10,6 @@
 #include "Material.h"
 #include "Mesh.h"
 #include "RendererComponent.h"
-#include "Cubemap.h"
 #include <filesystem>
 
 #include "GraphicsSubsystem.h"

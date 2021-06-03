@@ -103,11 +103,15 @@ void compute(int3 threadOffset : SV_GroupThreadID, int3 globalId : SV_DispatchTh
             // Weight each sample by its distance from the refrence depth - but also scale the weight by 1/10 of the reference depth so that the further from the camera the samples are, the higher the tolerance for depth differences is
             
             float localWeight = max(0.0, 5.0 - abs(depthSamples[threadOffset.x + x][threadOffset.y + y] - depth) / (depth * 0.1));
-            weightsSpacial += localWeight;
-            aoLocal += aoSamples[threadOffset.x + x][threadOffset.y + y].x * localWeight;
+            if (!isnan(localWeight))
+            {
+                weightsSpacial += localWeight;
+                aoLocal += aoSamples[threadOffset.x + x][threadOffset.y + y].x * localWeight;
+            }
         }
     }
     
+    weightsSpacial = max(0.01, weightsSpacial);
     aoLocal /= weightsSpacial;
     
     // Temporal filter
@@ -144,6 +148,8 @@ void compute(int3 threadOffset : SV_GroupThreadID, int3 globalId : SV_DispatchTh
     
     float2 lastAODepth = _AODepthHist.Load(int3(tcp.xy * sz.xy, _DepthMip));
     temporalWeight *= max(0.0, 1.0 - abs(lastAODepth.y - depth) / (depth * 0.1));
+    if (isnan(temporalWeight)) temporalWeight = 0;
+
     ao = lastAODepth.x;
     ao = lerp(aoLocal, ao, temporalWeight);
     
