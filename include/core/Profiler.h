@@ -4,6 +4,10 @@
 #include <utility>
 #include <map>
 
+#ifndef SOLAR_PROFILE
+#define SOLAR_PROFILE 0
+#endif
+
 struct ProfilerNode
 {
 	friend class Profiler;
@@ -37,6 +41,7 @@ public:
 	Profiler() = delete;
 	~Profiler() = delete;
 
+#if SOLAR_PROFILE
 	static void Begin(std::string name, std::string category = "Unknown");
 	static void End();
 	
@@ -48,4 +53,17 @@ public:
 	static Shared<ProfilerNode> GetRootNode();
 	static std::vector<Shared<ProfilerNode>>& GetRootNodes();
 	static double GetTimeForCategory(const std::string& category);
+#else
+	static void Begin(std::string name, std::string category = "Unknown") {}
+	static void End() {}
+	
+	static void BeginRoot() {}
+	static void EndRoot() {}
+
+	static bool HasRootNodes() { return false; }
+	static Shared<ProfilerNode> GetNodeFromPath(const std::string& path) { return nullptr; }
+	static Shared<ProfilerNode> GetRootNode() { return nullptr; }
+	static std::vector<Shared<ProfilerNode>>& GetRootNodes() { return std::vector<Shared<ProfilerNode>>(); }
+	static double GetTimeForCategory(const std::string& category) { return 0; }
+#endif
 };

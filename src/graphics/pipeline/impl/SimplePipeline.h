@@ -2,6 +2,9 @@
 #include "pipeline/RenderPipeline.h"
 #include <random>
 
+#include "postprocessing/GTAOEffect.h"
+#include "postprocessing/PostProcessStack.h"
+
 enum class GBufferType
 {
 	Diffuse, Normal, Position, SpecMetal, Depth
@@ -9,19 +12,11 @@ enum class GBufferType
 
 class SimplePipeline final : public RenderPipeline
 {
-	std::default_random_engine rand;
-	std::uniform_real<float> dpi;
-	std::uniform_real<float> d01;
-	
 	Shared<Material> m_shadowmapMat, m_compositeMat;
 	Shared<RenderTexture> m_rt, m_shadowmap;
 	Shared<Material> m_satConv, m_satH, m_satV;
-	Shared<Material> m_gtao, m_blit;
-
-	Shared<RenderTexture> m_gtaoLast, m_gtaoCur, m_gtaoTemp;
-
-	Shared<Shader> m_gtaoFilter;
-	Unique<MaterialPropertyBlock> m_gtaoFProps;
+	PostProcessStack m_ppstack;
+	PostProcessContext m_ppctx;
 	
 public:
 	void Init(const PipelineContext& ctx) override;
@@ -30,24 +25,13 @@ public:
 };
 
 inline void SimplePipeline::Init(const PipelineContext& ctx)
-{
-	std::random_device dev;
-	rand = std::default_random_engine(dev());
-	dpi = std::uniform_real(0.f, 6.28f);
-	d01 = std::uniform_real(0.f, 1.f);
-	
+{	
 	m_shadowmapMat = Material::Create(ShaderCompiler::Compile("ShadowMapShader.hlsl", "vert", "", [](GraphicsPipelineDesc& desc)
 	{
 		desc.RTVFormats[0] = TEX_FORMAT_UNKNOWN;
 		desc.NumRenderTargets = 0;
 		desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	}));
-
-	m_gtao = Material::Create(ShaderCompiler::Compile("GTAO.hlsl", "vert", "frag"));
-	m_blit = Material::Create(ShaderCompiler::Compile("Blit.hlsl", "vert", "frag"));
-
-	m_gtaoFilter = ShaderCompiler::CompileCompute("GTAOFilter.hlsl", "compute");
-	m_gtaoFProps = MaterialPropertyBlock::Create(m_gtaoFilter);
 	
 	m_compositeMat = Material::Create(ShaderCompiler::Compile("GBufferComposite.hlsl", "vert", "frag"));
 
@@ -61,6 +45,8 @@ inline void SimplePipeline::Init(const PipelineContext& ctx)
 
 	m_compositeMat->GetProperties().Set("_MainLight.color", glm::vec3(0));
 	m_compositeMat->GetProperties().Set("_MainLight.direction", glm::normalize(glm::vec3(-1, 1, -1)));
+	
+	m_ppstack.Use<GTAOEffect>();
 }
 
 inline void SimplePipeline::RenderLight(const CullingResults& culled, const glm::mat4& viewToLight, const Shared<RenderTexture>& target, const PipelineContext& ctx) const
@@ -96,15 +82,8 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 		m_compositeMat->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
 		m_compositeMat->GetProperties().SetTexture("_GBPosition", m_rt->Color(3));
 		m_compositeMat->GetProperties().SetTexture("_GBDepth", m_rt->Depth());
-
-		m_gtao->GetProperties().SetTexture("_GBNormal", m_rt->Color(2));
-		m_gtao->GetProperties().SetTexture("_GBPosition", m_rt->Color(3));
-
-		const auto gtDesc = RenderTextureDesc { target->Width(), target->Height(), TextureFormat::RG32 };
-		m_gtaoCur  = RenderTexture::Create(gtDesc, 1, false);
-		m_gtaoLast = RenderTexture::Create(gtDesc, 1, false);
-		m_gtaoTemp = RenderTexture::Create(gtDesc, 1, false);
 	}
+
 	
 	CullingResults culled;
 	ctx.Context()->SetRenderTarget(m_rt.get());
@@ -114,27 +93,14 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.SetupCameraProps(culled);
 
 	ctx.Draw(culled, { nullptr });
-	
-	m_gtao->GetProperties().Set("_Aspect", 1.f / camera.aspect);
-	m_gtao->GetProperties().Set("_InvRTSize", 1.f / glm::vec2(target->Width(), target->Height()));
-	m_gtao->GetProperties().Set("_AngleOffset", dpi(rand));
-	m_gtao->GetProperties().Set("_SpatialOffset", d01(rand) - 0.5f);
 
-	ctx.Context()->SetRenderTarget(m_gtaoTemp.get());
-	ctx.Context()->Clear(nullptr, 1, 0);
-	ctx.Context()->Blit(m_gtaoTemp.get(), m_gtao);
-
-	m_gtaoFProps->SetTexture("_AODepthCur", m_gtaoTemp->Color(0));
-	m_gtaoFProps->SetTexture("_AODepthHist", m_gtaoLast->Color(0));
-	m_gtaoFProps->SetTexture("_GBPosition", m_rt->Color(3));
-	m_gtaoFProps->SetTexture("_AOOut", m_gtaoCur->Color(0), true);
-	m_gtaoFProps->Set("_CameraVPDelta", lastVP);
-
-	const glm::ivec3 groups((target->Width() >> 3) + 1, (target->Height() >> 3) + 1, 1);
-	ctx.Context()->DispatchCompute(groups, m_gtaoFilter, *m_gtaoFProps);
+	m_ppctx.ctx = &ctx;
+	m_ppctx.camera = &camera;
+	m_ppctx.culled = &culled;
+	m_ppctx.gBuffers = m_rt.get();
 	
-	ctx.Context()->Blit(m_gtaoCur->Color(0), m_gtaoLast->Color(0), m_blit);
-	
+	m_ppstack.Render<EffectLocation::BeforeComposite>(target, m_ppctx);
+
 	static const auto SIZE = 15.f;
 	const auto shadowmatrix = 
 		glm::orthoLH_ZO(-SIZE, SIZE, -SIZE, SIZE, 0.f, 50.f) * 
@@ -153,7 +119,7 @@ inline void SimplePipeline::RenderCamera(const Shared<Scene>& scene, const Camer
 	ctx.Context()->GetConstants()->worldSpaceCamPos = cameraTransform.position;
 	ctx.Context()->FlushConstants();
 
-	m_compositeMat->GetProperties().SetTexture("_GBAmbientOcclusion", m_gtaoCur->Color(0));
+	m_compositeMat->GetProperties().SetTexture("_GBAmbientOcclusion", m_ppstack.Get<GTAOEffect>().GTAOResultTexture());
 	m_compositeMat->GetProperties().SetTexture("_Skybox", camera.skybox.get());
 	m_compositeMat->GetProperties().SetTexture("_IBL", camera.indirectIBL.get());
 	

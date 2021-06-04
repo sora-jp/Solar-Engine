@@ -16,6 +16,7 @@ Shared<ProfilerNode> CreateChild(const Shared<ProfilerNode>& parent, std::string
 	return node;
 }
 
+#if SOLAR_PROFILE
 void Profiler::Begin(std::string name, std::string category)
 {
 	const auto diff = std::chrono::high_resolution_clock::now() - _curNodeStart;
@@ -111,3 +112,5 @@ double Profiler::GetTimeForCategory(const std::string& category)
 {
 	return _curNode ? _lastCategoryTimes[category] : _categoryTimes[category];
 }
+
+#endif

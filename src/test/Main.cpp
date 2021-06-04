@@ -88,8 +88,8 @@ void TestApp::Init()
 		//desc.RasterizerDesc.CullMode = CULL_MODE_NONE;
 	});
 	// C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test
-	//const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
-	const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
+	const std::filesystem::path path = R"(E:\Solar Engine\src\test)";
+	//const std::filesystem::path path = R"(C:\Users\oskar.tornevall\Documents\Projects\Github\Solar-Engine\src\test)";
 	
 	m_envMap = TextureCube::Load((path / "HdrOutdoorCityPathDayClear001_JPG_4K.jpg").string());
 	m_diffuseIbl = TextureCube::ConvolveDiffuse(m_envMap);
